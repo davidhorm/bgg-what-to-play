@@ -1,7 +1,6 @@
 import Card from "@mui/material/Card";
 import CardMedia from "@mui/material/CardMedia";
 import CardContent from "@mui/material/CardContent";
-import Typography from "@mui/material/Typography";
 import type { BoardGame } from "./useGetCollectionQuery";
 
 type Props = {
@@ -16,7 +15,7 @@ export const GameCard = ({ game }: Props) => (
       alt={`${game.name} thumbnail`}
     />
     <CardContent>
-      <Typography variant="h5">{game.name}</Typography>
+      <h2 className="my-0 text-2xl font-normal">{game.name}</h2>
     </CardContent>
   </Card>
 );
