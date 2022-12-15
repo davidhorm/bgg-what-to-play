@@ -154,3 +154,5 @@ export const useGetCollectionQuery = (username: string) => {
     data,
   };
 };
+
+export type BoardGame = ReturnType<typeof useGetCollectionQuery>["data"][0];

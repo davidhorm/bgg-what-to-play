@@ -22,4 +22,11 @@ module.exports = {
     sourceType: "module",
   },
   plugins: ["react", "@typescript-eslint"],
+  rules: {
+    // https://mui.com/material-ui/guides/minimizing-bundle-size/#option-one-use-path-imports
+    "no-restricted-imports": [
+      "error",
+      { patterns: ["@mui/*/*/*", "!@mui/material/test-utils/*"] },
+    ],
+  },
 };
