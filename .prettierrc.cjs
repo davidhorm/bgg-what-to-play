@@ -1,4 +1,8 @@
 module.exports = {
   quoteProps: "consistent",
-  plugins: ["prettier-plugin-tailwindcss"],
+  plugins: [
+    "@trivago/prettier-plugin-sort-imports",
+    "prettier-plugin-tailwindcss",
+  ],
+  importOrder: ["^react$", "^react/(.*)$", "<THIRD_PARTY_MODULES>", "^[./]"],
 };

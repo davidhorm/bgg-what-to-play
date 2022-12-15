@@ -1,6 +1,6 @@
 import Card from "@mui/material/Card";
-import CardMedia from "@mui/material/CardMedia";
 import CardContent from "@mui/material/CardContent";
+import CardMedia from "@mui/material/CardMedia";
 import type { BoardGame } from "./useGetCollectionQuery";
 
 type Props = {

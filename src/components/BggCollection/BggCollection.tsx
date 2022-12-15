@@ -1,5 +1,5 @@
-import { useGetCollectionQuery } from "./useGetCollectionQuery";
 import { GameCard } from "./GameCard";
+import { useGetCollectionQuery } from "./useGetCollectionQuery";
 
 export const BggCollection = () => {
   const { isLoading, error, data } = useGetCollectionQuery("davidhorm");
