@@ -12,7 +12,9 @@ Website to visualize your [BGG](https://boardgamegeek.com/) collection to better
 
 These are the other scripts defined in `package.json`.
 
-| Script         | Description                       |
-| -------------- | --------------------------------- |
-| `pnpm build`   | Build for production.             |
-| `pnpm preview` | Locally preview production build. |
+| Script          | Description                          |
+| --------------- | ------------------------------------ |
+| `pnpm build`    | Build for production.                |
+| `pnpm preview`  | Locally preview production build.    |
+| `pnpm lint`     | Report linting and formatting errors |
+| `pnpm lint:fix` | Fix linting and formatting errors    |
