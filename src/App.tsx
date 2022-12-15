@@ -1,12 +1,8 @@
-import CssBaseline from "@mui/material/CssBaseline";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ServiceProvider } from "./components/ServiceProvider";
 import { BggCollection } from "./components/BggCollection";
 
-const queryClient = new QueryClient();
-
 export const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <CssBaseline />
+  <ServiceProvider>
     <BggCollection />
-  </QueryClientProvider>
+  </ServiceProvider>
 );
