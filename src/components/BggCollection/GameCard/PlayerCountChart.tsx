@@ -6,22 +6,18 @@ import {
   Tooltip,
   XAxis,
 } from "recharts";
-
-const mockData = [
-  { "numplayers": "1", "Best": 36, "Recommended": 145, "Not Recommended": -30 },
-  { "numplayers": "2", "Best": 182, "Recommended": 87, "Not Recommended": -5 },
-  { "numplayers": "3", "Best": 150, "Recommended": 99, "Not Recommended": -6 },
-  { "numplayers": "4", "Best": 48, "Recommended": 159, "Not Recommended": -27 },
-];
+import type { BoardGame } from "..";
 
 const tooltipSort = ["Best", "Recommended", "Not Recommended"];
 
-export const PlayerCountChart = () => (
+type Props = Pick<BoardGame, "recommendedPlayerCount">;
+
+export const PlayerCountChart = ({ recommendedPlayerCount }: Props) => (
   <ResponsiveContainer minWidth={100} minHeight={150}>
     <BarChart
       width={500}
       height={300}
-      data={mockData}
+      data={recommendedPlayerCount}
       stackOffset="sign"
       margin={{
         top: 5,

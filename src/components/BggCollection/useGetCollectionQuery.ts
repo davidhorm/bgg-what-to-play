@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getBggCollection, getBggThing } from "bgg-xml-api-client";
 import {
+  BoardGame,
   transformToBoardGame,
   transformToThingIds,
 } from "./useGetCollectionQuery.utils";
@@ -37,7 +38,7 @@ export const useGetCollectionQuery = (username: string) => {
     queryFn: () => getBggThing({ id: thingIds }),
   });
 
-  const data = thingsData?.data.item.map(transformToBoardGame);
+  const data: BoardGame[] = thingsData?.data.item.map(transformToBoardGame);
 
   return {
     isLoading: collectionIsLoading || thingsIsLoading,

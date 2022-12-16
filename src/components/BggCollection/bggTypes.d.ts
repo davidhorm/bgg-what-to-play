@@ -41,7 +41,7 @@ type SuggestedNumPlayersPoll = {
   name: "suggested_numplayers";
   title: string;
   totalvotes: string;
-  results: SuggestedNumPlayersResult[];
+  results: SuggestedNumPlayersResult | SuggestedNumPlayersResult[];
 };
 
 type SuggestedPlayerAgeResult = {

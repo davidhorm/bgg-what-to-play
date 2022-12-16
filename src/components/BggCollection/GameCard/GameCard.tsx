@@ -24,7 +24,7 @@ export const GameCard = ({ game }: Props) => (
         </div>
         <div>Time: {game.playingtime}</div>
       </div>
-      <PlayerCountChart />
+      <PlayerCountChart recommendedPlayerCount={game.recommendedPlayerCount} />
     </CardContent>
   </Card>
 );
