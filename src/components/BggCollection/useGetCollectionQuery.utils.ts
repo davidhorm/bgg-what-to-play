@@ -102,6 +102,8 @@ const transformToRecommendedPlayerCount = (poll: ThingItem["poll"]) => {
     : [];
 };
 
+// TODO: format min/max player number to combine if same (p2)
+
 export const transformToBoardGame = (i: ThingItem) => ({
   name: getPrimaryName(i.name),
   id: i.id,

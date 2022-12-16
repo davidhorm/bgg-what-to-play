@@ -6,8 +6,10 @@ import {
   transformToThingIds,
 } from "./useGetCollectionQuery.utils";
 
+// TODO: handle querying array of usernames (p3)
+
 export const useGetCollectionQuery = (username: string) => {
-  // TODO: handle response code 202 for queued request.
+  // TODO: handle response code 202 for queued request. (p1)
   // see https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc11
 
   const {
@@ -22,7 +24,7 @@ export const useGetCollectionQuery = (username: string) => {
         username,
         brief: 1,
         own: 1,
-        excludesubtype: "boardgameexpansion", // MAYBE TODO: include expansions later
+        excludesubtype: "boardgameexpansion", // TODO: include expansions later (p3)
       }),
   });
 
@@ -35,13 +37,13 @@ export const useGetCollectionQuery = (username: string) => {
   } = useQuery({
     enabled: !!thingIds,
     queryKey: ["BggThings", thingIds],
-    queryFn: () => getBggThing({ id: thingIds }),
+    queryFn: () => getBggThing({ id: thingIds }), // TODO: query game weight with stat: 1 (p1)
   });
 
   const data: BoardGame[] = thingsData?.data.item.map(transformToBoardGame);
 
   return {
-    isLoading: collectionIsLoading || thingsIsLoading,
+    isLoading: collectionIsLoading || thingsIsLoading, // TODO: reimplement isLoading with status bar (p1)
     error: collectionError || thingsError,
     data,
   };

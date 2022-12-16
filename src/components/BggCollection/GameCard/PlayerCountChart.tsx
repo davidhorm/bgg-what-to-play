@@ -12,6 +12,10 @@ const tooltipSort = ["Best", "Recommended", "Not Recommended"];
 
 type Props = Pick<BoardGame, "recommendedPlayerCount">;
 
+// TODO: show percentage in tooltip (p3)
+// TODO: add gradients to bar colors (p3)
+// TODO: highlight bar (or dull other bars) when filtered (p2)
+
 export const PlayerCountChart = ({ recommendedPlayerCount }: Props) => (
   <ResponsiveContainer minWidth={100} minHeight={150}>
     <BarChart

@@ -8,6 +8,9 @@ export const BggCollection = () => {
 
   if (error) return <>An error has occurred: {JSON.stringify(error)}</>;
 
+  // TODO: filter to show only valid player count (p1)
+  // TODO: build filter and sort by specific player count (p1)
+  // TODO: render user's collection last published date (p3)
   return (
     <div className="flex flex-wrap">
       {data?.map((game) => (

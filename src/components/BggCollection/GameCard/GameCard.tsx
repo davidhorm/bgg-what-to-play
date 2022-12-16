@@ -8,6 +8,8 @@ type Props = {
   game: BoardGame;
 };
 
+// TODO: make cards consistent size (thumbnail height/width, and title ellipsis) (p2)
+
 export const GameCard = ({ game }: Props) => (
   <Card className="m-2 w-64 flex-auto text-center">
     <CardMedia

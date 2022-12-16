@@ -20,3 +20,7 @@ These are the other scripts defined in `package.json`.
 | `pnpm lint:fix` | Fix linting and formatting errors    |
 | `pnpm test`     | Run tests in watch mode              |
 | `pnpm test:cov` | Run tests with coverage reports      |
+
+## Development
+
+Using `TODO` comments and [Todo Tree](https://marketplace.visualstudio.com/items?itemName=Gruntfuggly.todo-tree) VSCode extension to track project tasks.
