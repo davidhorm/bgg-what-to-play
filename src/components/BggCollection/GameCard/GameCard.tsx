@@ -1,7 +1,8 @@
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
-import type { BoardGame } from "./useGetCollectionQuery";
+import type { BoardGame } from "../useGetCollectionQuery";
+import { PlayerCountChart } from "./PlayerCountChart";
 
 type Props = {
   game: BoardGame;
@@ -23,6 +24,7 @@ export const GameCard = ({ game }: Props) => (
         </div>
         <div>Time: {game.playingtime}</div>
       </div>
+      <PlayerCountChart />
     </CardContent>
   </Card>
 );
