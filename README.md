@@ -18,3 +18,5 @@ These are the other scripts defined in `package.json`.
 | `pnpm preview`  | Locally preview production build.    |
 | `pnpm lint`     | Report linting and formatting errors |
 | `pnpm lint:fix` | Fix linting and formatting errors    |
+| `pnpm test`     | Run tests in watch mode              |
+| `pnpm test:cov` | Run tests with coverage reports      |
