@@ -108,9 +108,9 @@ export const transformToBoardGame = (i: ThingItem) => ({
   name: getPrimaryName(i.name),
   id: i.id,
   thumbnail: i.thumbnail,
-  minplayers: i.minplayers.value,
-  maxplayers: i.maxplayers.value,
-  playingtime: i.playingtime.value,
+  minPlayers: parseInt(i.minplayers.value, 10),
+  maxPlayers: parseInt(i.maxplayers.value, 10),
+  playingTime: parseInt(i.playingtime.value, 10),
   recommendedPlayerCount: transformToRecommendedPlayerCount(i.poll),
 });
 

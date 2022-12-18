@@ -77,10 +77,10 @@ describe(transformToBoardGame.name, () => {
   const EXPECTED_BOARD_GAME = {
     id: "314088",
     thumbnail: "thumbnail.png",
-    maxplayers: "4",
-    minplayers: "1",
+    maxPlayers: 4,
+    minPlayers: 1,
     name: "Agropolis",
-    playingtime: "20",
+    playingTime: 20,
     recommendedPlayerCount: [],
   };
 

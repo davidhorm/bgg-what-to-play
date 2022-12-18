@@ -22,9 +22,9 @@ export const GameCard = ({ game }: Props) => (
       <h2 className="my-0 text-2xl font-normal">{game.name}</h2>
       <div className="flex justify-between">
         <div>
-          Players: {game.minplayers} - {game.maxplayers}
+          Players: {game.minPlayers} - {game.maxPlayers}
         </div>
-        <div>Time: {game.playingtime}</div>
+        <div>Time: {game.playingTime}</div>
       </div>
       <PlayerCountChart recommendedPlayerCount={game.recommendedPlayerCount} />
     </CardContent>
