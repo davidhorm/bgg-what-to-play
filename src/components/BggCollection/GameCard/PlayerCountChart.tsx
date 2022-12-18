@@ -37,9 +37,24 @@ export const PlayerCountChart = ({ recommendedPlayerCount }: Props) => (
         labelFormatter={(label) => `Player Count: ${label}`}
       />
       <ReferenceLine y={0} stroke="#000" />
-      <Bar stackId="playerCount" dataKey="Recommended" fill="#22c55e" />
-      <Bar stackId="playerCount" dataKey="Best" fill="#15803d" />
-      <Bar stackId="playerCount" dataKey="Not Recommended" fill="#f87171" />
+      <Bar
+        stackId="playerCount"
+        maxBarSize={32}
+        dataKey="Recommended"
+        fill="#22c55e"
+      />
+      <Bar
+        stackId="playerCount"
+        maxBarSize={32}
+        dataKey="Best"
+        fill="#15803d"
+      />
+      <Bar
+        stackId="playerCount"
+        maxBarSize={32}
+        dataKey="Not Recommended"
+        fill="#f87171"
+      />
     </BarChart>
   </ResponsiveContainer>
 );
