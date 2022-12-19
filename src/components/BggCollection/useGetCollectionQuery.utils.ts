@@ -1,3 +1,4 @@
+import type { BggCollectionResponse } from "bgg-xml-api-client";
 import type {
   CollectionItem,
   ThingItem,
@@ -128,3 +129,65 @@ export const transformToBoardGame = (i: ThingItem) => ({
 });
 
 export type BoardGame = ReturnType<typeof transformToBoardGame>;
+
+type FetchingStatus =
+  | "FETCHING_COLLECTION"
+  | "FETCHING_THINGS"
+  | "FETCHING_ERROR"
+  | "FETCHING_COMPLETE";
+
+type Progress = {
+  status: FetchingStatus;
+  progress: number;
+  message?: string;
+};
+
+type MaybeErrors = {
+  errors?: {
+    error: {
+      message: string;
+    };
+  };
+};
+
+type GetLoadingStatusProps = {
+  username: string;
+  collectionIsLoading: boolean;
+  collectionData?: BggCollectionResponse & MaybeErrors;
+  thingsIsLoading: boolean;
+};
+
+// TODO: add some unit tests (p3)
+export const getLoadingStatus = ({
+  username,
+  collectionIsLoading,
+  collectionData,
+  thingsIsLoading,
+}: GetLoadingStatusProps): Progress => {
+  if (collectionIsLoading) {
+    return {
+      status: "FETCHING_COLLECTION",
+      progress: 1,
+      message: `Fetching collection for ${username}...`,
+    };
+  }
+
+  if (collectionData?.errors?.error) {
+    return {
+      status: "FETCHING_ERROR",
+      progress: 100,
+      message: `${collectionData.errors.error.message} - ${username}`,
+    };
+  }
+
+  if (thingsIsLoading) {
+    // TODO: calc progress based on number of things in collection (p1)
+    return {
+      status: "FETCHING_THINGS",
+      progress: 50,
+      message: `Fetching boardgame details for ${username}...`,
+    };
+  }
+
+  return { status: "FETCHING_COMPLETE", progress: 100 };
+};

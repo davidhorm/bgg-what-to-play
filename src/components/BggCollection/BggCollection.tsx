@@ -1,14 +1,17 @@
 import { applyFiltersAndSorts } from "./BggCollection.utils";
 import { FilterControls } from "./FilterControls";
 import { GameCard } from "./GameCard";
+import { ProgressSpinner } from "./ProgressSpinner";
 import { useCollectionFilters } from "./useCollectionFilters";
 import { useGetCollectionQuery } from "./useGetCollectionQuery";
 
 export const BggCollection = () => {
-  const { isLoading, error, data } = useGetCollectionQuery("davidhorm");
+  const { loadingStatus, error, data } = useGetCollectionQuery("davidhorm");
   const filter = useCollectionFilters();
 
-  if (isLoading) return <>Loading...</>;
+  // TODO: implement aria-busy? (p3)
+  if (loadingStatus.status !== "FETCHING_COMPLETE")
+    return <ProgressSpinner loadingStatus={loadingStatus} />;
 
   if (error) return <>An error has occurred: {JSON.stringify(error)}</>;
 

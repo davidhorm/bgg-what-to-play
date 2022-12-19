@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
+// TODO: replace since client can't handle errors
 import { getBggCollection, getBggThing } from "bgg-xml-api-client";
 import {
   BoardGame,
+  getLoadingStatus,
   transformToBoardGame,
   transformToThingIds,
 } from "./useGetCollectionQuery.utils";
@@ -43,7 +45,12 @@ export const useGetCollectionQuery = (username: string) => {
   const data: BoardGame[] = thingsData?.data.item.map(transformToBoardGame);
 
   return {
-    isLoading: collectionIsLoading || thingsIsLoading, // TODO: reimplement isLoading with status bar (p1)
+    loadingStatus: getLoadingStatus({
+      username,
+      collectionIsLoading,
+      collectionData: collectionData?.data,
+      thingsIsLoading,
+    }),
     error: collectionError || thingsError,
     data,
   };
