@@ -12,10 +12,13 @@ describe(applyFiltersAndSorts.name, () => {
     maxPlayers: 2,
     playingTime: 60,
     recommendedPlayerCount: [],
+    averageWeight: 2.5,
   };
 
   const MOCK_FILTERS: CollectionFilters = {
     showInvalidPlayerCount: false,
+    filterByPlayerCountActive: false,
+    filterByPlayerCountValue: 1,
   };
 
   test.each`

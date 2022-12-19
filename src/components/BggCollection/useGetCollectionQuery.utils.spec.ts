@@ -4,7 +4,7 @@ import {
   transformToBoardGame, // hasSuggestedPlayersVotes,
 } from "./useGetCollectionQuery.utils";
 
-const MOCK_THING_ITEM: ThingItem = {
+const MOCK_THING_ITEM: Partial<ThingItem> = {
   type: "boardgame",
   id: "314088",
   thumbnail: "thumbnail.png",
@@ -24,6 +24,9 @@ const MOCK_THING_ITEM: ThingItem = {
   maxplaytime: { value: "20" },
   minage: { value: "8" },
   link: [],
+  statistics: {
+    ratings: { averageweight: { value: "2.5" }, ranks: { rank: [] } },
+  } as any,
 };
 
 // describe(hasSuggestedPlayersVotes.name, () => {
@@ -81,11 +84,14 @@ describe(transformToBoardGame.name, () => {
     minPlayers: 1,
     name: "Agropolis",
     playingTime: 20,
+    averageWeight: 2.5,
     recommendedPlayerCount: [],
   };
 
   test("WHEN standard mock ThingItem, THEN transform to expected BoardGame schema", () => {
-    expect(transformToBoardGame(MOCK_THING_ITEM)).toEqual(EXPECTED_BOARD_GAME);
+    expect(transformToBoardGame(MOCK_THING_ITEM as any)).toEqual(
+      EXPECTED_BOARD_GAME
+    );
   });
 
   test("WHEN ThingItem has `suggested_numplayers`, THEN transform to `recommendedPlayerCount`", () => {
@@ -183,15 +189,17 @@ describe(transformToBoardGame.name, () => {
       ],
     };
 
-    expect(transformToBoardGame(thingWithSuggestedPlayers)).toEqual(expected);
+    expect(transformToBoardGame(thingWithSuggestedPlayers as any)).toEqual(
+      expected
+    );
   });
 
   test("WHEN ThingItem has single `name`, THEN still get primary name", () => {
-    const thingWithSingleName: ThingItem = {
+    const thingWithSingleName: Partial<ThingItem> = {
       ...MOCK_THING_ITEM,
       name: { type: "primary", sortindex: "1", value: "Agropolis" },
     };
-    expect(transformToBoardGame(thingWithSingleName)).toEqual(
+    expect(transformToBoardGame(thingWithSingleName as any)).toEqual(
       EXPECTED_BOARD_GAME
     );
   });

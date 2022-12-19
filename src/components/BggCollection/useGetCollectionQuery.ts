@@ -37,7 +37,7 @@ export const useGetCollectionQuery = (username: string) => {
   } = useQuery({
     enabled: !!thingIds,
     queryKey: ["BggThings", thingIds],
-    queryFn: () => getBggThing({ id: thingIds }), // TODO: query game weight with stat: 1 (p1)
+    queryFn: () => getBggThing({ id: thingIds, stats: 1 }),
   });
 
   const data: BoardGame[] = thingsData?.data.item.map(transformToBoardGame);

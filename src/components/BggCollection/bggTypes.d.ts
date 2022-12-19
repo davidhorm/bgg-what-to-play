@@ -78,6 +78,17 @@ type Poll =
   | SuggestedPlayerAgePoll
   | LanguageDependencePoll;
 
+type Rank = {
+  type: string;
+  id: string;
+  name: string;
+  friendlyname: string;
+  value: string;
+  bayesaverage: string;
+};
+
+type ValueObject<S extends string> = Record<S, { value: string }>;
+
 export type ThingItem = {
   type: "boardgame";
   id: string;
@@ -85,13 +96,35 @@ export type ThingItem = {
   image: string;
   name: Name | Name[];
   description: string;
-  yearpublished: { value: string };
-  minplayers: { value: string };
-  maxplayers: { value: string };
   poll: Poll[];
-  playingtime: { value: string };
-  minplaytime: { value: string };
-  maxplaytime: { value: string };
-  minage: { value: string };
   link: Link[];
-};
+  statistics: {
+    page: string;
+    ratings: {
+      ranks: {
+        rank: Rank[];
+      };
+    } & ValueObject<
+      | "usersrated"
+      | "average"
+      | "bayesaverage"
+      | "stddev"
+      | "median"
+      | "owned"
+      | "trading"
+      | "wanting"
+      | "wishing"
+      | "numcomments"
+      | "numweights"
+      | "averageweight"
+    >;
+  };
+} & ValueObject<
+  | "yearpublished"
+  | "minplayers"
+  | "maxplayers"
+  | "playingtime"
+  | "minplaytime"
+  | "maxplaytime"
+  | "minage"
+>;

@@ -15,7 +15,14 @@ module.exports = {
     "plugin:react/jsx-runtime",
     "plugin:@typescript-eslint/recommended",
   ],
-  overrides: [],
+  overrides: [
+    {
+      files: ["*.spec.ts"],
+      rules: {
+        "@typescript-eslint/no-explicit-any": "off",
+      },
+    },
+  ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
     ecmaVersion: "latest",
