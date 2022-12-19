@@ -26,6 +26,7 @@ const maybeShowInvalidPlayerCount =
             .filter(removeRecsMoreThan(game.maxPlayers)),
         };
 
+// TODO: handle numplayers with + character (p3)
 const maybeFilterRecsByPlayerCount =
   (filterState: CollectionFilters) =>
   (game: BoardGame): BoardGame =>
