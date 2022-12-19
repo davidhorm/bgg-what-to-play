@@ -26,7 +26,41 @@ const maybeShowInvalidPlayerCount =
             .filter(removeRecsMoreThan(game.maxPlayers)),
         };
 
+const maybeFilterRecsByPlayerCount =
+  (filterState: CollectionFilters) =>
+  (game: BoardGame): BoardGame =>
+    filterState.filterByPlayerCountActive
+      ? {
+          ...game,
+          recommendedPlayerCount: game.recommendedPlayerCount.filter(
+            (r) =>
+              parseInt(r.numplayers, 10) ===
+              filterState.filterByPlayerCountValue
+          ),
+        }
+      : game;
+
+const maybeRemoveEmptyRecs =
+  (filterState: CollectionFilters) =>
+  (game: BoardGame): boolean =>
+    filterState.filterByPlayerCountActive
+      ? game.recommendedPlayerCount.length > 0
+      : true;
+
+const maybeSortByScore =
+  (filterState: CollectionFilters) =>
+  (gameA: BoardGame, gameB: BoardGame): number =>
+    filterState.filterByPlayerCountActive
+      ? gameB.recommendedPlayerCount[0].sortScore -
+        gameA.recommendedPlayerCount[0].sortScore
+      : 0;
+
 export const applyFiltersAndSorts = (
   games: BoardGame[],
   filterState: CollectionFilters
-) => games?.map(maybeShowInvalidPlayerCount(filterState));
+) =>
+  games
+    ?.map(maybeShowInvalidPlayerCount(filterState))
+    .map(maybeFilterRecsByPlayerCount(filterState)) // TODO: add tests for filterState.filterByPlayerCountActive (p2)
+    .filter(maybeRemoveEmptyRecs(filterState))
+    .sort(maybeSortByScore(filterState));

@@ -12,7 +12,7 @@ export const BggCollection = () => {
 
   if (error) return <>An error has occurred: {JSON.stringify(error)}</>;
 
-  // TODO: build filter and sort by specific player count (p1)
+  // TODO: add count of visible games (p2)
   // TODO: render user's collection last published date (p3)
   return (
     <main>

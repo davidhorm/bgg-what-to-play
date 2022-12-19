@@ -48,7 +48,7 @@ const reduceValueAndNumVotesToObjectProperties = (
       ...prevVal,
       [currVal.value]: parseInt(currVal.numvotes, 10),
     }),
-    { "Not Recommended": 0 }
+    { "Not Recommended": 0, "Recommended": 0, "Best": 0 }
   );
 
 /**
@@ -73,6 +73,18 @@ const flattenSuggestedNumPlayersResult = ({
   ...reduceValueAndNumVotesToObjectProperties(result),
 });
 
+const addSortScore = (
+  i: ReturnType<typeof flattenSuggestedNumPlayersResult>
+) => {
+  const totalVotes = i["Best"] + i["Recommended"] + i["Not Recommended"];
+  const bestPercent = i["Best"] / totalVotes;
+  const recPercent = i["Recommended"] / totalVotes;
+  const notRecPercent = i["Not Recommended"] / totalVotes;
+  const sortScore = bestPercent * 2 + recPercent - notRecPercent;
+
+  return { ...i, sortScore };
+};
+
 /**
  * Makes the "Not Recommended" value negative.
  *
@@ -86,9 +98,10 @@ const flattenSuggestedNumPlayersResult = ({
  * { "Best": 42, "Not Recommended": -37 }
  * ```
  */
-const makeNotRecommendedNegative = (
-  i: ReturnType<typeof flattenSuggestedNumPlayersResult>
-) => ({ ...i, "Not Recommended": 0 - i["Not Recommended"] });
+const makeNotRecommendedNegative = (i: ReturnType<typeof addSortScore>) => ({
+  ...i,
+  "Not Recommended": 0 - i["Not Recommended"],
+});
 
 const transformToRecommendedPlayerCount = (poll: ThingItem["poll"]) => {
   const recommendations =
@@ -98,6 +111,7 @@ const transformToRecommendedPlayerCount = (poll: ThingItem["poll"]) => {
   return Array.isArray(recommendations)
     ? recommendations
         .map(flattenSuggestedNumPlayersResult)
+        .map(addSortScore)
         .map(makeNotRecommendedNegative)
     : [];
 };
