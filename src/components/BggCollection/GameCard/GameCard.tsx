@@ -1,8 +1,8 @@
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
-import Rating from "@mui/material/Rating";
 import type { BoardGame } from "..";
+import { Complexity } from "./Complexity";
 import { PlayerCountChart } from "./PlayerCountChart";
 
 type Props = {
@@ -28,17 +28,7 @@ export const GameCard = ({ game }: Props) => (
           Players: {game.minPlayers} - {game.maxPlayers}
         </div>
         <div>Time: {game.playingTime}</div>
-        <div>
-          Complexity:{" "}
-          <Rating // TODO: style for mobile (p2)
-            name="Complexity"
-            value={game.averageWeight}
-            readOnly
-            size="small"
-            precision={0.1}
-            getLabelText={(value) => `${value} Complexity`}
-          />
-        </div>
+        <Complexity averageWeight={game.averageWeight} />
       </div>
       <PlayerCountChart recommendedPlayerCount={game.recommendedPlayerCount} />
     </CardContent>
