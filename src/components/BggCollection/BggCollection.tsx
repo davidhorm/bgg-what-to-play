@@ -2,8 +2,8 @@ import { applyFiltersAndSorts } from "./BggCollection.utils";
 import { FilterControls } from "./FilterControls";
 import { GameCard } from "./GameCard";
 import { ProgressSpinner } from "./ProgressSpinner";
-import { useCollectionFilters } from "./useCollectionFilters";
-import { useGetCollectionQuery } from "./useGetCollectionQuery";
+import { useCollectionFilters } from "./hooks/useCollectionFilters";
+import { useGetCollectionQuery } from "./hooks/useGetCollectionQuery";
 
 export const BggCollection = () => {
   const { loadingStatus, data } = useGetCollectionQuery("davidhorm");

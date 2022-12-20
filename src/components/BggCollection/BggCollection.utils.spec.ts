@@ -1,7 +1,7 @@
 import { describe, test, expect } from "vitest";
+import type { BoardGame } from ".";
 import { applyFiltersAndSorts } from "./BggCollection.utils";
-import type { CollectionFilters } from "./useCollectionFilters";
-import type { BoardGame } from "./useGetCollectionQuery.utils";
+import type { CollectionFilters } from "./hooks/useCollectionFilters";
 
 describe(applyFiltersAndSorts.name, () => {
   const MOCK_GAME: BoardGame = {
