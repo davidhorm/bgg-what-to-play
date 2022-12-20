@@ -1,31 +1,31 @@
 import { describe, test, expect } from "vitest";
-import { ThingItem } from "./bggTypes";
+import { Thing } from "./bggTypes";
 import {
   transformToBoardGame, // hasSuggestedPlayersVotes,
 } from "./useGetCollectionQuery.utils";
 
-const MOCK_THING_ITEM: Partial<ThingItem> = {
+const MOCK_THING_ITEM: Partial<Thing["items"]["item"][number]> = {
   type: "boardgame",
-  id: "314088",
+  id: 314088,
   thumbnail: "thumbnail.png",
   image: "box-art.png",
   name: [
-    { type: "primary", sortindex: "1", value: "Agropolis" },
-    { type: "alternate", sortindex: "1", value: "Agrópolis" },
-    { type: "alternate", sortindex: "1", value: "Ranczer" },
+    { type: "primary", sortindex: 1, value: "Agropolis" },
+    { type: "alternate", sortindex: 1, value: "Agrópolis" },
+    { type: "alternate", sortindex: 1, value: "Ranczer" },
   ],
   description: "lorem ipsum",
-  yearpublished: { value: "2021" },
-  minplayers: { value: "1" },
-  maxplayers: { value: "4" },
+  yearpublished: { value: 2021 },
+  minplayers: { value: 1 },
+  maxplayers: { value: 4 },
   poll: [], // MOCK_SUGGESTED_PLAYERS
-  playingtime: { value: "20" },
-  minplaytime: { value: "15" },
-  maxplaytime: { value: "20" },
-  minage: { value: "8" },
+  playingtime: { value: 20 },
+  minplaytime: { value: 15 },
+  maxplaytime: { value: 20 },
+  minage: { value: 8 },
   link: [],
   statistics: {
-    ratings: { averageweight: { value: "2.5" }, ranks: { rank: [] } },
+    ratings: { averageweight: { value: 2.5 }, ranks: { rank: [] } },
   } as any,
 };
 
@@ -78,7 +78,7 @@ const MOCK_THING_ITEM: Partial<ThingItem> = {
 
 describe(transformToBoardGame.name, () => {
   const EXPECTED_BOARD_GAME = {
-    id: "314088",
+    id: 314088,
     thumbnail: "thumbnail.png",
     maxPlayers: 4,
     minPlayers: 1,
@@ -95,49 +95,49 @@ describe(transformToBoardGame.name, () => {
   });
 
   test("WHEN ThingItem has `suggested_numplayers`, THEN transform to `recommendedPlayerCount`", () => {
-    const suggestedPlayers: ThingItem["poll"][0] = {
+    const suggestedPlayers: Thing["items"]["item"][number]["poll"][number] = {
       name: "suggested_numplayers",
       title: "User Suggested Number of Players",
-      totalvotes: "32",
+      totalvotes: 32,
       results: [
         {
-          numplayers: "1",
+          numplayers: 1,
           result: [
-            { value: "Best", numvotes: "27" },
-            { value: "Recommended", numvotes: "5" },
-            { value: "Not Recommended", numvotes: "0" },
+            { value: "Best", numvotes: 27 },
+            { value: "Recommended", numvotes: 5 },
+            { value: "Not Recommended", numvotes: 0 },
           ],
         },
         {
-          numplayers: "2",
+          numplayers: 2,
           result: [
-            { value: "Best", numvotes: "5" },
-            { value: "Recommended", numvotes: "12" },
-            { value: "Not Recommended", numvotes: "4" },
+            { value: "Best", numvotes: 5 },
+            { value: "Recommended", numvotes: 12 },
+            { value: "Not Recommended", numvotes: 4 },
           ],
         },
         {
-          numplayers: "3",
+          numplayers: 3,
           result: [
-            { value: "Best", numvotes: "0" },
-            { value: "Recommended", numvotes: "5" },
-            { value: "Not Recommended", numvotes: "12" },
+            { value: "Best", numvotes: 0 },
+            { value: "Recommended", numvotes: 5 },
+            { value: "Not Recommended", numvotes: 12 },
           ],
         },
         {
-          numplayers: "4",
+          numplayers: 4,
           result: [
-            { value: "Best", numvotes: "0" },
-            { value: "Recommended", numvotes: "2" },
-            { value: "Not Recommended", numvotes: "15" },
+            { value: "Best", numvotes: 0 },
+            { value: "Recommended", numvotes: 2 },
+            { value: "Not Recommended", numvotes: 15 },
           ],
         },
         {
           numplayers: "4+",
           result: [
-            { value: "Best", numvotes: "0" },
-            { value: "Recommended", numvotes: "0" },
-            { value: "Not Recommended", numvotes: "18" },
+            { value: "Best", numvotes: 0 },
+            { value: "Recommended", numvotes: 0 },
+            { value: "Not Recommended", numvotes: 18 },
           ],
         },
       ],
@@ -155,28 +155,28 @@ describe(transformToBoardGame.name, () => {
           "Best": 27,
           "Not Recommended": 0,
           "Recommended": 5,
-          "numplayers": "1",
+          "numplayers": 1,
           "sortScore": 1.84375,
         },
         {
           "Best": 5,
           "Not Recommended": -4,
           "Recommended": 12,
-          "numplayers": "2",
+          "numplayers": 2,
           "sortScore": 0.857142857142857,
         },
         {
           "Best": 0,
           "Not Recommended": -12,
           "Recommended": 5,
-          "numplayers": "3",
+          "numplayers": 3,
           "sortScore": -0.411764705882353,
         },
         {
           "Best": 0,
           "Not Recommended": -15,
           "Recommended": 2,
-          "numplayers": "4",
+          "numplayers": 4,
           "sortScore": -0.7647058823529411,
         },
         {
@@ -195,9 +195,9 @@ describe(transformToBoardGame.name, () => {
   });
 
   test("WHEN ThingItem has single `name`, THEN still get primary name", () => {
-    const thingWithSingleName: Partial<ThingItem> = {
+    const thingWithSingleName: Partial<Thing["items"]["item"][number]> = {
       ...MOCK_THING_ITEM,
-      name: { type: "primary", sortindex: "1", value: "Agropolis" },
+      name: { type: "primary", sortindex: 1, value: "Agropolis" },
     };
     expect(transformToBoardGame(thingWithSingleName as any)).toEqual(
       EXPECTED_BOARD_GAME

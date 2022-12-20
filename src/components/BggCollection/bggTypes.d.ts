@@ -1,73 +1,82 @@
-export type CollectionItem = {
+type BoardGameThing = {
   objecttype: "thing";
-  objectid: string;
+  objectid: number;
   subtype: "boardgame";
-  collid: string;
+  collid: number;
   name: {
     text: string;
-    sortindex: string;
+    sortindex: number;
   };
   status: {
-    own: "0" | "1";
-    prevowned: "0" | "1";
-    fortrade: "0" | "1";
-    want: "0" | "1";
-    wanttoplay: "0" | "1";
-    wanttobuy: "0" | "1";
-    wishlist: "0" | "1";
-    preordered: "0" | "1";
+    own: 0 | 1;
+    prevowned: 0 | 1;
+    fortrade: 0 | 1;
+    want: 0 | 1;
+    wanttoplay: 0 | 1;
+    wanttobuy: 0 | 1;
+    wishlist: 0 | 1;
+    preordered: 0 | 1;
     lastmodified: string;
   };
 };
 
-export type Name = {
+export type BriefCollection = {
+  items: {
+    totalitems: number;
+    termsofuse: string;
+    pubdate: string;
+    item: BoardGameThing[];
+  };
+};
+
+type Name = {
   type: "primary" | "alternate";
-  sortindex: "1";
+  sortindex: 1;
   value: string;
 };
 
-type Link = { type: string; id: string; value: string };
+type Link = { type: string; id: number; value: string };
 
 type SuggestedNumPlayersResult = {
-  numplayers: string;
+  numplayers: number | string;
   result: [
-    { value: "Best"; numvotes: string },
-    { value: "Recommended"; numvotes: string },
-    { value: "Not Recommended"; numvotes: string }
+    { value: "Best"; numvotes: number },
+    { value: "Recommended"; numvotes: number },
+    { value: "Not Recommended"; numvotes: number }
   ];
 };
 
 type SuggestedNumPlayersPoll = {
   name: "suggested_numplayers";
   title: string;
-  totalvotes: string;
+  totalvotes: number;
   results: SuggestedNumPlayersResult | SuggestedNumPlayersResult[];
 };
 
 type SuggestedPlayerAgeResult = {
-  value: string;
-  numvotes: string;
+  value: number | string;
+  numvotes: number;
 };
 
 type SuggestedPlayerAgePoll = {
   name: "suggested_playerage";
   title: string;
-  totalvotes: string;
+  totalvotes: number;
   results: {
     result: SuggestedPlayerAgeResult[];
   };
 };
 
 type LanguageDependenceResult = {
-  level: string;
+  level: number;
   value: string;
-  numvotes: string;
+  numvotes: number;
 };
 
 type LanguageDependencePoll = {
   name: "language_dependence";
   title: string;
-  totalvotes: string;
+  totalvotes: number;
   results: {
     result: LanguageDependenceResult[];
   };
@@ -87,11 +96,11 @@ type Rank = {
   bayesaverage: string;
 };
 
-type ValueObject<S extends string> = Record<S, { value: string }>;
+type ValueObject<S extends string> = Record<S, { value: number }>;
 
-export type ThingItem = {
+type BoardGameThingItem = {
   type: "boardgame";
-  id: string;
+  id: number;
   thumbnail: string;
   image: string;
   name: Name | Name[];
@@ -99,7 +108,7 @@ export type ThingItem = {
   poll: Poll[];
   link: Link[];
   statistics: {
-    page: string;
+    page: number;
     ratings: {
       ranks: {
         rank: Rank[];
@@ -128,3 +137,10 @@ export type ThingItem = {
   | "maxplaytime"
   | "minage"
 >;
+
+export type Thing = {
+  items: {
+    termsofuse: "https://boardgamegeek.com/xmlapi/termsofuse";
+    item: BoardGameThingItem[];
+  };
+};

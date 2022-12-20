@@ -6,14 +6,12 @@ import { useCollectionFilters } from "./useCollectionFilters";
 import { useGetCollectionQuery } from "./useGetCollectionQuery";
 
 export const BggCollection = () => {
-  const { loadingStatus, error, data } = useGetCollectionQuery("davidhorm");
+  const { loadingStatus, data } = useGetCollectionQuery("davidhorm");
   const filter = useCollectionFilters();
 
   // TODO: implement aria-busy? (p3)
-  if (loadingStatus.status !== "FETCHING_COMPLETE")
+  if (loadingStatus.status !== "FETCHING_COMPLETE" || !data)
     return <ProgressSpinner loadingStatus={loadingStatus} />;
-
-  if (error) return <>An error has occurred: {JSON.stringify(error)}</>;
 
   // TODO: add count of visible games (p2)
   // TODO: render user's collection last published date (p3)

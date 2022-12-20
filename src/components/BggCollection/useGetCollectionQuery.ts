@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-// TODO: replace since client can't handle errors
-import { getBggCollection, getBggThing } from "bgg-xml-api-client";
+import { XMLParser } from "fast-xml-parser";
+import type { BriefCollection, Thing } from "./bggTypes";
 import {
   BoardGame,
   getLoadingStatus,
@@ -14,44 +14,65 @@ export const useGetCollectionQuery = (username: string) => {
   // TODO: handle response code 202 for queued request. (p1)
   // see https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc11
 
+  const parser = new XMLParser({
+    ignoreAttributes: false,
+    attributeNamePrefix: "",
+    textNodeName: "text",
+    removeNSPrefix: true,
+    allowBooleanAttributes: true,
+    parseAttributeValue: true,
+  });
+
   const {
     isLoading: collectionIsLoading,
     error: collectionError,
     data: collectionData,
-  } = useQuery({
+  } = useQuery<BriefCollection, Error>({
     enabled: !!username,
     queryKey: ["BggCollection", username],
     queryFn: () =>
-      getBggCollection({
-        username,
-        brief: 1,
-        own: 1,
-        excludesubtype: "boardgameexpansion", // TODO: include expansions later (p3)
-      }),
+      fetch(
+        `https://boardgamegeek.com/xmlapi2/collection?username=${username}&brief=1&own=1&excludesubtype=boardgameexpansion` // TODO: include expansions later (p3)
+      )
+        .then((response) => response.text())
+        .then((xml) => parser.parse(xml))
+        .catch(() => {
+          throw new Error(`Unable to query collection for ${username}`);
+        }),
+    retry: false,
   });
 
-  const thingIds = collectionData?.data.item.map(transformToThingIds);
+  // TODO: handle long list of things (p1)
+  const thingIds = collectionData?.items.item
+    .map(transformToThingIds)
+    .join(",");
 
   const {
     isLoading: thingsIsLoading,
     error: thingsError,
     data: thingsData,
-  } = useQuery({
+  } = useQuery<Thing, Error>({
     enabled: !!thingIds,
     queryKey: ["BggThings", thingIds],
-    queryFn: () => getBggThing({ id: thingIds, stats: 1 }),
+    queryFn: () =>
+      fetch(`https://boardgamegeek.com/xmlapi2/thing?id=${thingIds}&stats=1`)
+        .then((response) => response.text())
+        .then((xml) => parser.parse(xml))
+        .catch((err) => {
+          throw new Error(JSON.stringify(err));
+        }),
   });
 
-  const data: BoardGame[] = thingsData?.data.item.map(transformToBoardGame);
+  const data: BoardGame[] | undefined =
+    thingsData?.items.item.map(transformToBoardGame);
 
   return {
     loadingStatus: getLoadingStatus({
       username,
       collectionIsLoading,
-      collectionData: collectionData?.data,
       thingsIsLoading,
+      errorMessage: collectionError?.message || thingsError?.message,
     }),
-    error: collectionError || thingsError,
     data,
   };
 };

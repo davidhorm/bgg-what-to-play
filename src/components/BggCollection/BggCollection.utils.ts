@@ -1,18 +1,24 @@
 import type { BoardGame } from ".";
 import type { CollectionFilters } from "./useCollectionFilters";
 
+const addOneIfHasPlusSign = (value: string) => (value.endsWith("+") ? 1 : 0);
+
+const normalizeToNumPlayers = (
+  numplayers: BoardGame["recommendedPlayerCount"][number]["numplayers"]
+): number =>
+  typeof numplayers === "number"
+    ? numplayers
+    : parseInt(numplayers, 10) + addOneIfHasPlusSign(numplayers);
+
 const removeRecsLessThan =
   (minPlayers: BoardGame["minPlayers"]) =>
   (rec: BoardGame["recommendedPlayerCount"][number]): boolean =>
-    parseInt(rec.numplayers, 10) >= minPlayers;
-
-const addOneIfHasPlusSign = (value: string) => (value.endsWith("+") ? 1 : 0);
+    normalizeToNumPlayers(rec.numplayers) >= minPlayers;
 
 const removeRecsMoreThan =
   (maxPlayers: BoardGame["maxPlayers"]) =>
   (rec: BoardGame["recommendedPlayerCount"][number]): boolean =>
-    parseInt(rec.numplayers, 10) + addOneIfHasPlusSign(rec.numplayers) <=
-    maxPlayers;
+    normalizeToNumPlayers(rec.numplayers) <= maxPlayers;
 
 const maybeShowInvalidPlayerCount =
   (filterState: CollectionFilters) =>
@@ -35,7 +41,7 @@ const maybeFilterRecsByPlayerCount =
           ...game,
           recommendedPlayerCount: game.recommendedPlayerCount.filter(
             (r) =>
-              parseInt(r.numplayers, 10) ===
+              normalizeToNumPlayers(r.numplayers) ===
               filterState.filterByPlayerCountValue
           ),
         }

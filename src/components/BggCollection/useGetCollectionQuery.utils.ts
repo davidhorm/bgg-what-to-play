@@ -1,13 +1,13 @@
-import type { BggCollectionResponse } from "bgg-xml-api-client";
 import type {
-  CollectionItem,
-  ThingItem,
+  BriefCollection,
+  Thing,
   Name,
   SuggestedNumPlayersResult,
 } from "./bggTypes";
 
-export const transformToThingIds = (i: CollectionItem) =>
-  parseInt(i.objectid, 10);
+export const transformToThingIds = (
+  i: BriefCollection["items"]["item"][number]
+) => i.objectid;
 
 const getPrimaryName = (name: Name | Name[]) => {
   const primaryName = Array.isArray(name)
@@ -47,7 +47,7 @@ const reduceValueAndNumVotesToObjectProperties = (
   result.reduce(
     (prevVal, currVal) => ({
       ...prevVal,
-      [currVal.value]: parseInt(currVal.numvotes, 10),
+      [currVal.value]: currVal.numvotes,
     }),
     { "Not Recommended": 0, "Recommended": 0, "Best": 0 }
   );
@@ -104,7 +104,9 @@ const makeNotRecommendedNegative = (i: ReturnType<typeof addSortScore>) => ({
   "Not Recommended": 0 - i["Not Recommended"],
 });
 
-const transformToRecommendedPlayerCount = (poll: ThingItem["poll"]) => {
+const transformToRecommendedPlayerCount = (
+  poll: Thing["items"]["item"][number]["poll"]
+) => {
   const recommendations =
     (poll.filter((p) => p.name === "suggested_numplayers")?.[0]
       ?.results as SuggestedNumPlayersResult[]) || [];
@@ -117,14 +119,14 @@ const transformToRecommendedPlayerCount = (poll: ThingItem["poll"]) => {
     : [];
 };
 
-export const transformToBoardGame = (i: ThingItem) => ({
+export const transformToBoardGame = (i: Thing["items"]["item"][number]) => ({
   name: getPrimaryName(i.name),
   id: i.id,
   thumbnail: i.thumbnail,
-  minPlayers: parseInt(i.minplayers.value, 10),
-  maxPlayers: parseInt(i.maxplayers.value, 10),
-  playingTime: parseInt(i.playingtime.value, 10),
-  averageWeight: parseFloat(i.statistics.ratings.averageweight.value),
+  minPlayers: i.minplayers.value,
+  maxPlayers: i.maxplayers.value,
+  playingTime: i.playingtime.value,
+  averageWeight: i.statistics.ratings.averageweight.value,
   recommendedPlayerCount: transformToRecommendedPlayerCount(i.poll),
 });
 
@@ -142,18 +144,10 @@ type Progress = {
   message?: string;
 };
 
-type MaybeErrors = {
-  errors?: {
-    error: {
-      message: string;
-    };
-  };
-};
-
 type GetLoadingStatusProps = {
   username: string;
   collectionIsLoading: boolean;
-  collectionData?: BggCollectionResponse & MaybeErrors;
+  errorMessage?: string;
   thingsIsLoading: boolean;
 };
 
@@ -161,7 +155,7 @@ type GetLoadingStatusProps = {
 export const getLoadingStatus = ({
   username,
   collectionIsLoading,
-  collectionData,
+  errorMessage,
   thingsIsLoading,
 }: GetLoadingStatusProps): Progress => {
   if (collectionIsLoading) {
@@ -172,11 +166,11 @@ export const getLoadingStatus = ({
     };
   }
 
-  if (collectionData?.errors?.error) {
+  if (errorMessage) {
     return {
       status: "FETCHING_ERROR",
       progress: 100,
-      message: `${collectionData.errors.error.message} - ${username}`,
+      message: errorMessage,
     };
   }
 
