@@ -1,5 +1,5 @@
 import CircularProgress from "@mui/material/CircularProgress";
-import type { useGetCollectionQuery } from "./useGetCollectionQuery";
+import type { useGetCollectionQuery } from "./hooks/useGetCollectionQuery";
 
 type Props = Pick<ReturnType<typeof useGetCollectionQuery>, "loadingStatus">;
 

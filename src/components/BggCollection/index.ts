@@ -1,2 +1,2 @@
 export { BggCollection } from "./BggCollection";
-export type { BoardGame } from "./useGetCollectionQuery.utils";
+export type { BoardGame } from "./hooks/useGetCollectionQuery.utils";
