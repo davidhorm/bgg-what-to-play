@@ -43,7 +43,7 @@ export const useGetCollectionQuery = (username: string) => {
   });
 
   // TODO: handle long list of things (p1)
-  const thingIds = collectionData?.items.item
+  const thingIds = collectionData?.items?.item
     .map(transformToThingIds)
     .join(",");
 
