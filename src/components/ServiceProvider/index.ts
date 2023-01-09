@@ -1,1 +1,1 @@
-export { ServiceProvider } from "./ServiceProvider";
+export { ServiceProvider, MockServiceProvider } from "./ServiceProvider";

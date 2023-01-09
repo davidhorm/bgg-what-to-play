@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, test } from "vitest";
+import { MockServiceProvider } from "../ServiceProvider";
 import { SearchFilterForm } from "./SearchFilterForm";
 
 const ORIGINAL_LOCATION = location.href;
@@ -16,7 +17,11 @@ describe(SearchFilterForm.name, () => {
 
   test("WHEN submit `davidhorm` as username, THEN query params is `?username=davidhorm`", async () => {
     const user = userEvent.setup();
-    render(<SearchFilterForm />);
+    render(
+      <MockServiceProvider>
+        <SearchFilterForm />
+      </MockServiceProvider>
+    );
     const input: HTMLInputElement = screen.getByLabelText("BGG Username");
 
     expect(location.search).toBe("");
@@ -30,7 +35,11 @@ describe(SearchFilterForm.name, () => {
 
   test("WHEN location already has username query param, THEN input box is populated with the same value", async () => {
     history.replaceState({}, "", `${ORIGINAL_LOCATION}?username=davidhorm`);
-    render(<SearchFilterForm />);
+    render(
+      <MockServiceProvider>
+        <SearchFilterForm />
+      </MockServiceProvider>
+    );
     const input = screen.getByLabelText("BGG Username") as HTMLInputElement;
 
     expect(location.search).toBe("?username=davidhorm");

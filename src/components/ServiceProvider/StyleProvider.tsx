@@ -1,14 +1,14 @@
+import { PropsWithChildren } from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import {
   StyledEngineProvider,
   ThemeProvider,
   createTheme,
 } from "@mui/material/styles";
-import type { OnlyChildrenProps } from "./ServiceProvider";
 
 const theme = createTheme();
 
-export const StyleProvider = ({ children }: OnlyChildrenProps) => (
+export const StyleProvider = ({ children }: PropsWithChildren<object>) => (
   <StyledEngineProvider injectFirst>
     <ThemeProvider theme={theme}>
       <CssBaseline />

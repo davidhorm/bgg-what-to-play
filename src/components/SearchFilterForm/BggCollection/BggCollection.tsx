@@ -5,9 +5,16 @@ import { ProgressSpinner } from "./ProgressSpinner";
 import { useCollectionFilters } from "./hooks/useCollectionFilters";
 import { useGetCollectionQuery } from "./hooks/useGetCollectionQuery";
 
-export const BggCollection = () => {
-  const { loadingStatus, data } = useGetCollectionQuery("davidhorm");
+type Props = {
+  username: string;
+};
+
+export const BggCollection = ({ username }: Props) => {
+  const { loadingStatus, data } = useGetCollectionQuery(username);
   const filter = useCollectionFilters();
+
+  // TODO: make pretty (p2)
+  if (!username) return <div>Please select a username</div>;
 
   // TODO: implement aria-busy? (p3)
   if (loadingStatus.status !== "FETCHING_COMPLETE" || !data)
@@ -16,13 +23,13 @@ export const BggCollection = () => {
   // TODO: add count of visible games (p2)
   // TODO: render user's collection last published date (p3)
   return (
-    <main>
+    <div>
       <FilterControls filter={filter} />
       <section className="flex flex-wrap">
         {applyFiltersAndSorts(data, filter.filterState)?.map((game) => (
           <GameCard key={game.id} game={game} />
         ))}
       </section>
-    </main>
+    </div>
   );
 };
