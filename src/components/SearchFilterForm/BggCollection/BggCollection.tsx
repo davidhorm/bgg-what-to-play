@@ -1,6 +1,7 @@
 import { applyFiltersAndSorts } from "./BggCollection.utils";
 import { FilterControls } from "./FilterControls";
 import { GameCard } from "./GameCard";
+import { MissingQueryValue } from "./MissingQueryValue";
 import { ProgressSpinner } from "./ProgressSpinner";
 import { useCollectionFilters } from "./hooks/useCollectionFilters";
 import { useGetCollectionQuery } from "./hooks/useGetCollectionQuery";
@@ -13,8 +14,7 @@ export const BggCollection = ({ username }: Props) => {
   const { loadingStatus, data } = useGetCollectionQuery(username);
   const filter = useCollectionFilters();
 
-  // TODO: make pretty (p2)
-  if (!username) return <div>Please select a username</div>;
+  if (!username) return <MissingQueryValue />;
 
   // TODO: implement aria-busy? (p3)
   if (loadingStatus.status !== "FETCHING_COMPLETE" || !data)

@@ -4,6 +4,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import { BggCollection } from "./BggCollection";
+import { Header } from "./Header";
 import { ReactComponent as MagnifyingGlassIcon } from "./magnifying-glass.svg";
 import { useQueryParams, QUERY_PARAMS } from "./useQueryParams";
 
@@ -12,8 +13,10 @@ export const SearchFilterForm = () => {
   const [username, setUsername] = useState(usernameQueryParam);
 
   return (
-    <main>
-      <Paper elevation={1} className="m-4 p-4">
+    <main className="p-4">
+      {!usernameQueryParam && <Header />}
+
+      <Paper elevation={1} className="p-4">
         <form
           onSubmit={(e) => {
             setQueryParam(QUERY_PARAMS.USERNAME, username);
