@@ -3,6 +3,7 @@ import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
+import { ReactComponent as MagnifyingGlassIcon } from "./magnifying-glass.svg";
 
 const QUERY_PARAMS = {
   USERNAME: "username",
@@ -42,7 +43,9 @@ export const SearchFilterForm = () => {
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
-                <IconButton type="submit">&gt;</IconButton>
+                <IconButton type="submit">
+                  <MagnifyingGlassIcon className="h-4" />
+                </IconButton>
               </InputAdornment>
             ),
           }}
