@@ -149,6 +149,7 @@ type GetLoadingStatusProps = {
   collectionIsLoading: boolean;
   errorMessage?: string;
   thingsIsLoading: boolean;
+  totalitems?: number;
 };
 
 // TODO: add some unit tests (p3)
@@ -157,6 +158,7 @@ export const getLoadingStatus = ({
   collectionIsLoading,
   errorMessage,
   thingsIsLoading,
+  totalitems,
 }: GetLoadingStatusProps): Progress => {
   if (collectionIsLoading) {
     return {
@@ -171,6 +173,14 @@ export const getLoadingStatus = ({
       status: "FETCHING_ERROR",
       progress: 100,
       message: errorMessage,
+    };
+  }
+
+  if (totalitems === 0) {
+    return {
+      status: "FETCHING_ERROR",
+      progress: 100,
+      message: `There seems to be 0 games owned in the collection for ${username}.`,
     };
   }
 

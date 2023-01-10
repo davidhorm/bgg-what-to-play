@@ -47,12 +47,11 @@ export const useGetCollectionQuery = (username: string) => {
             e?.message || `Unable to query collection for ${username}`
           );
         }),
-    retry: false,
   });
 
   // TODO: handle long list of things (p1)
   const thingIds = collectionData?.items?.item
-    .map(transformToThingIds)
+    ?.map(transformToThingIds)
     .join(",");
 
   const {
@@ -80,6 +79,7 @@ export const useGetCollectionQuery = (username: string) => {
       collectionIsLoading,
       thingsIsLoading,
       errorMessage: collectionError?.message || thingsError?.message,
+      totalitems: collectionData?.items?.totalitems,
     }),
     data,
   };
