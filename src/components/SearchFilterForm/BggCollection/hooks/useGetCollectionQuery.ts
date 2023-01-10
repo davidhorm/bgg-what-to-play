@@ -9,20 +9,18 @@ import {
 } from "./useGetCollectionQuery.utils";
 
 // TODO: handle querying array of usernames (p3)
+// TODO: handle querying other things like geeklists (p3)
+
+const parser = new XMLParser({
+  ignoreAttributes: false,
+  attributeNamePrefix: "",
+  textNodeName: "text",
+  removeNSPrefix: true,
+  allowBooleanAttributes: true,
+  parseAttributeValue: true,
+});
 
 export const useGetCollectionQuery = (username: string) => {
-  // TODO: handle response code 202 for queued request. (p1)
-  // see https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc11
-
-  const parser = new XMLParser({
-    ignoreAttributes: false,
-    attributeNamePrefix: "",
-    textNodeName: "text",
-    removeNSPrefix: true,
-    allowBooleanAttributes: true,
-    parseAttributeValue: true,
-  });
-
   const {
     isLoading: collectionIsLoading,
     error: collectionError,
@@ -32,12 +30,22 @@ export const useGetCollectionQuery = (username: string) => {
     queryKey: ["BggCollection", username],
     queryFn: () =>
       fetch(
-        `https://boardgamegeek.com/xmlapi2/collection?username=${username}&brief=1&own=1&excludesubtype=boardgameexpansion` // TODO: include expansions later (p3)
+        `https://bgg.cc/xmlapi2/collection?username=${username}&brief=1&own=1&excludesubtype=boardgameexpansion` // TODO: include expansions later (p3)
       )
-        .then((response) => response.text())
+        .then((response) => {
+          if (response.status === 202) {
+            // Handle response code 202 for queued request. (p1)
+            // see https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc11
+            throw new Error("202 Accepted");
+          }
+
+          return response.text();
+        })
         .then((xml) => parser.parse(xml))
-        .catch(() => {
-          throw new Error(`Unable to query collection for ${username}`);
+        .catch((e) => {
+          throw new Error(
+            e?.message || `Unable to query collection for ${username}`
+          );
         }),
     retry: false,
   });
