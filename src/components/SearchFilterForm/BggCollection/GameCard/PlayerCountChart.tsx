@@ -14,10 +14,10 @@ const tooltipSort = ["Best", "Recommended", "Not Recommended"];
 
 type Props = Pick<BoardGame, "recommendedPlayerCount">;
 
-// TODO: show percentage in tooltip (p3)
+// TODO: replace tooltip with % in label (p3) - see https://recharts.org/en-US/api/Label
 // TODO: add gradients to bar colors (p3)
 // TODO: highlight bar (or dull other bars) when filtered (p2)
-// TODO: maybe add id to bar so when Show Invalid that it doesn't change column (p3)
+// TODO: display placeholder when no data available (p2) - see https://github.com/recharts/recharts/issues/430
 
 export const PlayerCountChart = ({ recommendedPlayerCount }: Props) => {
   const ref = useRef<HTMLDivElement>(null);
