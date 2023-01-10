@@ -81,6 +81,7 @@ export const useGetCollectionQuery = (username: string) => {
       errorMessage: collectionError?.message || thingsError?.message,
       totalitems: collectionData?.items?.totalitems,
     }),
+    pubdate: collectionData?.items?.pubdate,
     data,
   };
 };

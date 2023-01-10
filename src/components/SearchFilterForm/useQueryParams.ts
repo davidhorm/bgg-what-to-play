@@ -9,7 +9,6 @@ type QueryParamKey = typeof QUERY_PARAMS[keyof typeof QUERY_PARAMS];
 const getQueryParamValue = (key: QueryParamKey) =>
   new URLSearchParams(document.location.search).get(key) || "";
 
-// TODO: make this Context (p1)
 export const useQueryParams = () => {
   const [username, setUsername] = useState(
     getQueryParamValue(QUERY_PARAMS.USERNAME)

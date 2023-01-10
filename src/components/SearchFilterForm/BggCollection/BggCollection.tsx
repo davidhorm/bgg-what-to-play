@@ -11,7 +11,7 @@ type Props = {
 };
 
 export const BggCollection = ({ username }: Props) => {
-  const { loadingStatus, data } = useGetCollectionQuery(username);
+  const { loadingStatus, data, pubdate } = useGetCollectionQuery(username);
   const filter = useCollectionFilters();
 
   if (!username) return <MissingQueryValue />;
@@ -19,13 +19,29 @@ export const BggCollection = ({ username }: Props) => {
   if (loadingStatus.status !== "FETCHING_COMPLETE" || !data)
     return <NoDataDisplay loadingStatus={loadingStatus} />;
 
-  // TODO: add count of visible games (p2)
-  // TODO: render user's collection last published date (p3)
+  const filteredGames = applyFiltersAndSorts(data, filter.filterState);
+
   return (
     <div>
       <FilterControls filter={filter} />
+
+      <section className="flex gap-4 px-4 text-xs text-gray-500">
+        <span>
+          {pubdate
+            ? `Collection as of: ${new Date(pubdate).toLocaleDateString()}`
+            : ""}
+        </span>
+        <span>
+          # of Games:
+          {filteredGames.length !== data.length
+            ? ` ${filteredGames.length} / `
+            : ` `}
+          {data.length}
+        </span>
+      </section>
+
       <section className="flex flex-wrap">
-        {applyFiltersAndSorts(data, filter.filterState)?.map((game) => (
+        {filteredGames?.map((game) => (
           <GameCard key={game.id} game={game} />
         ))}
       </section>

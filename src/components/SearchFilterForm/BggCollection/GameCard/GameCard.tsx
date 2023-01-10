@@ -10,7 +10,6 @@ type Props = {
 };
 
 // TODO: make cards consistent size (thumbnail height/width, and title ellipsis) (p2)
-// TODO: add content-visibility css. https://web.dev/content-visibility/ (p2)
 // TODO: format min/max player number to combine if same (p2)
 
 export const GameCard = ({ game }: Props) => (

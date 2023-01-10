@@ -34,7 +34,7 @@ export const FilterControls = ({
           valueLabelDisplay="on"
           size="small"
           min={1}
-          max={15} // TODO: maybe calc max range based on collection (p3)
+          max={10} // TODO: define range (p3)
           marks
           disabled={!filterState.filterByPlayerCountActive}
           value={filterState.filterByPlayerCountValue}
