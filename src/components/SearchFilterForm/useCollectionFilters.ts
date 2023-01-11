@@ -1,6 +1,7 @@
 import { useReducer } from "react";
 
 const initialState = {
+  username: "",
   showInvalidPlayerCount: false,
   filterByPlayerCountActive: false,
   filterByPlayerCountValue: 1,

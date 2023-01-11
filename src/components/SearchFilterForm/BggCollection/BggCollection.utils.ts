@@ -1,5 +1,5 @@
 import type { BoardGame } from ".";
-import type { CollectionFilters } from "./hooks/useCollectionFilters";
+import type { CollectionFilters } from "../useCollectionFilters";
 
 const addOneIfHasPlusSign = (value: string) => (value.endsWith("+") ? 1 : 0);
 

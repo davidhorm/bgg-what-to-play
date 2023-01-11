@@ -1,30 +1,28 @@
+import type { CollectionFilters } from "../useCollectionFilters";
 import { applyFiltersAndSorts } from "./BggCollection.utils";
-import { FilterControls } from "./FilterControls";
 import { GameCard } from "./GameCard";
 import { MissingQueryValue } from "./MissingQueryValue";
 import { NoDataDisplay } from "./NoDataDisplay";
-import { useCollectionFilters } from "./hooks/useCollectionFilters";
 import { useGetCollectionQuery } from "./hooks/useGetCollectionQuery";
 
 type Props = {
-  username: string;
+  filterState: CollectionFilters;
 };
 
-export const BggCollection = ({ username }: Props) => {
-  const { loadingStatus, data, pubdate } = useGetCollectionQuery(username);
-  const filter = useCollectionFilters();
+export const BggCollection = ({ filterState }: Props) => {
+  const { loadingStatus, data, pubdate } = useGetCollectionQuery(
+    filterState.username
+  );
 
-  if (!username) return <MissingQueryValue />;
+  if (!filterState.username) return <MissingQueryValue />;
 
   if (loadingStatus.status !== "FETCHING_COMPLETE" || !data)
     return <NoDataDisplay loadingStatus={loadingStatus} />;
 
-  const filteredGames = applyFiltersAndSorts(data, filter.filterState);
+  const filteredGames = applyFiltersAndSorts(data, filterState);
 
   return (
     <div>
-      <FilterControls filter={filter} />
-
       <section className="flex gap-4 px-4 text-xs text-gray-500">
         <span>
           {pubdate

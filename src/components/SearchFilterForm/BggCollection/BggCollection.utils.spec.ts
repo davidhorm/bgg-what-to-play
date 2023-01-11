@@ -1,12 +1,12 @@
 import { describe, test, expect } from "vitest";
 import type { BoardGame } from ".";
+import type { CollectionFilters } from "../useCollectionFilters";
 import { applyFiltersAndSorts } from "./BggCollection.utils";
-import type { CollectionFilters } from "./hooks/useCollectionFilters";
 
 describe(applyFiltersAndSorts.name, () => {
   const MOCK_GAME: BoardGame = {
     name: "Ticket to Ride",
-    id: "9209",
+    id: 9209,
     thumbnail: "thumbnail.png",
     minPlayers: 2,
     maxPlayers: 2,
@@ -16,6 +16,7 @@ describe(applyFiltersAndSorts.name, () => {
   };
 
   const MOCK_FILTERS: CollectionFilters = {
+    username: "",
     showInvalidPlayerCount: false,
     filterByPlayerCountActive: false,
     filterByPlayerCountValue: 1,

@@ -2,7 +2,7 @@ import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
 import Slider from "@mui/material/Slider";
-import type { useCollectionFilters } from "./hooks/useCollectionFilters";
+import type { useCollectionFilters } from "./useCollectionFilters";
 
 type Props = {
   filter: ReturnType<typeof useCollectionFilters>;
