@@ -1,7 +1,26 @@
 import { useReducer } from "react";
 
+//#region QueryParams
+
+const QUERY_PARAMS = {
+  USERNAME: "username",
+} as const;
+
+type QueryParamKey = typeof QUERY_PARAMS[keyof typeof QUERY_PARAMS];
+
+const getQueryParamValue = (key: QueryParamKey) =>
+  new URLSearchParams(document.location.search).get(key) || "";
+
+const setQueryParam = (key: QueryParamKey, value: string) => {
+  const url = new URL(document.location.href);
+  url.searchParams.set(key, value);
+  history.pushState({}, "", url);
+};
+
+//#endregion QueryParams
+
 const initialState = {
-  username: "",
+  username: getQueryParamValue(QUERY_PARAMS.USERNAME),
   showInvalidPlayerCount: false,
   filterByPlayerCountActive: false,
   filterByPlayerCountValue: 1,
@@ -15,6 +34,11 @@ type ActionHandler<T> = (
 ) => CollectionFilters;
 
 const resetFilters: ActionHandler<Partial<undefined>> = () => initialState;
+
+const setUsername: ActionHandler<string> = (state, username) => {
+  setQueryParam(QUERY_PARAMS.USERNAME, username);
+  return { ...state, username };
+};
 
 const toggleShowInvalidPlayerCount: ActionHandler<Partial<undefined>> = (
   state
@@ -34,6 +58,7 @@ const setFilterByPlayerCountValue: ActionHandler<number> = (
 
 const actions = {
   RESET_FILTERS: resetFilters,
+  SET_USERNAME: setUsername,
   TOGGLE_SHOW_INVALID_PLAYER_COUNT: toggleShowInvalidPlayerCount,
   TOGGLE_FILTER_BY_PLAYER_COUNT_ACTIVE: toggleFilterByPlayerCountActive,
   SET_FILTER_BY_PLAYER_COUNT_VALUE: setFilterByPlayerCountValue,

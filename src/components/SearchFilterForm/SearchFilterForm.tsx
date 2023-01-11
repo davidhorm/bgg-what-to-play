@@ -8,21 +8,24 @@ import { FilterControls } from "./FilterControls";
 import { Header } from "./Header";
 import { ReactComponent as MagnifyingGlassIcon } from "./magnifying-glass.svg";
 import { useCollectionFilters } from "./useCollectionFilters";
-import { useQueryParams, QUERY_PARAMS } from "./useQueryParams";
 
 export const SearchFilterForm = () => {
-  const { username: usernameQueryParam, setQueryParam } = useQueryParams();
-  const [username, setUsername] = useState(usernameQueryParam);
   const filter = useCollectionFilters();
+  const [usernameInput, setUsernameInput] = useState(
+    filter.filterState.username
+  );
 
   return (
     <main className="p-4">
-      {!usernameQueryParam && <Header />}
+      {!filter.filterState.username && <Header />}
 
       <Paper elevation={1} className="p-4">
         <form
           onSubmit={(e) => {
-            setQueryParam(QUERY_PARAMS.USERNAME, username);
+            filter.filterDispatch({
+              type: "SET_USERNAME",
+              payload: usernameInput,
+            });
             e.preventDefault();
           }}
         >
@@ -31,8 +34,8 @@ export const SearchFilterForm = () => {
             label="BGG Username"
             variant="filled"
             size="small"
-            value={username}
-            onChange={({ target: { value } }) => setUsername(value)}
+            value={usernameInput}
+            onChange={({ target: { value } }) => setUsernameInput(value)}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -48,9 +51,7 @@ export const SearchFilterForm = () => {
         <FilterControls filter={filter} />
       </Paper>
 
-      <BggCollection
-        filterState={{ ...filter.filterState, username: usernameQueryParam }}
-      />
+      <BggCollection filterState={filter.filterState} />
     </main>
   );
 };
