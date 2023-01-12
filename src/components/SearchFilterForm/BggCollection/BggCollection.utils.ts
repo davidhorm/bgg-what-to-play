@@ -32,34 +32,25 @@ const maybeShowInvalidPlayerCount =
             .filter(removeRecsMoreThan(game.maxPlayers)),
         };
 
-// TODO: handle numplayers with + character (p3)
-const maybeFilterRecsByPlayerCount =
-  (filterState: CollectionFilters) =>
-  (game: BoardGame): BoardGame =>
-    filterState.filterByPlayerCountActive
-      ? {
-          ...game,
-          recommendedPlayerCount: game.recommendedPlayerCount.filter(
-            (r) =>
-              normalizeToNumPlayers(r.numplayers) ===
-              filterState.filterByPlayerCountValue
-          ),
-        }
-      : game;
-
-const maybeRemoveEmptyRecs =
+const maybeRemoveGamesNotWithinPlayerCountValue =
   (filterState: CollectionFilters) =>
   (game: BoardGame): boolean =>
     filterState.filterByPlayerCountActive
-      ? game.recommendedPlayerCount.length > 0
+      ? game.recommendedPlayerCount.filter(
+          (g) => g.numplayers === filterState.filterByPlayerCountValue
+        ).length > 0
       : true;
 
 const maybeSortByScore =
   (filterState: CollectionFilters) =>
   (gameA: BoardGame, gameB: BoardGame): number =>
     filterState.filterByPlayerCountActive
-      ? gameB.recommendedPlayerCount[0].sortScore -
-        gameA.recommendedPlayerCount[0].sortScore
+      ? gameB.recommendedPlayerCount.filter(
+          (b) => b.numplayers === filterState.filterByPlayerCountValue
+        )?.[0].sortScore -
+        gameA.recommendedPlayerCount.filter(
+          (a) => a.numplayers === filterState.filterByPlayerCountValue
+        )?.[0].sortScore
       : 0;
 
 export const applyFiltersAndSorts = (
@@ -68,6 +59,5 @@ export const applyFiltersAndSorts = (
 ) =>
   games
     ?.map(maybeShowInvalidPlayerCount(filterState))
-    .map(maybeFilterRecsByPlayerCount(filterState)) // TODO: add tests for filterState.filterByPlayerCountActive (p2)
-    .filter(maybeRemoveEmptyRecs(filterState))
+    .filter(maybeRemoveGamesNotWithinPlayerCountValue(filterState))
     .sort(maybeSortByScore(filterState));

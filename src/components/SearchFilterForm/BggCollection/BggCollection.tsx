@@ -40,7 +40,7 @@ export const BggCollection = ({ filterState }: Props) => {
 
       <section className="flex flex-wrap">
         {filteredGames?.map((game) => (
-          <GameCard key={game.id} game={game} />
+          <GameCard key={game.id} game={game} filterState={filterState} />
         ))}
       </section>
     </div>

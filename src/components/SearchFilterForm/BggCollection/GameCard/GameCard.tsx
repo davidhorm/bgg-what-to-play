@@ -2,17 +2,19 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import type { BoardGame } from "..";
+import type { CollectionFilters } from "../../useCollectionFilters";
 import { Complexity } from "./Complexity";
 import { PlayerCountChart } from "./PlayerCountChart";
 
 type Props = {
   game: BoardGame;
+  filterState: CollectionFilters;
 };
 
 // TODO: make cards consistent size (thumbnail height/width, and title ellipsis) (p2)
 // TODO: format min/max player number to combine if same (p2)
 
-export const GameCard = ({ game }: Props) => (
+export const GameCard = ({ game, filterState }: Props) => (
   <Card className="m-2 w-64 flex-auto text-center">
     <CardMedia
       className="mx-auto w-32"
@@ -29,7 +31,10 @@ export const GameCard = ({ game }: Props) => (
         <div>Time: {game.playingTime}</div>
         <Complexity averageWeight={game.averageWeight} />
       </div>
-      <PlayerCountChart recommendedPlayerCount={game.recommendedPlayerCount} />
+      <PlayerCountChart
+        recommendedPlayerCount={game.recommendedPlayerCount}
+        filterState={filterState}
+      />
     </CardContent>
   </Card>
 );
