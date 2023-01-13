@@ -20,10 +20,14 @@ const setQueryParam = (key: QueryParamKey, value: string) => {
 //#endregion QueryParams
 
 const initialState = {
+  /** The username defined in the query param, or submitted in the input. */
   username: getQueryParamValue(QUERY_PARAMS.USERNAME),
+
+  /** If `true`, then show the invalid Player Count outside of the game's actual min/max Player Count. */
   showInvalidPlayerCount: false,
-  filterByPlayerCountActive: false,
-  filterByPlayerCountValue: 1,
+
+  /** The `[minRange, maxRange]` the user wants to filter/sort the collection. */
+  filterByPlayerCountRange: [1, Number.POSITIVE_INFINITY],
 };
 
 export type CollectionFilters = typeof initialState;
@@ -44,23 +48,15 @@ const toggleShowInvalidPlayerCount: ActionHandler<Partial<undefined>> = (
   state
 ) => ({ ...state, showInvalidPlayerCount: !state.showInvalidPlayerCount });
 
-const toggleFilterByPlayerCountActive: ActionHandler<Partial<undefined>> = (
-  state
-) => ({
-  ...state,
-  filterByPlayerCountActive: !state.filterByPlayerCountActive,
-});
-
-const setFilterByPlayerCountValue: ActionHandler<number> = (
+const setFilterByPlayerCountValue: ActionHandler<number[]> = (
   state,
   payload
-) => ({ ...state, filterByPlayerCountValue: payload });
+) => ({ ...state, filterByPlayerCountRange: payload });
 
 const actions = {
   RESET_FILTERS: resetFilters,
   SET_USERNAME: setUsername,
   TOGGLE_SHOW_INVALID_PLAYER_COUNT: toggleShowInvalidPlayerCount,
-  TOGGLE_FILTER_BY_PLAYER_COUNT_ACTIVE: toggleFilterByPlayerCountActive,
   SET_FILTER_BY_PLAYER_COUNT_VALUE: setFilterByPlayerCountValue,
 };
 

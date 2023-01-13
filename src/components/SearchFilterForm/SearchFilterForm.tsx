@@ -2,6 +2,7 @@ import Paper from "@mui/material/Paper";
 import { BggCollection } from "./BggCollection";
 import { FilterControls } from "./FilterControls";
 import { Header } from "./Header";
+import { PlayerCountSlider } from "./PlayerCountSlider";
 import { UsernameInput } from "./UsernameInput";
 import { useCollectionFilters } from "./useCollectionFilters";
 
@@ -14,6 +15,8 @@ export const SearchFilterForm = () => {
 
       <Paper elevation={1} className="p-4">
         <UsernameInput filter={filter} />
+
+        <PlayerCountSlider filter={filter} />
 
         <FilterControls filter={filter} />
       </Paper>
