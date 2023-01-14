@@ -32,7 +32,7 @@ const getFill = (
   recommendation: Recommendation
 ) => {
   const [defaultColor, fadedColor] = colorFillByRec[recommendation];
-  const [minRange, maxRange] = filterState.filterByPlayerCountRange;
+  const [minRange, maxRange] = filterState.playerCountRange;
 
   if (minRange !== 1 || maxRange !== Number.POSITIVE_INFINITY) {
     const playerCountOnRec =

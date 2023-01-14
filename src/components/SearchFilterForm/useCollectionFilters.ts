@@ -26,12 +26,15 @@ const initialFilterState = {
   /** If `true`, then show the invalid Player Count outside of the game's actual min/max Player Count. */
   showInvalidPlayerCount: false,
 
-  /** The `[minRange, maxRange]` the user wants to filter/sort the collection. */
-  filterByPlayerCountRange: [1, Number.POSITIVE_INFINITY],
+  /**
+   * The `[minRange, maxRange]` the user wants to filter/sort the collection.
+   * - Valid `minRange` values are 1-11.
+   * - Valid `maxRange` values are 1-10, or Infinity;
+   */
+  playerCountRange: [1, Number.POSITIVE_INFINITY] as [number, number],
 };
 
 export type CollectionFilterState = typeof initialFilterState;
-
 type ActionHandler<T> = (
   state: CollectionFilterState,
   payload: T
@@ -49,16 +52,22 @@ const toggleShowInvalidPlayerCount: ActionHandler<Partial<undefined>> = (
   state
 ) => ({ ...state, showInvalidPlayerCount: !state.showInvalidPlayerCount });
 
-const setFilterByPlayerCountValue: ActionHandler<number[]> = (
+const convertElevenToInfinity = (value: number) =>
+  value >= 11 ? Number.POSITIVE_INFINITY : value;
+
+const setPlayerCountRange: ActionHandler<[number, number]> = (
   state,
   payload
-) => ({ ...state, filterByPlayerCountRange: payload });
+) => ({
+  ...state,
+  playerCountRange: [payload[0], convertElevenToInfinity(payload[1])],
+});
 
 const actions = {
   RESET_FILTERS: resetFilters,
   SET_USERNAME: setUsername,
   TOGGLE_SHOW_INVALID_PLAYER_COUNT: toggleShowInvalidPlayerCount,
-  SET_FILTER_BY_PLAYER_COUNT_VALUE: setFilterByPlayerCountValue,
+  SET_PLAYER_COUNT_RANGE: setPlayerCountRange,
 };
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */

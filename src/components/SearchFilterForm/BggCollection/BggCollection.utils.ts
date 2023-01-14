@@ -37,8 +37,7 @@ const maybeShowInvalidPlayerCount =
 const removeGamesNotWithinPlayerCountRange =
   (filterState: CollectionFilterState) =>
   (game: BoardGame): boolean => {
-    const [minFilterCount, maxFilterCount] =
-      filterState.filterByPlayerCountRange;
+    const [minFilterCount, maxFilterCount] = filterState.playerCountRange;
 
     const minWithinRange =
       minFilterCount <= game.minPlayers && game.minPlayers <= maxFilterCount;
@@ -64,7 +63,7 @@ const calcSortScoreSum = (
 const maybeSortByScore =
   (filterState: CollectionFilterState) =>
   (gameA: BoardGame, gameB: BoardGame): number => {
-    const [minRange, maxRange] = filterState.filterByPlayerCountRange;
+    const [minRange, maxRange] = filterState.playerCountRange;
 
     if (minRange !== 1 || maxRange !== Number.POSITIVE_INFINITY) {
       return (

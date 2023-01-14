@@ -14,7 +14,7 @@ const marks = Array.from({ length: 11 }, (_, i) => i + 1).map((value) => ({
 }));
 
 const convertElevenToInfinity = (value: number) =>
-  value === 11 ? Number.POSITIVE_INFINITY : value;
+  value >= 11 ? Number.POSITIVE_INFINITY : value;
 
 export const PlayerCountSlider = ({
   filter: { filterState, filterDispatch },
@@ -25,7 +25,6 @@ export const PlayerCountSlider = ({
     </label>
     <Slider
       id="player-count"
-      aria-label="Filter by player count"
       className="mx-4 mt-8"
       getAriaLabel={getValueLabel}
       getAriaValueText={getValueLabel}
@@ -35,12 +34,11 @@ export const PlayerCountSlider = ({
       max={11}
       marks={marks}
       scale={convertElevenToInfinity}
-      value={filterState.filterByPlayerCountRange}
+      value={filterState.playerCountRange}
       onChange={(_, value) => {
-        const [minRange, maxRange] = value as number[];
         filterDispatch({
-          type: "SET_FILTER_BY_PLAYER_COUNT_VALUE",
-          payload: [minRange, convertElevenToInfinity(maxRange)],
+          type: "SET_PLAYER_COUNT_RANGE",
+          payload: value as [number, number],
         });
       }}
     />

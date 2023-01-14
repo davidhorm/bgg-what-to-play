@@ -18,7 +18,7 @@ describe(applyFiltersAndSorts.name, () => {
   const MOCK_FILTERS: CollectionFilterState = {
     username: "",
     showInvalidPlayerCount: false,
-    filterByPlayerCountRange: [1, Number.POSITIVE_INFINITY],
+    playerCountRange: [1, Number.POSITIVE_INFINITY],
   };
 
   test.each`
