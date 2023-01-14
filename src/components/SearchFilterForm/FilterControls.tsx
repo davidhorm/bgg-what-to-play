@@ -1,10 +1,10 @@
+import type { CollectionFilterReducer } from "@/types";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
-import type { useCollectionFilters } from "./useCollectionFilters";
 
 type Props = {
-  filter: ReturnType<typeof useCollectionFilters>;
+  filter: CollectionFilterReducer;
 };
 
 export const FilterControls = ({

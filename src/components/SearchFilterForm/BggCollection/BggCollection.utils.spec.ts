@@ -1,6 +1,6 @@
+import type { CollectionFilterState } from "@/types";
 import { describe, test, expect } from "vitest";
 import type { BoardGame } from ".";
-import type { CollectionFilters } from "../useCollectionFilters";
 import { applyFiltersAndSorts } from "./BggCollection.utils";
 
 describe(applyFiltersAndSorts.name, () => {
@@ -15,7 +15,7 @@ describe(applyFiltersAndSorts.name, () => {
     averageWeight: 2.5,
   };
 
-  const MOCK_FILTERS: CollectionFilters = {
+  const MOCK_FILTERS: CollectionFilterState = {
     username: "",
     showInvalidPlayerCount: false,
     filterByPlayerCountRange: [1, Number.POSITIVE_INFINITY],

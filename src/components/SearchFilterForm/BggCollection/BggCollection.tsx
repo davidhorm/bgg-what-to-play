@@ -1,4 +1,4 @@
-import type { CollectionFilters } from "../useCollectionFilters";
+import type { CollectionFilterState } from "@/types";
 import { applyFiltersAndSorts } from "./BggCollection.utils";
 import { GameCard } from "./GameCard";
 import { MissingQueryValue } from "./MissingQueryValue";
@@ -6,7 +6,7 @@ import { NoDataDisplay } from "./NoDataDisplay";
 import { useGetCollectionQuery } from "./hooks/useGetCollectionQuery";
 
 type Props = {
-  filterState: CollectionFilters;
+  filterState: CollectionFilterState;
 };
 
 export const BggCollection = ({ filterState }: Props) => {

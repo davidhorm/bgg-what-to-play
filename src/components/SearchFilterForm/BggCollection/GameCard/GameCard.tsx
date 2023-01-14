@@ -1,14 +1,14 @@
+import type { CollectionFilterState } from "@/types";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import type { BoardGame } from "..";
-import type { CollectionFilters } from "../../useCollectionFilters";
 import { Complexity } from "./Complexity";
 import { PlayerCountChart } from "./PlayerCountChart";
 
 type Props = {
   game: BoardGame;
-  filterState: CollectionFilters;
+  filterState: CollectionFilterState;
 };
 
 // TODO: make cards consistent size (thumbnail height/width, and title ellipsis) (p2)

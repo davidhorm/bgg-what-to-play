@@ -19,7 +19,7 @@ const setQueryParam = (key: QueryParamKey, value: string) => {
 
 //#endregion QueryParams
 
-const initialState = {
+const initialFilterState = {
   /** The username defined in the query param, or submitted in the input. */
   username: getQueryParamValue(QUERY_PARAMS.USERNAME),
 
@@ -30,14 +30,15 @@ const initialState = {
   filterByPlayerCountRange: [1, Number.POSITIVE_INFINITY],
 };
 
-export type CollectionFilters = typeof initialState;
+export type CollectionFilterState = typeof initialFilterState;
 
 type ActionHandler<T> = (
-  state: CollectionFilters,
+  state: CollectionFilterState,
   payload: T
-) => CollectionFilters;
+) => CollectionFilterState;
 
-const resetFilters: ActionHandler<Partial<undefined>> = () => initialState;
+const resetFilters: ActionHandler<Partial<undefined>> = () =>
+  initialFilterState;
 
 const setUsername: ActionHandler<string> = (state, username) => {
   setQueryParam(QUERY_PARAMS.USERNAME, username);
@@ -78,14 +79,16 @@ type CreateActions<T extends typeof actions> = {
 type Action = CreateActions<typeof actions>;
 
 /** Reducer pattern based off of https://stackoverflow.com/questions/74884329/how-to-derive-action-type-from-mapping-object-for-usereducer-dispatch-type-safet */
-const reducer: ActionHandler<Action> = (state, action): CollectionFilters =>
+const reducer: ActionHandler<Action> = (state, action): CollectionFilterState =>
   (actions[action.type] as ActionHandler<typeof action["payload"]>)(
     state,
     action.payload
   );
 
 export const useCollectionFilters = () => {
-  const [filterState, filterDispatch] = useReducer(reducer, initialState);
+  const [filterState, filterDispatch] = useReducer(reducer, initialFilterState);
 
   return { filterState, filterDispatch };
 };
+
+export type CollectionFilterReducer = ReturnType<typeof useCollectionFilters>;

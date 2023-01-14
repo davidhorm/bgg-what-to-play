@@ -1,12 +1,12 @@
 import { useState } from "react";
+import type { CollectionFilterReducer } from "@/types";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import { ReactComponent as MagnifyingGlassIcon } from "./magnifying-glass.svg";
-import type { useCollectionFilters } from "./useCollectionFilters";
 
 type Props = {
-  filter: ReturnType<typeof useCollectionFilters>;
+  filter: CollectionFilterReducer;
 };
 
 export const UsernameInput = ({

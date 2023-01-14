@@ -1,8 +1,8 @@
+import type { CollectionFilterReducer } from "@/types";
 import Slider from "@mui/material/Slider";
-import type { useCollectionFilters } from "./useCollectionFilters";
 
 type Props = {
-  filter: ReturnType<typeof useCollectionFilters>;
+  filter: CollectionFilterReducer;
 };
 
 const getValueLabel = (value: number) =>

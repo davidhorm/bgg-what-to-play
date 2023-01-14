@@ -1,5 +1,5 @@
+import type { CollectionFilterState } from "@/types";
 import type { BoardGame } from ".";
-import type { CollectionFilters } from "../useCollectionFilters";
 
 const addOneIfHasPlusSign = (value: string) => (value.endsWith("+") ? 1 : 0);
 
@@ -22,7 +22,7 @@ const removeRecsMoreThan =
     normalizeToNumPlayers(rec.numplayers) <= maxPlayers;
 
 const maybeShowInvalidPlayerCount =
-  (filterState: CollectionFilters) =>
+  (filterState: CollectionFilterState) =>
   (game: BoardGame): BoardGame =>
     filterState.showInvalidPlayerCount
       ? game
@@ -35,7 +35,7 @@ const maybeShowInvalidPlayerCount =
 
 /** TODO: Add unit tests (p3) */
 const removeGamesNotWithinPlayerCountRange =
-  (filterState: CollectionFilters) =>
+  (filterState: CollectionFilterState) =>
   (game: BoardGame): boolean => {
     const [minFilterCount, maxFilterCount] =
       filterState.filterByPlayerCountRange;
@@ -62,7 +62,7 @@ const calcSortScoreSum = (
     .reduce((prev, curr) => curr.sortScore + prev, 0);
 
 const maybeSortByScore =
-  (filterState: CollectionFilters) =>
+  (filterState: CollectionFilterState) =>
   (gameA: BoardGame, gameB: BoardGame): number => {
     const [minRange, maxRange] = filterState.filterByPlayerCountRange;
 
@@ -78,7 +78,7 @@ const maybeSortByScore =
 
 export const applyFiltersAndSorts = (
   games: BoardGame[],
-  filterState: CollectionFilters
+  filterState: CollectionFilterState
 ) =>
   games
     ?.map(maybeShowInvalidPlayerCount(filterState))

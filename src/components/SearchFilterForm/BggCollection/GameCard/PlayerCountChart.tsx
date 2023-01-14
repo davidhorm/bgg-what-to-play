@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import type { CollectionFilterState } from "@/types";
 import {
   Bar,
   BarChart,
@@ -9,7 +10,6 @@ import {
   Cell,
 } from "recharts";
 import type { BoardGame } from "..";
-import type { CollectionFilters } from "../../useCollectionFilters";
 import { useOnScreen } from "../hooks/useOnScreen";
 
 const tooltipSort = ["Best", "Recommended", "Not Recommended"] as const;
@@ -23,12 +23,12 @@ const colorFillByRec: Record<Recommendation, [string, string]> = {
 };
 
 type Props = Pick<BoardGame, "recommendedPlayerCount"> & {
-  filterState: CollectionFilters;
+  filterState: CollectionFilterState;
 };
 
 const getFill = (
   numplayers: Props["recommendedPlayerCount"][number]["numplayers"],
-  filterState: CollectionFilters,
+  filterState: CollectionFilterState,
   recommendation: Recommendation
 ) => {
   const [defaultColor, fadedColor] = colorFillByRec[recommendation];
