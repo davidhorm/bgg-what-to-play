@@ -1,6 +1,6 @@
 import { memo } from "react";
+import type { BoardGame } from "@/types";
 import Rating from "@mui/material/Rating";
-import type { BoardGame } from "..";
 
 type Props = {
   averageWeight: BoardGame["averageWeight"];

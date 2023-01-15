@@ -1,10 +1,9 @@
-import type { CollectionFilterState } from "@/types";
+import type { CollectionFilterState, BoardGame } from "@/types";
 import { describe, test, expect } from "vitest";
-import type { BoardGame } from ".";
 import { applyFiltersAndSorts } from "./BggCollection.utils";
 
 describe(applyFiltersAndSorts.name, () => {
-  const MOCK_GAME: BoardGame = {
+  const MOCK_GAME: Partial<BoardGame> = {
     name: "Ticket to Ride",
     id: 9209,
     thumbnail: "thumbnail.png",
@@ -30,7 +29,7 @@ describe(applyFiltersAndSorts.name, () => {
   `(
     "GIVEN recommendedPlayerCount length originally 3, WHEN showInvalidPlayerCount=$showInvalidPlayerCount, THEN expect recommendedPlayerCount length = $expectedLength",
     ({ showInvalidPlayerCount, expectedLength }) => {
-      const gameWith3Recs: BoardGame = {
+      const gameWith3Recs: Partial<BoardGame> = {
         ...MOCK_GAME,
         recommendedPlayerCount: [
           { playerCountValue: 1 },

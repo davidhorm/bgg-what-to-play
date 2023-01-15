@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { XMLParser } from "fast-xml-parser";
 import type { BriefCollection, Thing } from "./bggTypes";
 import {
-  BoardGame,
+  SimpleBoardGame,
   getLoadingStatus,
   transformToBoardGame,
   transformToThingIds,
@@ -70,7 +70,7 @@ export const useGetCollectionQuery = (username: string) => {
         }),
   });
 
-  const data: BoardGame[] | undefined =
+  const data: SimpleBoardGame[] | undefined =
     thingsData?.items.item.map(transformToBoardGame);
 
   return {

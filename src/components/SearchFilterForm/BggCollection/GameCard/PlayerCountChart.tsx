@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import type { CollectionFilterState } from "@/types";
+import type { BoardGame, CollectionFilterState } from "@/types";
 import {
   Bar,
   BarChart,
@@ -9,7 +9,6 @@ import {
   XAxis,
   Cell,
 } from "recharts";
-import type { BoardGame } from "..";
 import { useOnScreen } from "../hooks/useOnScreen";
 
 const tooltipSort = ["Best", "Recommended", "Not Recommended"] as const;
@@ -27,7 +26,7 @@ type Props = Pick<BoardGame, "recommendedPlayerCount"> & {
 };
 
 const getFill = (
-  playerCountValue: Props["recommendedPlayerCount"][number]["playerCountValue"],
+  isPlayerCountWithinRange: Props["recommendedPlayerCount"][number]["isPlayerCountWithinRange"],
   filterState: CollectionFilterState,
   recommendation: Recommendation
 ) => {
@@ -35,9 +34,7 @@ const getFill = (
   const [minRange, maxRange] = filterState.playerCountRange;
 
   if (minRange !== 1 || maxRange !== Number.POSITIVE_INFINITY) {
-    return minRange <= playerCountValue && playerCountValue <= maxRange
-      ? defaultColor
-      : fadedColor;
+    return isPlayerCountWithinRange ? defaultColor : fadedColor;
   }
 
   return defaultColor;
@@ -92,7 +89,7 @@ export const PlayerCountChart = ({
                       <Cell
                         key={`${recommendation}-${playerCount.playerCountValue}-${playerCountIndex}`}
                         fill={getFill(
-                          playerCount.playerCountValue,
+                          playerCount.isPlayerCountWithinRange,
                           filterState,
                           recommendation as Recommendation
                         )}

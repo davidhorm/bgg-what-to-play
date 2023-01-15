@@ -129,6 +129,8 @@ const addSortScore = (
  */
 const makeNotRecommendedNegative = (i: ReturnType<typeof addSortScore>) => ({
   ...i,
+
+  /** Number of people who voted "Not Recommended" to play this game at this player count. */
   "Not Recommended": 0 - i["Not Recommended"],
 });
 
@@ -179,7 +181,8 @@ export const transformToBoardGame = (i: Thing["items"]["item"][number]) => ({
   recommendedPlayerCount: transformToRecommendedPlayerCount(i.poll),
 });
 
-export type BoardGame = ReturnType<typeof transformToBoardGame>;
+/** Board Game that only has simple props calculated from BGG. */
+export type SimpleBoardGame = ReturnType<typeof transformToBoardGame>;
 
 type FetchingStatus =
   | "FETCHING_COLLECTION"
