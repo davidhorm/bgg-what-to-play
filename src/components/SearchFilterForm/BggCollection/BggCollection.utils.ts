@@ -1,25 +1,15 @@
 import type { CollectionFilterState } from "@/types";
 import type { BoardGame } from ".";
 
-const addOneIfHasPlusSign = (value: string) => (value.endsWith("+") ? 1 : 0);
-
-/** TODO: Refactor calc as part of original query (p2) */
-const normalizeToNumPlayers = (
-  numplayers: BoardGame["recommendedPlayerCount"][number]["numplayers"]
-): number =>
-  typeof numplayers === "number"
-    ? numplayers
-    : parseInt(numplayers, 10) + addOneIfHasPlusSign(numplayers);
-
 const removeRecsLessThan =
   (minPlayers: BoardGame["minPlayers"]) =>
   (rec: BoardGame["recommendedPlayerCount"][number]): boolean =>
-    normalizeToNumPlayers(rec.numplayers) >= minPlayers;
+    rec.playerCountValue >= minPlayers;
 
 const removeRecsMoreThan =
   (maxPlayers: BoardGame["maxPlayers"]) =>
   (rec: BoardGame["recommendedPlayerCount"][number]): boolean =>
-    normalizeToNumPlayers(rec.numplayers) <= maxPlayers;
+    rec.playerCountValue <= maxPlayers;
 
 const maybeShowInvalidPlayerCount =
   (filterState: CollectionFilterState) =>
@@ -54,9 +44,7 @@ const calcSortScoreSum = (
 ): number =>
   game.recommendedPlayerCount
     .filter(
-      (g) =>
-        minRange <= normalizeToNumPlayers(g.numplayers) &&
-        normalizeToNumPlayers(g.numplayers) <= maxRange
+      (g) => minRange <= g.playerCountValue && g.playerCountValue <= maxRange
     )
     .reduce((prev, curr) => curr.sortScore + prev, 0);
 

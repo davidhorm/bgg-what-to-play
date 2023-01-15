@@ -10,6 +10,8 @@ describe(applyFiltersAndSorts.name, () => {
     thumbnail: "thumbnail.png",
     minPlayers: 2,
     maxPlayers: 2,
+    minPlaytime: 30,
+    maxPlaytime: 60,
     playingTime: 60,
     recommendedPlayerCount: [],
     averageWeight: 2.5,
@@ -28,13 +30,13 @@ describe(applyFiltersAndSorts.name, () => {
   `(
     "GIVEN recommendedPlayerCount length originally 3, WHEN showInvalidPlayerCount=$showInvalidPlayerCount, THEN expect recommendedPlayerCount length = $expectedLength",
     ({ showInvalidPlayerCount, expectedLength }) => {
-      const gameWith3Recs = {
+      const gameWith3Recs: BoardGame = {
         ...MOCK_GAME,
         recommendedPlayerCount: [
-          { numplayers: "1" },
-          { numplayers: "2" },
-          { numplayers: "2+" },
-        ],
+          { playerCountValue: 1 },
+          { playerCountValue: 2 },
+          { playerCountValue: 3 },
+        ] as any,
       };
       const filter = { ...MOCK_FILTERS, showInvalidPlayerCount };
       const actual = applyFiltersAndSorts([gameWith3Recs] as any, filter);

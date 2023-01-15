@@ -49,8 +49,26 @@ const reduceValueAndNumVotesToObjectProperties = (
       ...prevVal,
       [currVal.value]: currVal.numvotes,
     }),
-    { "Not Recommended": 0, "Recommended": 0, "Best": 0 }
+    {
+      /** Number of people who voted "Not Recommended" to play this game at this player count. */
+      "Not Recommended": 0,
+
+      /** Number of people who voted "Recommended" to play this game at this player count. */
+      "Recommended": 0,
+
+      /** Number of people who voted "Best" to play this game at this player count. */
+      "Best": 0,
+    }
   );
+
+const addOneIfHasPlusSign = (value: string) => (value.endsWith("+") ? 1 : 0);
+
+const normalizeNumPlayers = (
+  numplayers: SuggestedNumPlayersResult["numplayers"]
+): number =>
+  typeof numplayers === "number"
+    ? numplayers
+    : parseInt(numplayers, 10) + addOneIfHasPlusSign(numplayers);
 
 /**
  * Transforms the following object
@@ -63,14 +81,19 @@ const reduceValueAndNumVotesToObjectProperties = (
  *
  * to the following object
  * ```
- * { numplayers: "4+", Best: 42, Rec: 37 }
+ * { playerCountValue: 5, playerCountLabel: "4+" Best: 42, Rec: 37 }
  * ```
  */
 const flattenSuggestedNumPlayersResult = ({
   numplayers,
   result,
 }: SuggestedNumPlayersResult) => ({
-  numplayers,
+  /** The Player Count value normalized into a number. If the original value is a  string with "+", then add one. */
+  playerCountValue: normalizeNumPlayers(numplayers),
+
+  /** The Player Count value as a string, keeping the "+" as-is. */
+  playerCountLabel: numplayers.toString(),
+
   ...reduceValueAndNumVotesToObjectProperties(result),
 });
 
@@ -83,7 +106,12 @@ const addSortScore = (
   const notRecPercent = i["Not Recommended"] / totalVotes;
   const sortScore = bestPercent * 2 + recPercent - notRecPercent;
 
-  return { ...i, sortScore };
+  return {
+    ...i,
+
+    /** 2xBest % + Recommended % - Not Recommended % */
+    sortScore,
+  };
 };
 
 /**
@@ -120,13 +148,34 @@ const transformToRecommendedPlayerCount = (
 };
 
 export const transformToBoardGame = (i: Thing["items"]["item"][number]) => ({
+  /** Board Game's primary name */
   name: getPrimaryName(i.name),
+
+  /** BGG' Board Game Thing ID */
   id: i.id,
+
+  /** Board Game's thumbnail URL */
   thumbnail: i.thumbnail,
+
+  /** Board Game's minimum number of players */
   minPlayers: i.minplayers.value,
+
+  /** Board Game's maximum number of players */
   maxPlayers: i.maxplayers.value,
+
+  /** Board Game's minimum playtime. */
+  minPlaytime: i.minplaytime.value,
+
+  /** Board Game's maximum playtime. */
+  maxPlaytime: i.maxplaytime.value,
+
+  /** Board Game's average playtime */
   playingTime: i.playingtime.value,
+
+  /** Board Game's average weight */
   averageWeight: i.statistics.ratings.averageweight.value,
+
+  /** Board Game's recommended player count according to BGG poll */
   recommendedPlayerCount: transformToRecommendedPlayerCount(i.poll),
 });
 

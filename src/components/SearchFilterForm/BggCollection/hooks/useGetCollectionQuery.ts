@@ -62,7 +62,7 @@ export const useGetCollectionQuery = (username: string) => {
     enabled: !!thingIds,
     queryKey: ["BggThings", thingIds],
     queryFn: () =>
-      fetch(`https://boardgamegeek.com/xmlapi2/thing?id=${thingIds}&stats=1`)
+      fetch(`https://bgg.cc/xmlapi2/thing?id=${thingIds}&stats=1`)
         .then((response) => response.text())
         .then((xml) => parser.parse(xml))
         .catch((err) => {

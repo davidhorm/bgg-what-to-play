@@ -27,7 +27,7 @@ type Props = Pick<BoardGame, "recommendedPlayerCount"> & {
 };
 
 const getFill = (
-  numplayers: Props["recommendedPlayerCount"][number]["numplayers"],
+  playerCountValue: Props["recommendedPlayerCount"][number]["playerCountValue"],
   filterState: CollectionFilterState,
   recommendation: Recommendation
 ) => {
@@ -35,12 +35,7 @@ const getFill = (
   const [minRange, maxRange] = filterState.playerCountRange;
 
   if (minRange !== 1 || maxRange !== Number.POSITIVE_INFINITY) {
-    const playerCountOnRec =
-      typeof numplayers === "string"
-        ? parseInt(numplayers, 10) + 1
-        : numplayers;
-
-    return minRange <= playerCountOnRec && playerCountOnRec <= maxRange
+    return minRange <= playerCountValue && playerCountValue <= maxRange
       ? defaultColor
       : fadedColor;
   }
@@ -74,7 +69,7 @@ export const PlayerCountChart = ({
               bottom: 5,
             }}
           >
-            <XAxis dataKey="numplayers" axisLine={false} />
+            <XAxis dataKey="playerCountLabel" axisLine={false} />
             <Tooltip
               formatter={(value) => Math.abs(parseInt(value.toString(), 10))}
               itemSorter={(item) =>
@@ -95,9 +90,9 @@ export const PlayerCountChart = ({
                   {recommendedPlayerCount.map(
                     (playerCount, playerCountIndex) => (
                       <Cell
-                        key={`${recommendation}-${playerCount.numplayers}-${playerCountIndex}`}
+                        key={`${recommendation}-${playerCount.playerCountValue}-${playerCountIndex}`}
                         fill={getFill(
-                          playerCount.numplayers,
+                          playerCount.playerCountValue,
                           filterState,
                           recommendation as Recommendation
                         )}
