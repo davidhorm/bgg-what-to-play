@@ -1,4 +1,4 @@
-# What to Play
+# BGG What to Play
 
 Website to visualize your [BGG](https://boardgamegeek.com/) collection to better figure out which board game to play based on number of players and game length.
 
