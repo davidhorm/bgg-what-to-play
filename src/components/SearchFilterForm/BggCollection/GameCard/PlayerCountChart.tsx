@@ -44,7 +44,10 @@ const getFill = (
 // TODO: replace tooltip with % in label (p3) - see https://recharts.org/en-US/api/Label
 
 /** If the polling data has zero votes, then display "No Data Available" text */
-const MaybeNoDataAvailable = ({ data, height, width }: any) => {
+const MaybeNoDataAvailable = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  { data, height, width }: any // disable any because of how <Customized component /> works
+) => {
   if (
     (data as BoardGame["recommendedPlayerCount"]).filter(
       (rec) =>
@@ -57,8 +60,13 @@ const MaybeNoDataAvailable = ({ data, height, width }: any) => {
   }
 
   return (
-    <text dy={height / 2} dx={width / 2} fontSize="1rem" textAnchor="middle">
-      No Data Available
+    <text
+      dy={height / 2}
+      dx={width / 2}
+      fontSize="0.875rem"
+      textAnchor="middle"
+    >
+      No Recommendations Available
     </text>
   );
 };
@@ -73,56 +81,61 @@ export const PlayerCountChart = ({
   return (
     <div ref={ref} className="h-36">
       {isOnScreen && (
-        <ResponsiveContainer minWidth="6rem" minHeight="9rem">
-          <BarChart
-            width={500}
-            height={300}
-            data={recommendedPlayerCount}
-            stackOffset="sign"
-            margin={{
-              top: 5,
-              right: 30,
-              left: 20,
-              bottom: 5,
-            }}
-          >
-            <XAxis dataKey="playerCountLabel" axisLine={false} />
-            <Tooltip
-              formatter={(value) => Math.abs(parseInt(value.toString(), 10))}
-              itemSorter={(item) =>
-                tooltipSort.indexOf(item.dataKey as Recommendation)
-              }
-              labelFormatter={(label) => `Player Count: ${label}`}
-            />
-            <ReferenceLine y={0} stroke="#000" />
+        <figure>
+          <figcaption className="mt-4 text-xs text-gray-500">
+            Player Count Recommendations
+          </figcaption>
+          <ResponsiveContainer minWidth="6rem" minHeight="9rem">
+            <BarChart
+              width={500}
+              height={300}
+              data={recommendedPlayerCount}
+              stackOffset="sign"
+              margin={{
+                top: 5,
+                right: 30,
+                left: 20,
+                bottom: 5,
+              }}
+            >
+              <XAxis dataKey="playerCountLabel" axisLine={false} />
+              <Tooltip
+                formatter={(value) => Math.abs(parseInt(value.toString(), 10))}
+                itemSorter={(item) =>
+                  tooltipSort.indexOf(item.dataKey as Recommendation)
+                }
+                labelFormatter={(label) => `Player Count: ${label}`}
+              />
+              <ReferenceLine y={0} stroke="#000" />
 
-            <Customized component={<MaybeNoDataAvailable />} />
+              <Customized component={<MaybeNoDataAvailable />} />
 
-            {["Recommended", "Best", "Not Recommended"].map(
-              (recommendation, recommendationIndex) => (
-                <Bar
-                  key={`${recommendation}-${recommendationIndex}`}
-                  stackId="playerCount"
-                  maxBarSize={32}
-                  dataKey={recommendation}
-                >
-                  {recommendedPlayerCount.map(
-                    (playerCount, playerCountIndex) => (
-                      <Cell
-                        key={`${recommendation}-${playerCount.playerCountValue}-${playerCountIndex}`}
-                        fill={getFill(
-                          playerCount.isPlayerCountWithinRange,
-                          filterState,
-                          recommendation as Recommendation
-                        )}
-                      />
-                    )
-                  )}
-                </Bar>
-              )
-            )}
-          </BarChart>
-        </ResponsiveContainer>
+              {["Recommended", "Best", "Not Recommended"].map(
+                (recommendation, recommendationIndex) => (
+                  <Bar
+                    key={`${recommendation}-${recommendationIndex}`}
+                    stackId="playerCount"
+                    maxBarSize={32}
+                    dataKey={recommendation}
+                  >
+                    {recommendedPlayerCount.map(
+                      (playerCount, playerCountIndex) => (
+                        <Cell
+                          key={`${recommendation}-${playerCount.playerCountValue}-${playerCountIndex}`}
+                          fill={getFill(
+                            playerCount.isPlayerCountWithinRange,
+                            filterState,
+                            recommendation as Recommendation
+                          )}
+                        />
+                      )
+                    )}
+                  </Bar>
+                )
+              )}
+            </BarChart>
+          </ResponsiveContainer>
+        </figure>
       )}
     </div>
   );
