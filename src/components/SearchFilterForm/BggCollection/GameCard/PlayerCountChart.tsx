@@ -3,11 +3,12 @@ import type { BoardGame, CollectionFilterState } from "@/types";
 import {
   Bar,
   BarChart,
+  Cell,
+  Customized,
   ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
-  Cell,
 } from "recharts";
 import { useOnScreen } from "../hooks/useOnScreen";
 
@@ -41,7 +42,26 @@ const getFill = (
 };
 
 // TODO: replace tooltip with % in label (p3) - see https://recharts.org/en-US/api/Label
-// TODO: display placeholder when no data available (p2) - see https://github.com/recharts/recharts/issues/430
+
+/** If the polling data has zero votes, then display "No Data Available" text */
+const MaybeNoDataAvailable = ({ data, height, width }: any) => {
+  if (
+    (data as BoardGame["recommendedPlayerCount"]).filter(
+      (rec) =>
+        rec["Not Recommended"] !== 0 ||
+        rec["Recommended"] !== 0 ||
+        rec["Best"] !== 0
+    ).length > 0
+  ) {
+    return null;
+  }
+
+  return (
+    <text dy={height / 2} dx={width / 2} fontSize="1rem" textAnchor="middle">
+      No Data Available
+    </text>
+  );
+};
 
 export const PlayerCountChart = ({
   recommendedPlayerCount,
@@ -75,6 +95,8 @@ export const PlayerCountChart = ({
               labelFormatter={(label) => `Player Count: ${label}`}
             />
             <ReferenceLine y={0} stroke="#000" />
+
+            <Customized component={<MaybeNoDataAvailable />} />
 
             {["Recommended", "Best", "Not Recommended"].map(
               (recommendation, recommendationIndex) => (
