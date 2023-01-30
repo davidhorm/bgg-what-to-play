@@ -25,3 +25,4 @@ dist-ssr
 
 # Audo generated files
 pnpm-lock.yaml
+public/mockServiceWorker.js
