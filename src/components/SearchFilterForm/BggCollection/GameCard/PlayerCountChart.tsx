@@ -1,5 +1,5 @@
-import { useRef } from "react";
 import type { BoardGame, CollectionFilterState } from "@/types";
+import { useInView } from "react-intersection-observer";
 import {
   Bar,
   BarChart,
@@ -10,7 +10,6 @@ import {
   Tooltip,
   XAxis,
 } from "recharts";
-import { useOnScreen } from "../hooks/useOnScreen";
 
 const tooltipSort = ["Best", "Recommended", "Not Recommended"] as const;
 
@@ -75,12 +74,11 @@ export const PlayerCountChart = ({
   recommendedPlayerCount,
   filterState,
 }: Props) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const isOnScreen = useOnScreen(ref);
+  const { ref, inView } = useInView();
 
   return (
     <div ref={ref} className="h-36">
-      {isOnScreen && (
+      {inView && (
         <figure>
           <figcaption className="mt-4 text-xs text-gray-500">
             Player Count Recommendations
