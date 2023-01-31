@@ -8,6 +8,7 @@ const DEFAULT_PLAYER_COUNT_MAX = Number.POSITIVE_INFINITY;
 const QUERY_PARAMS = {
   USERNAME: "username",
   PLAYER_COUNT: "playerCount",
+  SHOW_INVALID_PLAYER_COUNT: "showInvalid",
 } as const;
 
 type QueryParamKey = typeof QUERY_PARAMS[keyof typeof QUERY_PARAMS];
@@ -70,6 +71,12 @@ const maybeSetQueryParams = (newState: CollectionFilterState) => {
       url.searchParams.delete(QUERY_PARAMS.PLAYER_COUNT);
     }
 
+    if (newState.showInvalidPlayerCount) {
+      url.searchParams.set(QUERY_PARAMS.SHOW_INVALID_PLAYER_COUNT, "1");
+    } else {
+      url.searchParams.delete(QUERY_PARAMS.SHOW_INVALID_PLAYER_COUNT);
+    }
+
     history.pushState({}, "", url);
   }
 };
@@ -81,7 +88,8 @@ const initialFilterState = {
   username: getQueryParamValue(QUERY_PARAMS.USERNAME),
 
   /** If `true`, then show the invalid Player Count outside of the game's actual min/max Player Count. */
-  showInvalidPlayerCount: false,
+  showInvalidPlayerCount:
+    getQueryParamValue(QUERY_PARAMS.SHOW_INVALID_PLAYER_COUNT) === "1",
 
   /**
    * The `[minRange, maxRange]` the user wants to filter/sort the collection.
@@ -117,7 +125,10 @@ const setUsername: ActionHandler<string> = (state, username) =>
 
 const toggleShowInvalidPlayerCount: ActionHandler<Partial<undefined>> = (
   state
-) => ({ ...state, showInvalidPlayerCount: !state.showInvalidPlayerCount });
+) =>
+  setQueryParamAndState(state, {
+    showInvalidPlayerCount: !state.showInvalidPlayerCount,
+  });
 
 const convertElevenToInfinity = (value: number) =>
   value >= 11 ? Number.POSITIVE_INFINITY : value;
