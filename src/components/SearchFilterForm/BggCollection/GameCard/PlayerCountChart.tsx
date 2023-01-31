@@ -79,11 +79,11 @@ export const PlayerCountChart = ({
   return (
     <div ref={ref} className="h-36">
       {inView && (
-        <figure>
+        <figure className="m-0">
           <figcaption className="mt-4 text-xs text-gray-500">
             Player Count Recommendations
           </figcaption>
-          <ResponsiveContainer minWidth="6rem" minHeight="9rem">
+          <ResponsiveContainer minWidth="18rem" minHeight="9rem">
             <BarChart
               width={500}
               height={300}
@@ -96,7 +96,12 @@ export const PlayerCountChart = ({
                 bottom: 5,
               }}
             >
-              <XAxis dataKey="playerCountLabel" axisLine={false} />
+              <XAxis
+                dataKey="playerCountLabel"
+                axisLine={false}
+                interval="preserveStartEnd"
+              />
+
               <Tooltip
                 formatter={(value) => Math.abs(parseInt(value.toString(), 10))}
                 itemSorter={(item) =>
