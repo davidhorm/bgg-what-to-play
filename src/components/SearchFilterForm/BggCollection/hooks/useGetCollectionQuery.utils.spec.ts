@@ -29,53 +29,6 @@ const MOCK_THING_ITEM: Partial<Thing["items"]["item"][number]> = {
   } as any,
 };
 
-// describe(hasSuggestedPlayersVotes.name, () => {
-//   const MOCK_ZERO_VOTES: ThingItem["poll"][0] = {
-//     name: "suggested_numplayers",
-//     title: "User Suggested Number of Players",
-//     totalvotes: "0",
-//     results: {
-//       numplayers: "0+",
-//       result: [
-//         {
-//           value: "Best",
-//           numvotes: "0",
-//         },
-//         {
-//           value: "Recommended",
-//           numvotes: "0",
-//         },
-//         {
-//           value: "Not Recommended",
-//           numvotes: "0",
-//         },
-//       ],
-//     },
-//   };
-
-//   test("WHEN ThingItem has empty poll array, THEN return `false`", () => {
-//     expect(hasSuggestedPlayersVotes(MOCK_THING_ITEM)).toBeFalsy();
-//   });
-
-//   test("WHEN totalvotes = 0, THEN return `false`", () => {
-//     const thingWithZeroVotes = {
-//       ...MOCK_THING_ITEM,
-//       poll: [MOCK_ZERO_VOTES],
-//     };
-
-//     expect(hasSuggestedPlayersVotes(thingWithZeroVotes)).toBeFalsy();
-//   });
-
-//   test("WHEN totalvotes = 1, THEN return `true`", () => {
-//     const thingWithOneVote = {
-//       ...MOCK_THING_ITEM,
-//       poll: [{ ...MOCK_ZERO_VOTES, totalvotes: "1" }],
-//     };
-
-//     expect(hasSuggestedPlayersVotes(thingWithOneVote)).toBeTruthy();
-//   });
-// });
-
 describe(transformToBoardGame.name, () => {
   const EXPECTED_BOARD_GAME = {
     id: 314088,
@@ -209,5 +162,16 @@ describe(transformToBoardGame.name, () => {
     expect(transformToBoardGame(thingWithSingleName as any)).toEqual(
       EXPECTED_BOARD_GAME
     );
+  });
+
+  test(`WHEN ThingItem.name = "Can&#039;t Stop", THEN parse as "Can't Stop"`, () => {
+    const thingWithSingleName: Partial<Thing["items"]["item"][number]> = {
+      ...MOCK_THING_ITEM,
+      name: { type: "primary", sortindex: 1, value: "Can&#039;t Stop" },
+    };
+    expect(transformToBoardGame(thingWithSingleName as any)).toEqual({
+      ...EXPECTED_BOARD_GAME,
+      name: "Can't Stop",
+    });
   });
 });

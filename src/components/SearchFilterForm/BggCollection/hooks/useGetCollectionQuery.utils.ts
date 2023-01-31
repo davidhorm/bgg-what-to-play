@@ -9,26 +9,23 @@ export const transformToThingIds = (
   i: BriefCollection["items"]["item"][number]
 ) => i.objectid;
 
+/**
+ *
+ * @param str - ex. "Can&#039;t Stop"
+ * @returns - ex. "Can't Stop"
+ */
+const decodeHtmlCharCodes = (str: string) =>
+  str.replace(/(&#(\d+);)/g, (match, capture, charCode) =>
+    String.fromCharCode(charCode)
+  );
+
 const getPrimaryName = (name: Name | Name[]) => {
   const primaryName = Array.isArray(name)
     ? name.filter((n) => n.type === "primary")[0]
     : name;
-  return primaryName.value;
+
+  return decodeHtmlCharCodes(primaryName.value);
 };
-
-// Maybe don't need to filter if `transformToRecommendedPlayerCount` checks if it's an array?
-// export const hasSuggestedPlayersVotes = (thing: ThingItem) => {
-//   const suggestedPlayers = thing.poll.filter(
-//     (p) => p.name === "suggested_numplayers"
-//   );
-
-//   if (suggestedPlayers.length > 0) {
-//     const totalVotes = parseInt(suggestedPlayers[0].totalvotes, 10);
-//     return totalVotes > 0;
-//   }
-
-//   return false;
-// };
 
 /**
  * Transforms the following array
