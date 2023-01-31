@@ -153,6 +153,9 @@ export const transformToBoardGame = (i: Thing["items"]["item"][number]) => ({
   /** BGG' Board Game Thing ID */
   id: i.id,
 
+  /** BGG Thing type */
+  type: i.type,
+
   /** Board Game's thumbnail URL */
   thumbnail: i.thumbnail,
 

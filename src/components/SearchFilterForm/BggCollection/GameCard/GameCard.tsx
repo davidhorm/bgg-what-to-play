@@ -12,9 +12,14 @@ type Props = {
 export const GameCard = ({ game, filterState }: Props) => (
   <Card className="m-2 w-80 max-w-xs flex-auto text-center">
     <CardContent>
-      <h2 className="my-0 mb-2 truncate text-3xl font-normal">{game.name}</h2>
+      <a
+        className="block truncate text-2xl font-normal text-black no-underline decoration-1 hover:underline"
+        href={`https://boardgamegeek.com/${game.type}/${game.id}`}
+      >
+        {game.name}
+      </a>
 
-      <div className="flex justify-between">
+      <div className="mt-2 flex justify-between">
         <CardMedia
           className="max-w-32 mx-auto h-auto max-h-32 w-auto"
           component="img"
