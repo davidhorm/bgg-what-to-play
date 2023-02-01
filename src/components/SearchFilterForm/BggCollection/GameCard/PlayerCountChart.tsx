@@ -11,9 +11,7 @@ import {
   XAxis,
 } from "recharts";
 
-const tooltipSort = ["Best", "Recommended", "Not Recommended"] as const;
-
-type Recommendation = typeof tooltipSort[number];
+type Recommendation = "Best" | "Recommended" | "Not Recommended";
 
 const colorFillByRec: Record<Recommendation, [string, string]> = {
   "Best": ["#15803d" /* green-700 */, "#bbf7d0" /* green-200 */],
@@ -40,8 +38,6 @@ const getFill = (
   return defaultColor;
 };
 
-// TODO: replace tooltip with % in label (p3) - see https://recharts.org/en-US/api/Label
-
 /** If the polling data has zero votes, then display "No Data Available" text */
 const MaybeNoDataAvailable = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -67,6 +63,63 @@ const MaybeNoDataAvailable = (
     >
       No Recommendations Available
     </text>
+  );
+};
+
+const CustomTooltip = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  { payload, label }: any
+) => {
+  if (!payload[0]?.payload) return null;
+
+  const {
+    Best,
+    Recommended,
+    ["Not Recommended"]: notRecNeg,
+  } = payload[0].payload;
+  const notRec = Math.abs(notRecNeg);
+  const total = Best + Recommended + notRec;
+
+  const getPercentage = (value: number) =>
+    ` (${Math.round((value / total) * 100)}%)`;
+
+  return (
+    <div className="bg-white/90 p-1 text-left text-sm">
+      <p>Player Count: {label}</p>
+      <ul className="table list-none pl-1">
+        <li className="table-row">
+          <span className="table-cell text-right" role="img" aria-label="best">
+            😍:
+          </span>
+          <span className="table-cell px-1 text-right">{Best}</span>
+          <span className="table-cell text-right">{getPercentage(Best)}</span>
+        </li>
+        <li className="table-row">
+          <span
+            className="table-cell text-right"
+            role="img"
+            aria-label="recommended"
+          >
+            🙂:
+          </span>
+          <span className="table-cell px-1 text-right">{Recommended}</span>
+          <span className="table-cell text-right">
+            {getPercentage(Recommended)}
+          </span>
+        </li>
+        <li className="table-row">
+          <span
+            className="table-cell text-right"
+            role="img"
+            aria-label="not recommended"
+          >
+            😓:
+          </span>
+          <span className="table-cell px-1 text-right">{notRec}</span>
+          <span className="table-cell text-right">{getPercentage(notRec)}</span>
+        </li>
+      </ul>
+    </div>
   );
 };
 
@@ -102,13 +155,8 @@ export const PlayerCountChart = ({
                 interval="preserveStartEnd"
               />
 
-              <Tooltip
-                formatter={(value) => Math.abs(parseInt(value.toString(), 10))}
-                itemSorter={(item) =>
-                  tooltipSort.indexOf(item.dataKey as Recommendation)
-                }
-                labelFormatter={(label) => `Player Count: ${label}`}
-              />
+              <Tooltip content={<CustomTooltip />} />
+
               <ReferenceLine y={0} stroke="#000" />
 
               <Customized component={<MaybeNoDataAvailable />} />
