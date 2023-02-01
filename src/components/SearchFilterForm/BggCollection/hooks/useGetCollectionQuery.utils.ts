@@ -198,21 +198,21 @@ type Progress = {
 
 type GetLoadingStatusProps = {
   username: string;
-  collectionIsLoading: boolean;
+  boardGameCollectionIsLoading: boolean;
+  boardGameThingsIsLoading: boolean;
   errorMessage?: string;
-  thingsIsLoading: boolean;
   totalitems?: number;
 };
 
 // TODO: add some unit tests (p3)
 export const getLoadingStatus = ({
   username,
-  collectionIsLoading,
+  boardGameCollectionIsLoading,
+  boardGameThingsIsLoading,
   errorMessage,
-  thingsIsLoading,
   totalitems,
 }: GetLoadingStatusProps): Progress => {
-  if (collectionIsLoading) {
+  if (boardGameCollectionIsLoading) {
     return {
       status: "FETCHING_COLLECTION",
       progress: 1,
@@ -236,7 +236,7 @@ export const getLoadingStatus = ({
     };
   }
 
-  if (thingsIsLoading) {
+  if (boardGameThingsIsLoading) {
     // TODO: calc progress based on number of things in collection (p1)
     return {
       status: "FETCHING_THINGS",

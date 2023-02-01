@@ -1,7 +1,7 @@
 type BoardGameThing = {
   objecttype: "thing";
   objectid: number;
-  subtype: "boardgame";
+  subtype: "boardgame" | "boardgameexpansion";
   collid: number;
   name: {
     text: string;

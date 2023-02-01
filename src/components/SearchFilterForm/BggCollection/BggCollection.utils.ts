@@ -1,6 +1,13 @@
 import type { CollectionFilterState } from "@/types";
 import type { SimpleBoardGame } from ".";
 
+const maybeShowExpansions =
+  (filterState: CollectionFilterState) => (game: SimpleBoardGame) => {
+    if (filterState.showExpansions) return true;
+
+    return game.type === "boardgame";
+  };
+
 //#region maybeShowInvalidPlayerCount
 
 const removeRecsLessThan =
@@ -81,8 +88,8 @@ const calcSortScoreSum = (
 const maybeSortByScore =
   (filterState: CollectionFilterState) =>
   (gameA: SimpleBoardGame, gameB: SimpleBoardGame): number => {
+    // if using non-default player range, then sort by score
     const [minRange, maxRange] = filterState.playerCountRange;
-
     if (minRange !== 1 || maxRange !== Number.POSITIVE_INFINITY) {
       return (
         calcSortScoreSum(gameB, minRange, maxRange) -
@@ -90,7 +97,8 @@ const maybeSortByScore =
       );
     }
 
-    return 0;
+    // else sort by game name by default.
+    return gameA.name.localeCompare(gameB.name);
   };
 
 //#endregion maybeSortByScore
@@ -100,7 +108,8 @@ export const applyFiltersAndSorts = (
   filterState: CollectionFilterState
 ) =>
   games
-    ?.map(maybeShowInvalidPlayerCount(filterState))
+    ?.filter(maybeShowExpansions(filterState))
+    .map(maybeShowInvalidPlayerCount(filterState))
     .map(addIsPlayerCountWithinRange(filterState))
     .filter((g) => g.isPlayerCountWithinRange) // Remove games not within Player Count Range
     .sort(maybeSortByScore(filterState));

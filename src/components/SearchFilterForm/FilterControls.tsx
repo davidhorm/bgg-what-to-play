@@ -13,6 +13,16 @@ export const FilterControls = ({
   <section className="p-4">
     <FormGroup>
       <FormControlLabel
+        label="Show expansions"
+        control={
+          <Checkbox
+            checked={filterState.showExpansions}
+            onChange={() => filterDispatch({ type: "TOGGLE_SHOW_EXPANSIONS" })}
+          />
+        }
+      />
+
+      <FormControlLabel
         label="Show invalid player counts"
         control={
           <Checkbox

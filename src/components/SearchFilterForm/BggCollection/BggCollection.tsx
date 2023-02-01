@@ -11,7 +11,8 @@ type Props = {
 
 export const BggCollection = ({ filterState }: Props) => {
   const { loadingStatus, data, pubdate } = useGetCollectionQuery(
-    filterState.username
+    filterState.username,
+    filterState.showExpansions
   );
 
   if (!filterState.username) return <MissingQueryValue />;

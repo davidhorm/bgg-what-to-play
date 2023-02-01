@@ -9,6 +9,7 @@ const QUERY_PARAMS = {
   USERNAME: "username",
   PLAYER_COUNT: "playerCount",
   SHOW_INVALID_PLAYER_COUNT: "showInvalid",
+  SHOW_EXPANSIONS: "showExpansions",
 } as const;
 
 type QueryParamKey = typeof QUERY_PARAMS[keyof typeof QUERY_PARAMS];
@@ -25,6 +26,9 @@ const convertPlayerCountRangeValueToQueryParam = (
     ? minRange.toString()
     : playerCountRange.join("-");
 };
+
+const convertElevenToInfinity = (value: number) =>
+  value >= 11 ? Number.POSITIVE_INFINITY : value;
 
 const convertPlayerCountRangeQueryParamToValue = (
   value: string | null
@@ -77,6 +81,12 @@ const maybeSetQueryParams = (newState: CollectionFilterState) => {
       url.searchParams.delete(QUERY_PARAMS.SHOW_INVALID_PLAYER_COUNT);
     }
 
+    if (newState.showExpansions) {
+      url.searchParams.set(QUERY_PARAMS.SHOW_EXPANSIONS, "1");
+    } else {
+      url.searchParams.delete(QUERY_PARAMS.SHOW_EXPANSIONS);
+    }
+
     history.pushState({}, "", url);
   }
 };
@@ -99,6 +109,9 @@ const initialFilterState = {
   playerCountRange: convertPlayerCountRangeQueryParamToValue(
     getQueryParamValue(QUERY_PARAMS.PLAYER_COUNT)
   ),
+
+  /** If `true`, then show expansions in collection. */
+  showExpansions: getQueryParamValue(QUERY_PARAMS.SHOW_EXPANSIONS) === "1",
 };
 
 export type CollectionFilterState = typeof initialFilterState;
@@ -130,8 +143,8 @@ const toggleShowInvalidPlayerCount: ActionHandler<Partial<undefined>> = (
     showInvalidPlayerCount: !state.showInvalidPlayerCount,
   });
 
-const convertElevenToInfinity = (value: number) =>
-  value >= 11 ? Number.POSITIVE_INFINITY : value;
+const toggleShowExpansions: ActionHandler<Partial<undefined>> = (state) =>
+  setQueryParamAndState(state, { showExpansions: !state.showExpansions });
 
 const setPlayerCountRange: ActionHandler<[number, number]> = (state, payload) =>
   setQueryParamAndState(state, {
@@ -140,9 +153,10 @@ const setPlayerCountRange: ActionHandler<[number, number]> = (state, payload) =>
 
 const actions = {
   RESET_FILTERS: resetFilters,
-  SET_USERNAME: setUsername,
-  TOGGLE_SHOW_INVALID_PLAYER_COUNT: toggleShowInvalidPlayerCount,
   SET_PLAYER_COUNT_RANGE: setPlayerCountRange,
+  SET_USERNAME: setUsername,
+  TOGGLE_SHOW_EXPANSIONS: toggleShowExpansions,
+  TOGGLE_SHOW_INVALID_PLAYER_COUNT: toggleShowInvalidPlayerCount,
 };
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
