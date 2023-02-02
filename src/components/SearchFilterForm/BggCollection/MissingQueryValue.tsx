@@ -1,6 +1,6 @@
 export const MissingQueryValue = () => (
-  <section className="p-4">
-    <h2>What&apos;s your BGG username?</h2>
+  <section className="max-w-sm p-4 xl:max-w-7xl">
+    <h2 className="mt-0">What&apos;s your BGG username?</h2>
     <div className="relative h-0 w-full" style={{ paddingBottom: "43%" }}>
       <iframe
         src="https://giphy.com/embed/3o7aTskHEUdgCQAXde"
