@@ -1,6 +1,7 @@
 /// <reference types="vitest" />
 import react from "@vitejs/plugin-react";
 import path from "path";
+import analyze from "rollup-plugin-analyzer";
 import { defineConfig } from "vite";
 import svgr from "vite-plugin-svgr";
 
@@ -13,6 +14,17 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+    },
+  },
+  build: {
+    rollupOptions: {
+      plugins: [
+        analyze({
+          summaryOnly: true,
+          filterSummary: true,
+          filter: (m) => m.percent > 2,
+        }),
+      ],
     },
   },
   test: {
