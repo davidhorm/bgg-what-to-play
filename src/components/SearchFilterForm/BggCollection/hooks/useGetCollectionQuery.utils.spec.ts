@@ -32,6 +32,7 @@ const MOCK_THING_ITEM: Partial<Thing["items"]["item"][number]> = {
 describe(transformToBoardGame.name, () => {
   const EXPECTED_BOARD_GAME = {
     id: 314088,
+    type: "boardgame",
     thumbnail: "thumbnail.png",
     maxPlayers: 4,
     maxPlaytime: 20,

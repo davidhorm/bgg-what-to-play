@@ -5,6 +5,7 @@ import { applyFiltersAndSorts } from "./BggCollection.utils";
 describe(applyFiltersAndSorts.name, () => {
   const MOCK_GAME: Partial<BoardGame> = {
     name: "Ticket to Ride",
+    type: "boardgame",
     id: 9209,
     thumbnail: "thumbnail.png",
     minPlayers: 2,
@@ -19,6 +20,7 @@ describe(applyFiltersAndSorts.name, () => {
   const MOCK_FILTERS: CollectionFilterState = {
     username: "",
     showInvalidPlayerCount: false,
+    showExpansions: false,
     playerCountRange: [1, Number.POSITIVE_INFINITY],
   };
 
