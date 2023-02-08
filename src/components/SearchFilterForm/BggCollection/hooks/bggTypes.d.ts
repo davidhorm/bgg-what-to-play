@@ -32,7 +32,7 @@ export type BriefCollection = {
 type Name = {
   type: "primary" | "alternate";
   sortindex: 1;
-  value: string;
+  value: string | number;
 };
 
 type Link = { type: string; id: number; value: string };

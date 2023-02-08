@@ -1,67 +1,16 @@
 import { useQuery, useQueries } from "@tanstack/react-query";
-import { XMLParser } from "fast-xml-parser";
 import * as _ from "lodash-es";
-import type { BriefCollection, Thing } from "./bggTypes";
+import type { BriefCollection } from "./bggTypes";
 import {
+  fetchBggCollection,
+  fetchBggThings,
   SimpleBoardGame,
   transformToBoardGame,
-  transformToThingIds,
+  transformToThingIdsCollection,
 } from "./useGetCollectionQuery.utils";
 
 // TODO: handle querying array of usernames (p3)
 // TODO: handle querying other things like geeklists (p3)
-
-const parser = new XMLParser({
-  ignoreAttributes: false,
-  attributeNamePrefix: "",
-  textNodeName: "text",
-  removeNSPrefix: true,
-  allowBooleanAttributes: true,
-  parseAttributeValue: true,
-});
-
-const fetchBggCollection = (username: string, showExpansions: boolean) =>
-  fetch(
-    showExpansions
-      ? `https://bgg.cc/xmlapi2/collection?username=${username}&brief=1&own=1&subtype=boardgameexpansion`
-      : `https://bgg.cc/xmlapi2/collection?username=${username}&brief=1&own=1&excludesubtype=boardgameexpansion`
-  )
-    .then((response) => {
-      if (response.status === 202) {
-        // Handle response code 202 for queued request. (p1)
-        // see https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc11
-        throw new Error("202 Accepted");
-      }
-
-      return response.text();
-    })
-    .then((xml) => parser.parse(xml))
-    .catch((e) => {
-      throw new Error(
-        e?.message || `Unable to query collection for ${username}`
-      );
-    });
-
-const fetchBggThings = (thingIds?: string): Promise<Thing> | undefined =>
-  thingIds
-    ? fetch(`https://bgg.cc/xmlapi2/thing?id=${thingIds}&stats=1`)
-        .then((response) => response.text())
-        .then((xml) => parser.parse(xml))
-        .catch((err) => {
-          throw new Error(JSON.stringify(err));
-        })
-    : undefined;
-
-const THING_QUERY_LIMIT = 1200;
-
-const transformToThingIdsCollection = (
-  boardgames?: BriefCollection,
-  expansions?: BriefCollection
-) =>
-  [
-    ..._.chunk(boardgames?.items.item, THING_QUERY_LIMIT),
-    ..._.chunk(expansions?.items.item, THING_QUERY_LIMIT),
-  ].map((briefs) => briefs.map(transformToThingIds).join(","));
 
 export const useGetCollectionQuery = (
   username: string,

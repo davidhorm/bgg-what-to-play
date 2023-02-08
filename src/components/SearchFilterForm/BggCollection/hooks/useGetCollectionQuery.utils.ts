@@ -1,3 +1,5 @@
+import { XMLParser } from "fast-xml-parser";
+import * as _ from "lodash-es";
 import type {
   BriefCollection,
   Thing,
@@ -5,9 +7,30 @@ import type {
   SuggestedNumPlayersResult,
 } from "./bggTypes";
 
-export const transformToThingIds = (
-  i: BriefCollection["items"]["item"][number]
-) => i.objectid;
+//#region transformToThingIdsCollection
+
+const transformToThingIds = (i: BriefCollection["items"]["item"][number]) =>
+  i.objectid;
+
+const THING_QUERY_LIMIT = 1200;
+
+const transformToUniqueChunks = (games?: BriefCollection) =>
+  _.chunk(
+    _.uniq(games?.items.item.map(transformToThingIds)),
+    THING_QUERY_LIMIT
+  ).map((numbers) => numbers.join(","));
+
+export const transformToThingIdsCollection = (
+  boardgames?: BriefCollection,
+  expansions?: BriefCollection
+) => [
+  ...transformToUniqueChunks(boardgames),
+  ...transformToUniqueChunks(expansions),
+];
+
+//#endregion transformToThingIdsCollection
+
+//#region transformToBoardGame
 
 /**
  *
@@ -24,7 +47,7 @@ const getPrimaryName = (name: Name | Name[]) => {
     ? name.filter((n) => n.type === "primary")[0]
     : name;
 
-  return decodeHtmlCharCodes(primaryName.value);
+  return decodeHtmlCharCodes(primaryName.value.toString());
 };
 
 /**
@@ -183,3 +206,46 @@ export const transformToBoardGame = (i: Thing["items"]["item"][number]) => ({
 
 /** Board Game that only has simple props calculated from BGG. */
 export type SimpleBoardGame = ReturnType<typeof transformToBoardGame>;
+
+//#endregion transformToBoardGame
+
+const parser = new XMLParser({
+  ignoreAttributes: false,
+  attributeNamePrefix: "",
+  textNodeName: "text",
+  removeNSPrefix: true,
+  allowBooleanAttributes: true,
+  parseAttributeValue: true,
+});
+
+export const fetchBggCollection = (username: string, showExpansions: boolean) =>
+  fetch(
+    showExpansions
+      ? `https://bgg.cc/xmlapi2/collection?username=${username}&brief=1&own=1&subtype=boardgameexpansion`
+      : `https://bgg.cc/xmlapi2/collection?username=${username}&brief=1&own=1&excludesubtype=boardgameexpansion`
+  )
+    .then((response) => {
+      if (response.status === 202) {
+        // Handle response code 202 for queued request. (p1)
+        // see https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc11
+        throw new Error("202 Accepted");
+      }
+
+      return response.text();
+    })
+    .then((xml) => parser.parse(xml))
+    .catch((e) => {
+      throw new Error(
+        e?.message || `Unable to query collection for ${username}`
+      );
+    });
+
+export const fetchBggThings = (thingIds?: string): Promise<Thing> | undefined =>
+  thingIds
+    ? fetch(`https://bgg.cc/xmlapi2/thing?id=${thingIds}&stats=1`)
+        .then((response) => response.text())
+        .then((xml) => parser.parse(xml))
+        .catch((err) => {
+          throw new Error(JSON.stringify(err));
+        })
+    : undefined;
