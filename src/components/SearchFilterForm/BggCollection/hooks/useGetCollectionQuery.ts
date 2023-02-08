@@ -1,9 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueries } from "@tanstack/react-query";
 import { XMLParser } from "fast-xml-parser";
+import * as _ from "lodash-es";
 import type { BriefCollection, Thing } from "./bggTypes";
 import {
   SimpleBoardGame,
-  getLoadingStatus,
   transformToBoardGame,
   transformToThingIds,
 } from "./useGetCollectionQuery.utils";
@@ -42,13 +42,33 @@ const fetchBggCollection = (username: string, showExpansions: boolean) =>
       );
     });
 
+const fetchBggThings = (thingIds?: string): Promise<Thing> | undefined =>
+  thingIds
+    ? fetch(`https://bgg.cc/xmlapi2/thing?id=${thingIds}&stats=1`)
+        .then((response) => response.text())
+        .then((xml) => parser.parse(xml))
+        .catch((err) => {
+          throw new Error(JSON.stringify(err));
+        })
+    : undefined;
+
+const THING_QUERY_LIMIT = 1200;
+
+const transformToThingIdsCollection = (
+  boardgames?: BriefCollection,
+  expansions?: BriefCollection
+) =>
+  [
+    ..._.chunk(boardgames?.items.item, THING_QUERY_LIMIT),
+    ..._.chunk(expansions?.items.item, THING_QUERY_LIMIT),
+  ].map((briefs) => briefs.map(transformToThingIds).join(","));
+
 export const useGetCollectionQuery = (
   username: string,
   showExpansions: boolean
 ) => {
-  //#region Board Game
   const {
-    isLoading: boardGameCollectionIsLoading,
+    status: boardGameCollectionStatus,
     error: boardGameCollectionError,
     data: boardGameCollectionData,
   } = useQuery<BriefCollection, Error>({
@@ -57,29 +77,8 @@ export const useGetCollectionQuery = (
     queryFn: () => fetchBggCollection(username, false),
   });
 
-  const boardGameThingIds = boardGameCollectionData?.items?.item
-    ?.map(transformToThingIds)
-    .join(",");
-
   const {
-    isLoading: boardGameThingsIsLoading,
-    error: boardGameThingsError,
-    data: boardGameThingsData,
-  } = useQuery<Thing, Error>({
-    enabled: !!boardGameThingIds,
-    queryKey: ["BggThings", boardGameThingIds],
-    queryFn: () =>
-      fetch(`https://bgg.cc/xmlapi2/thing?id=${boardGameThingIds}&stats=1`)
-        .then((response) => response.text())
-        .then((xml) => parser.parse(xml))
-        .catch((err) => {
-          throw new Error(JSON.stringify(err));
-        }),
-  });
-  //#endregion Board Game
-
-  //#region Board Game Expansion
-  const {
+    status: boardGameExpansionStatus,
     error: boardGameExpansionCollectionError,
     data: boardGameExpansionCollectionData,
   } = useQuery<BriefCollection, Error>({
@@ -88,47 +87,110 @@ export const useGetCollectionQuery = (
     queryFn: () => fetchBggCollection(username, true),
   });
 
-  const boardGameExpansionThingIds =
-    boardGameExpansionCollectionData?.items?.item
-      ?.map(transformToThingIds)
-      .join(",");
+  const thingIdsCollection = transformToThingIdsCollection(
+    boardGameCollectionData,
+    boardGameExpansionCollectionData
+  );
 
-  const {
-    error: boardGameExpansionThingsError,
-    data: boardGameExpansionThingsData,
-  } = useQuery<Thing, Error>({
-    enabled: !!boardGameExpansionThingIds,
-    queryKey: ["BggThingsBoardGameExpansion", boardGameExpansionThingIds],
-    queryFn: () =>
-      fetch(
-        `https://bgg.cc/xmlapi2/thing?id=${boardGameExpansionThingIds}&stats=1`
-      )
-        .then((response) => response.text())
-        .then((xml) => parser.parse(xml))
-        .catch((err) => {
-          throw new Error(JSON.stringify(err));
-        }),
+  const thingResults = useQueries({
+    queries: thingIdsCollection.map((thingIds) => ({
+      queryKey: ["BggThings", thingIds],
+      enabled: !!thingIds,
+      queryFn: () => fetchBggThings(thingIds),
+    })),
   });
-  //#endregion Board Game Expansion
 
-  const data: SimpleBoardGame[] | undefined = [
-    ...(boardGameThingsData?.items.item || []),
-    ...(boardGameExpansionThingsData?.items.item || []),
-  ].map(transformToBoardGame);
+  const data: SimpleBoardGame[] | undefined = _.flatten(
+    thingResults.map((result) =>
+      result.data?.items.item
+        ? result.data.items.item.map(transformToBoardGame)
+        : []
+    )
+  );
+
+  /**
+   * Returns the total number of queries (Collections + Things). If still querying the collection,
+   * then assume at least 1 extra Thing query, and append '?' char.
+   */
+  const getQueryDenominator = () => {
+    if (!username) return "/ 0";
+
+    if (showExpansions) {
+      if (
+        boardGameCollectionStatus === "loading" &&
+        boardGameExpansionStatus === "loading"
+      )
+        return "/ 4?";
+
+      if (
+        boardGameCollectionStatus === "success" &&
+        boardGameExpansionStatus === "loading"
+      )
+        return `/ ${thingResults.length + 3}?`;
+
+      return `/ ${thingResults.length + 2}`;
+    }
+
+    if (boardGameCollectionStatus === "loading") return "/ 2?";
+
+    return `/ ${
+      thingResults.length + 1 + Number(boardGameExpansionStatus === "success")
+    }`;
+  };
+
+  const initialLoadingState = {
+    /** Number of queries in `success` state. */
+    successfulQueryCount:
+      Number(boardGameCollectionStatus === "success") +
+      Number(boardGameExpansionStatus === "success"),
+
+    /** True if there are any errors in the queries. */
+    isError:
+      boardGameCollectionStatus === "error" ||
+      boardGameExpansionStatus === "error",
+
+    /** Any error messages. */
+    errorMessage: `${boardGameCollectionError?.message || ""} ${
+      boardGameExpansionCollectionError?.message || ""
+    }`.trim(),
+  };
+
+  const loadingStatus = thingResults.reduce(
+    (prevVal, currVal) => ({
+      successfulQueryCount:
+        prevVal.successfulQueryCount + Number(currVal.status === "success"),
+      isError: prevVal.isError || currVal.status === "error",
+      errorMessage: `${prevVal.errorMessage} ${
+        (currVal.error as Error)?.message
+      }`.trim(),
+    }),
+    initialLoadingState
+  );
+
+  const loadingMessage =
+    loadingStatus.successfulQueryCount <
+    thingResults.length + 1 + Number(showExpansions)
+      ? `Loading (${
+          loadingStatus.successfulQueryCount + getQueryDenominator()
+        })`
+      : "";
 
   return {
-    loadingStatus: getLoadingStatus({
-      username,
-      boardGameCollectionIsLoading,
-      boardGameThingsIsLoading,
-      errorMessage:
-        boardGameCollectionError?.message ||
-        boardGameThingsError?.message ||
-        boardGameExpansionCollectionError?.message ||
-        boardGameExpansionThingsError?.message,
-      totalitems: data?.length,
-    }),
-    pubdate: boardGameCollectionData?.items?.pubdate,
+    pubdate: boardGameCollectionData?.items?.pubdate
+      ? `Collection as of: ${new Date(
+          boardGameCollectionData?.items?.pubdate
+        ).toLocaleDateString()}`
+      : "",
+    loadingMessage,
     data,
+    error: loadingStatus.isError
+      ? {
+          isBoardGameAccepted:
+            boardGameCollectionError?.message === "202 Accepted",
+          isExpansionAccepted:
+            boardGameExpansionCollectionError?.message === "202 Accepted",
+          message: loadingStatus.errorMessage,
+        }
+      : undefined,
   };
 };

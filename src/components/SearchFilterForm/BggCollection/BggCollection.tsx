@@ -1,8 +1,9 @@
 import type { CollectionFilterState } from "@/types";
+import CircularProgress from "@mui/material/CircularProgress";
+import { AcceptedResponse } from "./AcceptedResponse";
 import { applyFiltersAndSorts } from "./BggCollection.utils";
 import { GameCard } from "./GameCard";
 import { MissingQueryValue } from "./MissingQueryValue";
-import { NoDataDisplay } from "./NoDataDisplay";
 import { useGetCollectionQuery } from "./hooks/useGetCollectionQuery";
 
 type Props = {
@@ -10,26 +11,21 @@ type Props = {
 };
 
 export const BggCollection = ({ filterState }: Props) => {
-  const { loadingStatus, data, pubdate } = useGetCollectionQuery(
+  const { data, pubdate, loadingMessage, error } = useGetCollectionQuery(
     filterState.username,
     filterState.showExpansions
   );
 
   if (!filterState.username) return <MissingQueryValue />;
 
-  if (loadingStatus.status !== "FETCHING_COMPLETE" || !data)
-    return <NoDataDisplay loadingStatus={loadingStatus} />;
+  if (error?.isBoardGameAccepted) return <AcceptedResponse />;
 
   const filteredGames = applyFiltersAndSorts(data, filterState);
 
   return (
     <div>
-      <section className="flex gap-4 px-4 text-xs text-gray-500">
-        <span>
-          {pubdate
-            ? `Collection as of: ${new Date(pubdate).toLocaleDateString()}`
-            : ""}
-        </span>
+      <section className="flex gap-4 px-4 pt-1 text-xs text-gray-500">
+        <span>{pubdate}</span>
         <span>
           # of Games:
           {filteredGames.length !== data.length
@@ -37,6 +33,11 @@ export const BggCollection = ({ filterState }: Props) => {
             : ` `}
           {data.length}
         </span>
+        {loadingMessage && (
+          <span>
+            {loadingMessage} <CircularProgress size="0.75rem" />
+          </span>
+        )}
       </section>
 
       <section className="flex flex-wrap">

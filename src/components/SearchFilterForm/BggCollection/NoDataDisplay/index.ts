@@ -1,1 +1,0 @@
-export { NoDataDisplay } from "./NoDataDisplay";
