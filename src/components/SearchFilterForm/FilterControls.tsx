@@ -10,7 +10,7 @@ type Props = {
 export const FilterControls = ({
   filter: { filterState, filterDispatch },
 }: Props) => (
-  <section className="p-4">
+  <div className="mt-1">
     <FormGroup>
       <FormControlLabel
         label="Show expansions"
@@ -34,5 +34,5 @@ export const FilterControls = ({
         }
       />
     </FormGroup>
-  </section>
+  </div>
 );

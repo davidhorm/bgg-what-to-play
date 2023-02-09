@@ -13,7 +13,12 @@ export const SearchFilterForm = () => {
     <main className="p-4">
       {!filter.filterState.username && <Header />}
 
-      <Paper elevation={1} className="p-4">
+      <Paper
+        elevation={1}
+        className="p-4"
+        component="section"
+        aria-label="Filter controls"
+      >
         <UsernameInput filter={filter} />
 
         <PlayerCountSlider filter={filter} />

@@ -16,6 +16,7 @@ export const UsernameInput = ({
 
   return (
     <form
+      role="search"
       onSubmit={(e) => {
         filterDispatch({ type: "SET_USERNAME", payload: usernameInput });
         e.preventDefault();
@@ -31,7 +32,7 @@ export const UsernameInput = ({
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
-              <IconButton type="submit">
+              <IconButton type="submit" aria-label="Search">
                 <MagnifyingGlassIcon className="h-4" />
               </IconButton>
             </InputAdornment>

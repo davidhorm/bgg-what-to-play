@@ -1,7 +1,7 @@
 import type { CollectionFilterState } from "@/types";
-import CircularProgress from "@mui/material/CircularProgress";
 import { AcceptedResponse } from "./AcceptedResponse";
 import { applyFiltersAndSorts } from "./BggCollection.utils";
+import { FilterStatus } from "./FilterStatus";
 import { GameCard } from "./GameCard";
 import { MissingQueryValue } from "./MissingQueryValue";
 import { useGetCollectionQuery } from "./hooks/useGetCollectionQuery";
@@ -24,33 +24,28 @@ export const BggCollection = ({ filterState }: Props) => {
 
   return (
     <div>
-      <section className="flex gap-4 px-4 pt-1 text-xs text-gray-500">
-        <span>{pubdate}</span>
-        <span>
-          # of Games:
-          {filteredGames.length !== data.length
-            ? ` ${filteredGames.length} / `
-            : ` `}
-          {data.length}
-        </span>
-        {loadingMessage && (
-          <span>
-            {loadingMessage} <CircularProgress size="0.75rem" />
-          </span>
-        )}
-      </section>
+      <FilterStatus
+        pubdate={pubdate}
+        filteredGamesLength={filteredGames.length}
+        totalGamesLength={data.length}
+        loadingMessage={loadingMessage}
+      />
 
-      <section className="flex flex-wrap">
+      <ol
+        aria-label="Search results"
+        aria-busy={!!loadingMessage}
+        aria-describedby="loading-search-results"
+        className="m-0 flex list-none flex-wrap gap-4 p-0 text-center"
+      >
         {filteredGames?.map((game) => (
-          <GameCard key={game.id} game={game} filterState={filterState} />
+          <li key={game.id} className="min-w-[40ch] flex-1">
+            <GameCard game={game} filterState={filterState} />
+          </li>
         ))}
         {Array.from({ length: 10 }).map((_, i) => (
-          <div
-            key={`placeholder-${i}`}
-            className="m-2 min-w-[40ch] flex-1"
-          ></div>
+          <li key={`placeholder-${i}`} className="m-2 min-w-[40ch] flex-1"></li>
         ))}
-      </section>
+      </ol>
     </div>
   );
 };

@@ -119,14 +119,12 @@ export const useGetCollectionQuery = (
   const loadingMessage =
     loadingStatus.successfulQueryCount <
     thingResults.length + 1 + Number(showExpansions)
-      ? `Loading (${
-          loadingStatus.successfulQueryCount + getQueryDenominator()
-        })`
+      ? `(${loadingStatus.successfulQueryCount + getQueryDenominator()})`
       : "";
 
   return {
     pubdate: boardGameCollectionData?.items?.pubdate
-      ? `Collection as of: ${new Date(
+      ? `${new Date(
           boardGameCollectionData?.items?.pubdate
         ).toLocaleDateString()}`
       : "",

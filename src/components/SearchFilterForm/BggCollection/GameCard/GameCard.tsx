@@ -10,7 +10,7 @@ type Props = {
 };
 
 export const GameCard = ({ game, filterState }: Props) => (
-  <Card className="m-2 min-w-[40ch] flex-1 text-center">
+  <Card>
     <CardContent>
       <a
         className="block min-w-0 truncate text-2xl font-normal text-black no-underline decoration-1 hover:underline"
