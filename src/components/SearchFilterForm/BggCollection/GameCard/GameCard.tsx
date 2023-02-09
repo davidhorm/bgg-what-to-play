@@ -10,10 +10,10 @@ type Props = {
 };
 
 export const GameCard = ({ game, filterState }: Props) => (
-  <Card className="m-2 w-80 max-w-xs flex-auto text-center">
+  <Card className="m-2 min-w-[40ch] flex-1 text-center">
     <CardContent>
       <a
-        className="block truncate text-2xl font-normal text-black no-underline decoration-1 hover:underline"
+        className="block min-w-0 truncate text-2xl font-normal text-black no-underline decoration-1 hover:underline"
         href={`https://boardgamegeek.com/${game.type}/${game.id}`}
       >
         {game.name}

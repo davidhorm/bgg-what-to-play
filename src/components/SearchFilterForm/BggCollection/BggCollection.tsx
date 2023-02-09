@@ -44,6 +44,12 @@ export const BggCollection = ({ filterState }: Props) => {
         {filteredGames?.map((game) => (
           <GameCard key={game.id} game={game} filterState={filterState} />
         ))}
+        {Array.from({ length: 10 }).map((_, i) => (
+          <div
+            key={`placeholder-${i}`}
+            className="m-2 min-w-[40ch] flex-1"
+          ></div>
+        ))}
       </section>
     </div>
   );
