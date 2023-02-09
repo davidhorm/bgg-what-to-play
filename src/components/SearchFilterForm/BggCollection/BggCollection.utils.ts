@@ -41,11 +41,15 @@ const addIsPlayerCountWithinRange =
   (filterState: CollectionFilterState) => (game: SimpleBoardGame) => {
     const [minFilterCount, maxFilterCount] = filterState.playerCountRange;
 
-    const minWithinRange = calcValueIsWithinRanage(
-      game.minPlayers,
-      minFilterCount,
-      maxFilterCount
-    );
+    const minWithinRange =
+      calcValueIsWithinRanage(
+        game.minPlayers,
+        minFilterCount,
+        maxFilterCount
+      ) ||
+      // handle edge case for id = 40567
+      (filterState.showInvalidPlayerCount && game.minPlayers === 0);
+
     const maxWithinRange = calcValueIsWithinRanage(
       game.maxPlayers,
       minFilterCount,
