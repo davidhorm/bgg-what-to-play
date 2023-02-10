@@ -10,6 +10,7 @@ import {
   Tooltip,
   XAxis,
 } from "recharts";
+import { AccessibleLabels } from "./AccessibleLabels";
 import { CustomTooltip } from "./CustomTooltip";
 import { MaybeNoDataAvailable } from "./MaybeNoDataAvailable";
 
@@ -23,6 +24,7 @@ const colorFillByRec: Record<Recommendation, [string, string]> = {
 
 type Props = Pick<BoardGame, "recommendedPlayerCount"> & {
   filterState: CollectionFilterState;
+  gameId: number;
 };
 
 const getFill = (
@@ -43,14 +45,18 @@ const getFill = (
 export const PlayerCountChart = ({
   recommendedPlayerCount,
   filterState,
+  gameId,
 }: Props) => {
   const { ref, inView } = useInView();
 
   return (
     <div ref={ref} className="h-36">
       {inView && (
-        <figure className="m-0">
-          <figcaption className="mt-4 text-xs text-gray-500">
+        <figure aria-labelledby={`figcap-${gameId}`} className="m-0">
+          <figcaption
+            id={`figcap-${gameId}`}
+            className="mt-4 text-xs text-gray-500"
+          >
             Player Count Recommendations
           </figcaption>
           <ResponsiveContainer minWidth="18rem" minHeight="9rem">
@@ -66,10 +72,13 @@ export const PlayerCountChart = ({
                 bottom: 5,
               }}
             >
+              <Customized component={<AccessibleLabels />} />
+
               <XAxis
                 dataKey="playerCountLabel"
                 axisLine={false}
                 interval="preserveStartEnd"
+                aria-hidden="true"
               />
 
               <Tooltip content={<CustomTooltip />} />

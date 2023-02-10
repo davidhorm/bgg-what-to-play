@@ -44,6 +44,7 @@ export const GameCard = ({ game, filterState }: Props) => (
       </div>
 
       <PlayerCountChart
+        gameId={game.id}
         recommendedPlayerCount={game.recommendedPlayerCount}
         filterState={filterState}
       />

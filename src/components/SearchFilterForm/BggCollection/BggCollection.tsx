@@ -43,7 +43,11 @@ export const BggCollection = ({ filterState }: Props) => {
           </li>
         ))}
         {Array.from({ length: 10 }).map((_, i) => (
-          <li key={`placeholder-${i}`} className="m-2 min-w-[40ch] flex-1"></li>
+          <li
+            key={`placeholder-${i}`}
+            className="m-2 min-w-[40ch] flex-1"
+            aria-hidden="true"
+          ></li>
         ))}
       </ol>
     </div>
