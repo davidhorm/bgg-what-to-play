@@ -9,6 +9,7 @@ module.exports = {
       version: "detect",
     },
   },
+  ignorePatterns: ["dist/"],
   extends: [
     "eslint:recommended",
     "plugin:react/recommended",
