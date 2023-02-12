@@ -242,6 +242,10 @@ export const fetchBggCollection = (username: string, showExpansions: boolean) =>
         throw new Error("000 Empty");
       }
 
+      if (json?.items?.item && !Array.isArray(json.items.item)) {
+        json.items.item = [json.items.item];
+      }
+
       return json;
     })
     .catch((e) => {
@@ -254,7 +258,15 @@ export const fetchBggThings = (thingIds?: string): Promise<Thing> | undefined =>
   thingIds
     ? fetch(`https://bgg.cc/xmlapi2/thing?id=${thingIds}&stats=1`)
         .then((response) => response.text())
-        .then((xml) => parser.parse(xml))
+        .then((xml) => {
+          const json = parser.parse(xml);
+
+          if (json?.items?.item && !Array.isArray(json.items.item)) {
+            json.items.item = [json.items.item];
+          }
+
+          return json;
+        })
         .catch((err) => {
           throw new Error(JSON.stringify(err));
         })
