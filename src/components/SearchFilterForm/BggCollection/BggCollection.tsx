@@ -3,7 +3,7 @@ import { AcceptedResponse } from "./AcceptedResponse";
 import { applyFiltersAndSorts } from "./BggCollection.utils";
 import { FilterStatus } from "./FilterStatus";
 import { GameCard } from "./GameCard";
-import { MissingQueryValue } from "./MissingQueryValue";
+import { MissingSomethingResponse } from "./MissingSomethingResponse";
 import { useGetCollectionQuery } from "./hooks/useGetCollectionQuery";
 
 type Props = {
@@ -16,9 +16,14 @@ export const BggCollection = ({ filterState }: Props) => {
     filterState.showExpansions
   );
 
-  if (!filterState.username) return <MissingQueryValue />;
+  if (!filterState.username) return <MissingSomethingResponse />;
 
   if (error?.isBoardGameAccepted) return <AcceptedResponse />;
+
+  if (error?.isBoardGameEmpty)
+    return (
+      <MissingSomethingResponse message="You have zero games in your collection?" />
+    );
 
   const filteredGames = applyFiltersAndSorts(data, filterState);
 

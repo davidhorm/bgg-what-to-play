@@ -24,6 +24,8 @@ export const useGetCollectionQuery = (
     enabled: !!username,
     queryKey: ["BggCollectionBoardGame", username],
     queryFn: () => fetchBggCollection(username, false),
+    retry: (failureCount, error) =>
+      error?.message === "000 Empty" ? false : failureCount < 3,
   });
 
   const {
@@ -136,6 +138,7 @@ export const useGetCollectionQuery = (
             boardGameCollectionError?.message === "202 Accepted",
           isExpansionAccepted:
             boardGameExpansionCollectionError?.message === "202 Accepted",
+          isBoardGameEmpty: boardGameCollectionError?.message === "000 Empty",
           message: loadingStatus.errorMessage,
         }
       : undefined,

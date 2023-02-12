@@ -235,7 +235,15 @@ export const fetchBggCollection = (username: string, showExpansions: boolean) =>
 
       return response.text();
     })
-    .then((xml) => parser.parse(xml))
+    .then((xml) => {
+      const json = parser.parse(xml);
+
+      if (!showExpansions && !json?.items?.item) {
+        throw new Error("000 Empty");
+      }
+
+      return json;
+    })
     .catch((e) => {
       throw new Error(
         e?.message || `Unable to query collection for ${username}`
