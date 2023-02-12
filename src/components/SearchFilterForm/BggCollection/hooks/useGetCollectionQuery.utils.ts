@@ -179,8 +179,10 @@ export const transformToBoardGame = (i: Thing["items"]["item"][number]) => ({
   /** BGG Thing type */
   type: i.type,
 
-  /** Board Game's thumbnail URL */
-  thumbnail: i.thumbnail,
+  /** Board Game's thumbnail URL (or BGG's No Image Available) */
+  thumbnail:
+    i.thumbnail ||
+    "https://cf.geekdo-images.com/zxVVmggfpHJpmnJY9j-k1w__itemrep/img/Py7CTY0tSBSwKQ0sgVjRFfsVUZU=/fit-in/246x300/filters:strip_icc()/pic1657689.jpg",
 
   /** Board Game's minimum number of players */
   minPlayers: i.minplayers.value,
