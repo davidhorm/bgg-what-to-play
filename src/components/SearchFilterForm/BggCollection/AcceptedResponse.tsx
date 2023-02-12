@@ -10,7 +10,8 @@ export const AcceptedResponse = () => (
       style={{ paddingBottom: "25%" }}
     >
       <iframe
-        src="https://giphy.com/embed/atcqQ5PuX41J6"
+        title="Guy carrying 40+ polystyrene boxes through the street all strapped to his back"
+        src="https://giphy.com/embed/kabjgjsiqjF4s"
         width="100%"
         height="100%"
         frameBorder="0"
