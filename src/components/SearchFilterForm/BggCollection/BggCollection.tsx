@@ -16,7 +16,7 @@ export const BggCollection = ({ filterState }: Props) => {
     filterState.showExpansions
   );
 
-  if (!filterState.username) return <MissingSomethingResponse />;
+  if (!data) return <></>;
 
   if (error?.isBoardGameAccepted) return <AcceptedResponse />;
 

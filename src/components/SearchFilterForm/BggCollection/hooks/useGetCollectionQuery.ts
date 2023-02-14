@@ -51,13 +51,16 @@ export const useGetCollectionQuery = (
     })),
   });
 
-  const data: SimpleBoardGame[] | undefined = _.flatten(
-    thingResults.map((result) =>
-      result.data?.items.item
-        ? result.data.items.item.map(transformToBoardGame)
-        : []
-    )
-  );
+  const data: SimpleBoardGame[] | undefined =
+    thingIdsCollection.length > 0
+      ? _.flatten(
+          thingResults.map((result) =>
+            result.data?.items.item
+              ? result.data.items.item.map(transformToBoardGame)
+              : []
+          )
+        )
+      : undefined;
 
   /**
    * Returns the total number of queries (Collections + Things). If still querying the collection,
