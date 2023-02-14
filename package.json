@@ -1,7 +1,7 @@
 {
   "name": "bgg-what-to-play",
-  "version": "0.0.1",
-  "description": "Website to visualize your BGG collection to better figure out which board game to play based on number of players and game length.",
+  "version": "1.0.0",
+  "description": "Website to visualize your BGG collection by player count recommendation.",
   "keywords": [
     "vite",
     "vitest",
@@ -9,16 +9,13 @@
     "typescript",
     "bgg",
     "boardgamegeek",
-    "react-query",
-    "@mui",
-    "tailwindcss",
     "recharts"
   ],
   "author": {
     "name": "David Horm",
     "url": "https://davidhorm.github.io/"
   },
-  "homepage": "https://github.com/davidhorm/bgg-what-to-play/",
+  "homepage": "https://davidhorm.github.io/bgg-what-to-play/",
   "bugs": {
     "url": "https://github.com/davidhorm/bgg-what-to-play/issues"
   },
