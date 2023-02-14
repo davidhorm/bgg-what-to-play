@@ -1,6 +1,6 @@
 {
   "name": "bgg-what-to-play",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Website to visualize your BGG collection by player count recommendation.",
   "keywords": [
     "vite",
@@ -30,7 +30,9 @@
     "test": "pnpm run test:unit run && pnpm run test:e2e",
     "test:unit": "vitest",
     "test:e2e": "concurrently --kill-others \"vite\" \"pnpm dlx playwright test\"",
-    "codegen": "concurrently --kill-others \"vite\" \"pnpm dlx playwright codegen\""
+    "codegen": "concurrently --kill-others \"vite\" \"pnpm dlx playwright codegen\"",
+    "predeploy": "pnpm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@emotion/react": "^11.10.5",
@@ -60,6 +62,7 @@
     "concurrently": "^7.6.0",
     "eslint": "^8.29.0",
     "eslint-plugin-react": "^7.31.11",
+    "gh-pages": "^5.0.0",
     "jsdom": "^21.0.0",
     "msw": "^0.49.2",
     "postcss": "^8.4.20",
