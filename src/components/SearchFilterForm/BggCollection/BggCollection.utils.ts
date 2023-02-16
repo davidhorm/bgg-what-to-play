@@ -2,8 +2,11 @@ import type { CollectionFilterState } from "@/types";
 import type { SimpleBoardGame } from ".";
 
 const maybeOutputList =
-  (filterState: CollectionFilterState, groupLabel: string) =>
-  (game: SimpleBoardGame, index: number, array: SimpleBoardGame[]) => {
+  <T extends SimpleBoardGame>(
+    filterState: CollectionFilterState,
+    groupLabel: string
+  ) =>
+  (game: T, index: number, array: T[]) => {
     if (filterState.isDebug && index === 0) {
       console.groupCollapsed(groupLabel);
       console.table(array.map(({ id, name }) => ({ id, name })));

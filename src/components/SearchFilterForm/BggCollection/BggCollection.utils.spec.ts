@@ -22,6 +22,7 @@ describe(applyFiltersAndSorts.name, () => {
     showInvalidPlayerCount: false,
     showExpansions: false,
     playerCountRange: [1, Number.POSITIVE_INFINITY],
+    isDebug: false,
   };
 
   test.each`
