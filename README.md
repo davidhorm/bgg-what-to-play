@@ -12,6 +12,10 @@ Website to visualize your [BGG](https://boardgamegeek.com/) collection to better
 1. `pnpm dev` to start the dev server
 1. Navigate to http://localhost:5173/
 
+### Troubleshoot
+
+If an expected game isn't showing up, then add `debug=1` to the query parameter to see the list of games as it goes through the different filters outputted to the console.
+
 ## Other Scripts
 
 These are the other scripts defined in `package.json`.
