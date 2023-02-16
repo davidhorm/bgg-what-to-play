@@ -59,14 +59,21 @@ const addIsPlayerCountWithinRange =
         minFilterCount,
         maxFilterCount
       ) ||
+      calcValueIsWithinRanage(
+        minFilterCount,
+        game.minPlayers,
+        game.maxPlayers
+      ) ||
       // handle edge case for id = 40567
       (filterState.showInvalidPlayerCount && game.minPlayers === 0);
 
-    const maxWithinRange = calcValueIsWithinRanage(
-      game.maxPlayers,
-      minFilterCount,
-      maxFilterCount
-    );
+    const maxWithinRange =
+      calcValueIsWithinRanage(
+        game.maxPlayers,
+        minFilterCount,
+        maxFilterCount
+      ) ||
+      calcValueIsWithinRanage(maxFilterCount, game.minPlayers, game.maxPlayers);
 
     return {
       ...game,
