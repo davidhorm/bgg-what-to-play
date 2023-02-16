@@ -13,6 +13,7 @@ import {
 import { AccessibleLabels } from "./AccessibleLabels";
 import { CustomTooltip } from "./CustomTooltip";
 import { MaybeNoDataAvailable } from "./MaybeNoDataAvailable";
+import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
 
 type Recommendation = "Best" | "Recommended" | "Not Recommended";
 
@@ -48,6 +49,7 @@ export const PlayerCountChart = ({
   gameId,
 }: Props) => {
   const { ref, inView } = useInView();
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   return (
     <div ref={ref} className="h-36">
@@ -94,6 +96,7 @@ export const PlayerCountChart = ({
                     stackId="playerCount"
                     maxBarSize={32}
                     dataKey={recommendation}
+                    isAnimationActive={!prefersReducedMotion}
                   >
                     {recommendedPlayerCount.map(
                       (playerCount, playerCountIndex) => (
