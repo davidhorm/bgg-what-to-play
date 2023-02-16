@@ -1,6 +1,18 @@
 import type { CollectionFilterState } from "@/types";
 import type { SimpleBoardGame } from ".";
 
+const maybeOutputList =
+  (filterState: CollectionFilterState, groupLabel: string) =>
+  (game: SimpleBoardGame, index: number, array: SimpleBoardGame[]) => {
+    if (filterState.isDebug && index === 0) {
+      console.groupCollapsed(groupLabel);
+      console.table(array.map(({ id, name }) => ({ id, name })));
+      console.groupEnd();
+    }
+
+    return game;
+  };
+
 const maybeShowExpansions =
   (filterState: CollectionFilterState) => (game: SimpleBoardGame) => {
     if (filterState.showExpansions) return true;
@@ -47,14 +59,21 @@ const addIsPlayerCountWithinRange =
         minFilterCount,
         maxFilterCount
       ) ||
+      calcValueIsWithinRanage(
+        minFilterCount,
+        game.minPlayers,
+        game.maxPlayers
+      ) ||
       // handle edge case for id = 40567
       (filterState.showInvalidPlayerCount && game.minPlayers === 0);
 
-    const maxWithinRange = calcValueIsWithinRanage(
-      game.maxPlayers,
-      minFilterCount,
-      maxFilterCount
-    );
+    const maxWithinRange =
+      calcValueIsWithinRanage(
+        game.maxPlayers,
+        minFilterCount,
+        maxFilterCount
+      ) ||
+      calcValueIsWithinRanage(maxFilterCount, game.minPlayers, game.maxPlayers);
 
     return {
       ...game,
@@ -112,10 +131,13 @@ export const applyFiltersAndSorts = (
   filterState: CollectionFilterState
 ) =>
   games
-    ?.filter(maybeShowExpansions(filterState))
+    ?.map(maybeOutputList(filterState, "All Games"))
+    .filter(maybeShowExpansions(filterState))
+    .map(maybeOutputList(filterState, "maybeShowExpansions"))
     .map(maybeShowInvalidPlayerCount(filterState))
     .map(addIsPlayerCountWithinRange(filterState))
     .filter((g) => g.isPlayerCountWithinRange) // Remove games not within Player Count Range
+    .map(maybeOutputList(filterState, "isPlayerCountWithinRange"))
     .sort(maybeSortByScore(filterState));
 
 export type BoardGame = ReturnType<typeof applyFiltersAndSorts>[number];

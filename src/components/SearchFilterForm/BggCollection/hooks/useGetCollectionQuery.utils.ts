@@ -118,18 +118,23 @@ const flattenSuggestedNumPlayersResult = ({
 });
 
 const addSortScore = (
-  i: ReturnType<typeof flattenSuggestedNumPlayersResult>
+  playerRec: ReturnType<typeof flattenSuggestedNumPlayersResult>
 ) => {
-  const totalVotes = i["Best"] + i["Recommended"] + i["Not Recommended"];
-  const bestPercent = i["Best"] / totalVotes;
-  const recPercent = i["Recommended"] / totalVotes;
-  const notRecPercent = i["Not Recommended"] / totalVotes;
-  const sortScore = bestPercent * 2 + recPercent - notRecPercent;
+  const { Best, Recommended, ["Not Recommended"]: notRec } = playerRec;
+  const totalVotes = Best + Recommended + notRec;
+  const bestPercent = Math.round((Best * 100) / totalVotes + Best * 2);
+  const recPercent = Math.round((Recommended * 100) / totalVotes + Recommended);
+  const notRecPercent = Math.round((notRec * 100) / totalVotes + notRec);
+  const maybeSortScore = bestPercent + recPercent - notRecPercent;
+  const sortScore =
+    totalVotes === 0 || Number.isNaN(maybeSortScore)
+      ? Number.NEGATIVE_INFINITY
+      : maybeSortScore;
 
   return {
-    ...i,
+    ...playerRec,
 
-    /** 2xBest % + Recommended % - Not Recommended % */
+    /** 2xBest Raw + Best % + Recommended Raw + Recommended % - Not Recommended Row - Not Recommended % */
     sortScore,
   };
 };

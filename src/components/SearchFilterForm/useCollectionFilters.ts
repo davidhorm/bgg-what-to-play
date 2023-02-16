@@ -10,6 +10,7 @@ const QUERY_PARAMS = {
   PLAYER_COUNT: "playerCount",
   SHOW_INVALID_PLAYER_COUNT: "showInvalid",
   SHOW_EXPANSIONS: "showExpansions",
+  IS_DEBUG: "debug",
 } as const;
 
 type QueryParamKey = typeof QUERY_PARAMS[keyof typeof QUERY_PARAMS];
@@ -112,6 +113,9 @@ const initialFilterState = {
 
   /** If `true`, then show expansions in collection. */
   showExpansions: getQueryParamValue(QUERY_PARAMS.SHOW_EXPANSIONS) === "1",
+
+  /** If `true`, then `console.log` messages to help troubleshoot. */
+  isDebug: getQueryParamValue(QUERY_PARAMS.IS_DEBUG) === "1",
 };
 
 export type CollectionFilterState = typeof initialFilterState;
