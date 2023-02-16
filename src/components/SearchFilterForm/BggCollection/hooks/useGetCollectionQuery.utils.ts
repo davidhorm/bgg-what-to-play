@@ -124,7 +124,10 @@ const addSortScore = (
   const bestPercent = i["Best"] / totalVotes;
   const recPercent = i["Recommended"] / totalVotes;
   const notRecPercent = i["Not Recommended"] / totalVotes;
-  const sortScore = bestPercent * 2 + recPercent - notRecPercent;
+  const maybeSortScore = bestPercent * 2 + recPercent - notRecPercent;
+  const sortScore = Number.isNaN(maybeSortScore)
+    ? Number.NEGATIVE_INFINITY
+    : maybeSortScore;
 
   return {
     ...i,
