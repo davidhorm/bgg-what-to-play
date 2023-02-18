@@ -23,7 +23,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "start": "pnpm run build && vite preview --port 5173",
+    "preview": "vite preview",
     "lint": "prettier --check . || eslint .",
     "lint:fix": "prettier --write . && eslint . --fix",
     "coverage": "vitest run --coverage",

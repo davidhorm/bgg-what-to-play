@@ -23,7 +23,7 @@ These are the other scripts defined in `package.json`.
 | Script            | Description                                                |
 | ----------------- | ---------------------------------------------------------- |
 | `pnpm build`      | Build for production.                                      |
-| `pnpm start`      | Locally preview production build.                          |
+| `pnpm preview`    | Locally preview production build.                          |
 | `pnpm lint`       | Report linting and formatting errors                       |
 | `pnpm lint:fix`   | Fix linting and formatting errors                          |
 | `pnpm test`       | Run unit and end-to-end tests                              |
