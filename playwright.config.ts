@@ -99,9 +99,8 @@ const config: PlaywrightTestConfig = {
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: "pnpm run start",
+    command: "pnpm run dev",
     port: 5173,
-    reuseExistingServer: true,
   },
 };
 
