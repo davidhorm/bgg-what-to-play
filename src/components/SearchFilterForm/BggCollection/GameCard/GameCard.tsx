@@ -28,19 +28,27 @@ export const GameCard = ({ game, filterState }: Props) => (
         />
 
         <dl className="my-2 min-w-fit">
-          <dt className="text-xs text-gray-500">User Rating</dt>
-          <dd className="mb-2 ml-0 text-2xl">
-            {game.userRating}{" "}
-            {game.userRating !== "N/A" && (
-              <span className="text-xs text-gray-500">/ 10</span>
-            )}
-          </dd>
+          {filterState.showRatings === "USER_RATING" && (
+            <>
+              <dt className="text-xs text-gray-500">User Rating</dt>
+              <dd className="mb-2 ml-0 text-2xl">
+                {game.userRating}{" "}
+                {game.userRating !== "N/A" && (
+                  <span className="text-xs text-gray-500">/ 10</span>
+                )}
+              </dd>
+            </>
+          )}
 
-          <dt className="text-xs text-gray-500">Average Rating</dt>
-          <dd className="mb-2 ml-0 text-2xl">
-            {game.averageRating}{" "}
-            <span className="text-xs text-gray-500">/ 10</span>
-          </dd>
+          {filterState.showRatings === "AVERAGE_RATING" && (
+            <>
+              <dt className="text-xs text-gray-500">Average Rating</dt>
+              <dd className="mb-2 ml-0 text-2xl">
+                {game.averageRating}{" "}
+                <span className="text-xs text-gray-500">/ 10</span>
+              </dd>
+            </>
+          )}
 
           <dt className="text-xs text-gray-500">Time (minutes)</dt>
           <dd className="mb-2 ml-0 text-2xl">
