@@ -51,12 +51,24 @@ export const useGetCollectionQuery = (
     })),
   });
 
+  const collectionData = [
+    ...(boardGameCollectionData?.items.item || []),
+    ...(boardGameExpansionCollectionData?.items.item || []),
+  ];
+
   const data: SimpleBoardGame[] | undefined =
     thingIdsCollection.length > 0
       ? _.flatten(
           thingResults.map((result) =>
             result.data?.items.item
-              ? result.data.items.item.map(transformToBoardGame)
+              ? result.data.items.item.map((thingData) =>
+                  transformToBoardGame(
+                    thingData,
+                    collectionData.find(
+                      (game) => game.objectid === thingData.id
+                    )
+                  )
+                )
               : []
           )
         )
