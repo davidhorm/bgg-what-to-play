@@ -25,6 +25,7 @@ export const FilterControls = ({
 
     <FormGroup row>
       <FormControlLabel
+        id="show-ratings"
         label="Show ratings"
         control={
           <Checkbox
@@ -35,6 +36,8 @@ export const FilterControls = ({
       />
       <RadioGroup
         className="ml-8"
+        aria-labelledby="show-ratings"
+        name="show-ratings-group"
         row
         value={filterState.showRatings}
         onChange={(_, newRating) =>
