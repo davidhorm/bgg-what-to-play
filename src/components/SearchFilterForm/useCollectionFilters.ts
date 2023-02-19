@@ -51,7 +51,7 @@ const convertPlayerCountRangeQueryParamToValue = (
   const parsedMaxRange = parseInt(maxRangeStr, 10);
   const maxRange = isNaN(parsedMaxRange)
     ? DEFAULT_PLAYER_COUNT_MAX
-    : convertElevenToInfinity(Math.max(parsedMinRange, 1));
+    : convertElevenToInfinity(Math.max(parsedMaxRange, 1));
 
   return [minRange, maxRange];
 };
