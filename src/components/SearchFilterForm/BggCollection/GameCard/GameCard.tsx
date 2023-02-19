@@ -21,23 +21,37 @@ export const GameCard = ({ game, filterState }: Props) => (
 
       <div className="mt-2 flex justify-between">
         <CardMedia
-          className="max-w-32 mx-auto h-auto max-h-32 w-auto"
+          className="max-h-40 min-w-fit object-contain p-4"
           component="img"
           src={game.thumbnail}
           alt={`${game.name} thumbnail`}
         />
 
-        <dl className="my-2">
+        <dl className="my-2 min-w-fit">
+          <dt className="text-xs text-gray-500">User Rating</dt>
+          <dd className="mb-2 ml-0 text-2xl">
+            {game.userRating}{" "}
+            {game.userRating !== "N/A" && (
+              <span className="text-xs text-gray-500">/ 10</span>
+            )}
+          </dd>
+
+          <dt className="text-xs text-gray-500">Average Rating</dt>
+          <dd className="mb-2 ml-0 text-2xl">
+            {game.averageRating}{" "}
+            <span className="text-xs text-gray-500">/ 10</span>
+          </dd>
+
           <dt className="text-xs text-gray-500">Time (minutes)</dt>
-          <dd className="ml-0 text-2xl">
+          <dd className="mb-2 ml-0 text-2xl">
             {game.minPlaytime === game.maxPlaytime
               ? `${game.maxPlaytime}`
               : `${game.minPlaytime} - ${game.maxPlaytime}`}
           </dd>
 
-          <dt className="mt-4 text-xs text-gray-500">Complexity</dt>
+          <dt className="text-xs text-gray-500">Complexity</dt>
           <dd className="ml-0 text-2xl">
-            {game.averageWeight.toFixed(1)}{" "}
+            {game.averageWeight}{" "}
             <span className="text-xs text-gray-500">/ 5</span>
           </dd>
         </dl>

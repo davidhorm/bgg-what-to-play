@@ -212,7 +212,19 @@ export const transformToBoardGame = (
   playingTime: thingData.playingtime.value,
 
   /** Board Game's average weight */
-  averageWeight: thingData.statistics.ratings.averageweight.value,
+  averageWeight: +thingData.statistics.ratings.averageweight.value.toFixed(1),
+
+  /** User's rating */
+  userRating:
+    typeof collectionData?.stats.rating.value === "number"
+      ? +collectionData.stats.rating.value.toFixed(1)
+      : collectionData?.stats.rating.value,
+
+  /** Average rating from all users */
+  averageRating:
+    typeof collectionData?.stats.rating.average?.value === "number"
+      ? +collectionData.stats.rating.average.value.toFixed(1)
+      : undefined,
 
   /** Board Game's recommended player count according to BGG poll */
   recommendedPlayerCount: transformToRecommendedPlayerCount(thingData.poll),
