@@ -1,7 +1,7 @@
 import { XMLParser } from "fast-xml-parser";
 import * as _ from "lodash-es";
 import type {
-  BriefCollection,
+  Collection,
   Thing,
   Name,
   SuggestedNumPlayersResult,
@@ -9,20 +9,20 @@ import type {
 
 //#region transformToThingIdsCollection
 
-const transformToThingIds = (i: BriefCollection["items"]["item"][number]) =>
+const transformToThingIds = (i: Collection["items"]["item"][number]) =>
   i.objectid;
 
 const THING_QUERY_LIMIT = 1200;
 
-const transformToUniqueChunks = (games?: BriefCollection) =>
+const transformToUniqueChunks = (games?: Collection) =>
   _.chunk(
     _.uniq(games?.items.item.map(transformToThingIds)),
     THING_QUERY_LIMIT
   ).map((numbers) => numbers.join(","));
 
 export const transformToThingIdsCollection = (
-  boardgames?: BriefCollection,
-  expansions?: BriefCollection
+  boardgames?: Collection,
+  expansions?: Collection
 ) => [
   ...transformToUniqueChunks(boardgames),
   ...transformToUniqueChunks(expansions),
