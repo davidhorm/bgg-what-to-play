@@ -1,7 +1,7 @@
 import { XMLParser } from "fast-xml-parser";
 import * as _ from "lodash-es";
 import type {
-  BriefCollection,
+  Collection,
   Thing,
   Name,
   SuggestedNumPlayersResult,
@@ -9,20 +9,20 @@ import type {
 
 //#region transformToThingIdsCollection
 
-const transformToThingIds = (i: BriefCollection["items"]["item"][number]) =>
+const transformToThingIds = (i: Collection["items"]["item"][number]) =>
   i.objectid;
 
 const THING_QUERY_LIMIT = 1200;
 
-const transformToUniqueChunks = (games?: BriefCollection) =>
+const transformToUniqueChunks = (games?: Collection) =>
   _.chunk(
     _.uniq(games?.items.item.map(transformToThingIds)),
     THING_QUERY_LIMIT
   ).map((numbers) => numbers.join(","));
 
 export const transformToThingIdsCollection = (
-  boardgames?: BriefCollection,
-  expansions?: BriefCollection
+  boardgames?: Collection,
+  expansions?: Collection
 ) => [
   ...transformToUniqueChunks(boardgames),
   ...transformToUniqueChunks(expansions),
@@ -174,41 +174,60 @@ const transformToRecommendedPlayerCount = (
     : [];
 };
 
-export const transformToBoardGame = (i: Thing["items"]["item"][number]) => ({
+export const transformToBoardGame = (
+  thingData: Thing["items"]["item"][number],
+  collectionData?: Collection["items"]["item"][number]
+) => ({
   /** Board Game's primary name */
-  name: getPrimaryName(i.name),
+  name:
+    collectionData?.name.text ||
+    collectionData?.originalname ||
+    getPrimaryName(thingData.name),
 
   /** BGG' Board Game Thing ID */
-  id: i.id,
+  id: thingData.id,
 
   /** BGG Thing type */
-  type: i.type,
+  type: thingData.type,
 
   /** Board Game's thumbnail URL (or BGG's No Image Available) */
   thumbnail:
-    i.thumbnail ||
+    collectionData?.thumbnail ||
+    thingData.thumbnail ||
     "https://cf.geekdo-images.com/zxVVmggfpHJpmnJY9j-k1w__itemrep/img/Py7CTY0tSBSwKQ0sgVjRFfsVUZU=/fit-in/246x300/filters:strip_icc()/pic1657689.jpg",
 
   /** Board Game's minimum number of players */
-  minPlayers: i.minplayers.value,
+  minPlayers: thingData.minplayers.value,
 
   /** Board Game's maximum number of players */
-  maxPlayers: i.maxplayers.value,
+  maxPlayers: thingData.maxplayers.value,
 
   /** Board Game's minimum playtime. */
-  minPlaytime: i.minplaytime.value,
+  minPlaytime: thingData.minplaytime.value,
 
   /** Board Game's maximum playtime. */
-  maxPlaytime: i.maxplaytime.value,
+  maxPlaytime: thingData.maxplaytime.value,
 
   /** Board Game's average playtime */
-  playingTime: i.playingtime.value,
+  playingTime: thingData.playingtime.value,
 
   /** Board Game's average weight */
-  averageWeight: i.statistics.ratings.averageweight.value,
+  averageWeight: +thingData.statistics.ratings.averageweight.value.toFixed(1),
+
+  /** User's rating */
+  userRating:
+    typeof collectionData?.stats.rating.value === "number"
+      ? +collectionData.stats.rating.value.toFixed(1)
+      : collectionData?.stats.rating.value,
+
+  /** Average rating from all users */
+  averageRating:
+    typeof collectionData?.stats.rating.average?.value === "number"
+      ? +collectionData.stats.rating.average.value.toFixed(1)
+      : undefined,
 
   /** Board Game's recommended player count according to BGG poll */
-  recommendedPlayerCount: transformToRecommendedPlayerCount(i.poll),
+  recommendedPlayerCount: transformToRecommendedPlayerCount(thingData.poll),
 });
 
 /** Board Game that only has simple props calculated from BGG. */
@@ -223,13 +242,18 @@ const parser = new XMLParser({
   removeNSPrefix: true,
   allowBooleanAttributes: true,
   parseAttributeValue: true,
+  isArray: (tagName, jpath, isLeafNode, isAttribute) =>
+    ["items.item", "items.item.stats.rating.ranks.rank"].includes(jpath),
 });
 
-export const fetchBggCollection = (username: string, showExpansions: boolean) =>
+export const fetchBggCollection = (
+  username: string,
+  showExpansions: boolean
+): Promise<Collection> =>
   fetch(
     showExpansions
-      ? `https://bgg.cc/xmlapi2/collection?username=${username}&brief=1&own=1&subtype=boardgameexpansion`
-      : `https://bgg.cc/xmlapi2/collection?username=${username}&brief=1&own=1&excludesubtype=boardgameexpansion`
+      ? `https://bgg.cc/xmlapi2/collection?username=${username}&stats=1&own=1&subtype=boardgameexpansion`
+      : `https://bgg.cc/xmlapi2/collection?username=${username}&stats=1&own=1&excludesubtype=boardgameexpansion`
   )
     .then((response) => {
       if (response.status === 202) {
@@ -247,10 +271,6 @@ export const fetchBggCollection = (username: string, showExpansions: boolean) =>
         throw new Error("000 Empty");
       }
 
-      if (json?.items?.item && !Array.isArray(json.items.item)) {
-        json.items.item = [json.items.item];
-      }
-
       return json;
     })
     .catch((e) => {
@@ -263,15 +283,7 @@ export const fetchBggThings = (thingIds?: string): Promise<Thing> | undefined =>
   thingIds
     ? fetch(`https://bgg.cc/xmlapi2/thing?id=${thingIds}&stats=1`)
         .then((response) => response.text())
-        .then((xml) => {
-          const json = parser.parse(xml);
-
-          if (json?.items?.item && !Array.isArray(json.items.item)) {
-            json.items.item = [json.items.item];
-          }
-
-          return json;
-        })
+        .then((xml) => parser.parse(xml))
         .catch((err) => {
           throw new Error(JSON.stringify(err));
         })

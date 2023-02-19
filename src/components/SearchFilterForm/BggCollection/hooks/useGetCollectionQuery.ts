@@ -1,6 +1,6 @@
 import { useQuery, useQueries } from "@tanstack/react-query";
 import * as _ from "lodash-es";
-import type { BriefCollection } from "./bggTypes";
+import type { Collection } from "./bggTypes";
 import {
   fetchBggCollection,
   fetchBggThings,
@@ -20,7 +20,7 @@ export const useGetCollectionQuery = (
     status: boardGameCollectionStatus,
     error: boardGameCollectionError,
     data: boardGameCollectionData,
-  } = useQuery<BriefCollection, Error>({
+  } = useQuery<Collection, Error>({
     enabled: !!username,
     queryKey: ["BggCollectionBoardGame", username],
     queryFn: () => fetchBggCollection(username, false),
@@ -32,7 +32,7 @@ export const useGetCollectionQuery = (
     status: boardGameExpansionStatus,
     error: boardGameExpansionCollectionError,
     data: boardGameExpansionCollectionData,
-  } = useQuery<BriefCollection, Error>({
+  } = useQuery<Collection, Error>({
     enabled: !!username && showExpansions,
     queryKey: ["BggCollectionBoardGameExpansion", username],
     queryFn: () => fetchBggCollection(username, true),
@@ -51,12 +51,24 @@ export const useGetCollectionQuery = (
     })),
   });
 
+  const collectionData = [
+    ...(boardGameCollectionData?.items.item || []),
+    ...(boardGameExpansionCollectionData?.items.item || []),
+  ];
+
   const data: SimpleBoardGame[] | undefined =
     thingIdsCollection.length > 0
       ? _.flatten(
           thingResults.map((result) =>
             result.data?.items.item
-              ? result.data.items.item.map(transformToBoardGame)
+              ? result.data.items.item.map((thingData) =>
+                  transformToBoardGame(
+                    thingData,
+                    collectionData.find(
+                      (game) => game.objectid === thingData.id
+                    )
+                  )
+                )
               : []
           )
         )

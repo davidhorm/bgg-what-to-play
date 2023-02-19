@@ -1,10 +1,10 @@
-type BoardGameThing = {
+type BriefBoardGameThing = {
   objecttype: "thing";
   objectid: number;
   subtype: "boardgame" | "boardgameexpansion";
   collid: number;
   name: {
-    text: string;
+    text: string | number;
     sortindex: number;
   };
   status: {
@@ -20,7 +20,52 @@ type BoardGameThing = {
   };
 };
 
-export type BriefCollection = {
+type NonBriefBoardGameThing = {
+  comment?: string;
+  image?: string;
+  numplays: number;
+  originalname?: string;
+  thumbnail?: string;
+  wishlistcomment?: string;
+  yearpublished?: number;
+};
+
+type BoardGameThingRank = {
+  type: "subtype" | "family";
+  name: string;
+  friendlyname: string;
+  id: number;
+  value: number | "Not Ranked";
+  bayesaverage: number | "Not Ranked";
+};
+
+type BoardGameThingStats = {
+  stats: {
+    rating: {
+      usersrated: { value: number };
+      average: { value: number };
+      bayesaverage: { value: number };
+      stddev: { value: number };
+      median: { value: number };
+      ranks: {
+        rank: BoardGameThingRank[];
+      };
+      value: number | "N/A";
+    };
+    minplayers?: number;
+    maxplayers?: number;
+    minplaytime?: number;
+    maxplaytime?: number;
+    playingtime?: number;
+    numowned: number;
+  };
+};
+
+type BoardGameThing = BriefBoardGameThing &
+  NonBriefBoardGameThing &
+  BoardGameThingStats;
+
+export type Collection = {
   items: {
     totalitems: number;
     termsofuse: string;
