@@ -29,9 +29,8 @@
     "coverage": "vitest run --coverage",
     "test": "pnpm run test:unit run && pnpm run test:e2e",
     "test:unit": "vitest",
-    "test:e2e": "concurrently --kill-others \"vite\" \"pnpm dlx playwright test\"",
+    "test:e2e": "pnpm dlx playwright test",
     "codegen": "concurrently --kill-others \"vite\" \"pnpm dlx playwright codegen\"",
-    "test:ci": "pnpm run test:unit run && pnpm dlx playwright test",
     "predeploy": "pnpm run build",
     "deploy": "gh-pages -d dist"
   },
