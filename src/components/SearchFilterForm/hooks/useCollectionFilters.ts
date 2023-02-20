@@ -1,4 +1,5 @@
 import { useReducer } from "react";
+import { booleanQueryParam } from "./booleanQueryParam";
 import { playerCountRange } from "./playerCountRange";
 import { showRatings } from "./showRatings";
 
@@ -6,9 +7,6 @@ import { showRatings } from "./showRatings";
 
 const QUERY_PARAMS = {
   USERNAME: "username",
-  SHOW_INVALID_PLAYER_COUNT: "showInvalid",
-  SHOW_EXPANSIONS: "showExpansions",
-  IS_DEBUG: "debug",
 } as const;
 
 type QueryParamKey = typeof QUERY_PARAMS[keyof typeof QUERY_PARAMS];
@@ -21,6 +19,17 @@ export type FilterControl<T> = {
   getReducer: ActionHandler<T>;
 };
 
+export type BooleanFilterControl = {
+  getInitialState: (queryParamKey: string) => boolean;
+  getReducer: (props: {
+    /** Key in CollectionFilterState used to store the value */
+    stateKey: keyof CollectionFilterState;
+
+    /** The key used in the query parameter. If empty, then use `stateKey` */
+    queryParamKey?: string;
+  }) => ActionHandler<Partial<undefined>>;
+};
+
 const maybeSetQueryParams = (newState: CollectionFilterState) => {
   // if username is set, then also update the query param
   if (newState.username) {
@@ -28,18 +37,6 @@ const maybeSetQueryParams = (newState: CollectionFilterState) => {
 
     // Always set username if it exists
     url.searchParams.set(QUERY_PARAMS.USERNAME, newState.username);
-
-    if (newState.showInvalidPlayerCount) {
-      url.searchParams.set(QUERY_PARAMS.SHOW_INVALID_PLAYER_COUNT, "1");
-    } else {
-      url.searchParams.delete(QUERY_PARAMS.SHOW_INVALID_PLAYER_COUNT);
-    }
-
-    if (newState.showExpansions) {
-      url.searchParams.set(QUERY_PARAMS.SHOW_EXPANSIONS, "1");
-    } else {
-      url.searchParams.delete(QUERY_PARAMS.SHOW_EXPANSIONS);
-    }
 
     history.pushState({}, "", url);
   }
@@ -52,8 +49,7 @@ const initialFilterState = {
   username: getQueryParamValue(QUERY_PARAMS.USERNAME),
 
   /** If `true`, then show the invalid Player Count outside of the game's actual min/max Player Count. */
-  showInvalidPlayerCount:
-    getQueryParamValue(QUERY_PARAMS.SHOW_INVALID_PLAYER_COUNT) === "1",
+  showInvalidPlayerCount: booleanQueryParam.getInitialState("showInvalid"),
 
   /**
    * The `[minRange, maxRange]` the user wants to filter/sort the collection.
@@ -63,7 +59,7 @@ const initialFilterState = {
   playerCountRange: playerCountRange.getInitialState(),
 
   /** If `true`, then show expansions in collection. */
-  showExpansions: getQueryParamValue(QUERY_PARAMS.SHOW_EXPANSIONS) === "1",
+  showExpansions: booleanQueryParam.getInitialState("showExpansions"),
 
   /**
    * If `"NO_RATING"`, then don't show any ratings in the cards
@@ -73,7 +69,7 @@ const initialFilterState = {
   showRatings: showRatings.getInitialState(),
 
   /** If `true`, then `console.log` messages to help troubleshoot. */
-  isDebug: getQueryParamValue(QUERY_PARAMS.IS_DEBUG) === "1",
+  isDebug: booleanQueryParam.getInitialState("debug"),
 };
 
 export type CollectionFilterState = typeof initialFilterState;
@@ -82,9 +78,6 @@ export type ActionHandler<T> = (
   state: CollectionFilterState,
   payload: T
 ) => CollectionFilterState;
-
-const resetFilters: ActionHandler<Partial<undefined>> = () =>
-  initialFilterState;
 
 const setQueryParamAndState: ActionHandler<Partial<CollectionFilterState>> = (
   state,
@@ -98,22 +91,16 @@ const setQueryParamAndState: ActionHandler<Partial<CollectionFilterState>> = (
 const setUsername: ActionHandler<string> = (state, username) =>
   setQueryParamAndState(state, { username });
 
-const toggleShowInvalidPlayerCount: ActionHandler<Partial<undefined>> = (
-  state
-) =>
-  setQueryParamAndState(state, {
-    showInvalidPlayerCount: !state.showInvalidPlayerCount,
-  });
-
-const toggleShowExpansions: ActionHandler<Partial<undefined>> = (state) =>
-  setQueryParamAndState(state, { showExpansions: !state.showExpansions });
-
 const actions = {
-  RESET_FILTERS: resetFilters,
   SET_PLAYER_COUNT_RANGE: playerCountRange.getReducer,
   SET_USERNAME: setUsername,
-  TOGGLE_SHOW_EXPANSIONS: toggleShowExpansions,
-  TOGGLE_SHOW_INVALID_PLAYER_COUNT: toggleShowInvalidPlayerCount,
+  TOGGLE_SHOW_EXPANSIONS: booleanQueryParam.getReducer({
+    stateKey: "showExpansions",
+  }),
+  TOGGLE_SHOW_INVALID_PLAYER_COUNT: booleanQueryParam.getReducer({
+    stateKey: "showInvalidPlayerCount",
+    queryParamKey: "showInvalid",
+  }),
   TOGGLE_SHOW_RATINGS: showRatings.getToggleShowRatings,
   SET_SHOW_RATINGS: showRatings.getReducer,
 };
