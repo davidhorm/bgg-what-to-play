@@ -2,23 +2,15 @@ import { useReducer } from "react";
 import { booleanQueryParam } from "./booleanQueryParam";
 import { playerCountRange } from "./playerCountRange";
 import { showRatings } from "./showRatings";
+import { username } from "./username";
 
-//#region QueryParams
-
-const QUERY_PARAMS = {
-  USERNAME: "username",
-} as const;
-
-type QueryParamKey = typeof QUERY_PARAMS[keyof typeof QUERY_PARAMS];
-
-const getQueryParamValue = (key: QueryParamKey) =>
-  new URLSearchParams(document.location.search).get(key) || "";
-
+/** Interface to abstract filter control logic. Needs to be able to provide initial state, and a reducer to set state */
 export type FilterControl<T> = {
   getInitialState: () => T;
   getReducer: ActionHandler<T>;
 };
 
+/** Interface to abstract boolean filter controls. */
 export type BooleanFilterControl = {
   getInitialState: (queryParamKey: string) => boolean;
   getReducer: (props: {
@@ -30,23 +22,9 @@ export type BooleanFilterControl = {
   }) => ActionHandler<Partial<undefined>>;
 };
 
-const maybeSetQueryParams = (newState: CollectionFilterState) => {
-  // if username is set, then also update the query param
-  if (newState.username) {
-    const url = new URL(document.location.href);
-
-    // Always set username if it exists
-    url.searchParams.set(QUERY_PARAMS.USERNAME, newState.username);
-
-    history.pushState({}, "", url);
-  }
-};
-
-//#endregion QueryParams
-
 const initialFilterState = {
   /** The username defined in the query param, or submitted in the input. */
-  username: getQueryParamValue(QUERY_PARAMS.USERNAME),
+  username: username.getInitialState(),
 
   /** If `true`, then show the invalid Player Count outside of the game's actual min/max Player Count. */
   showInvalidPlayerCount: booleanQueryParam.getInitialState("showInvalid"),
@@ -79,21 +57,9 @@ export type ActionHandler<T> = (
   payload: T
 ) => CollectionFilterState;
 
-const setQueryParamAndState: ActionHandler<Partial<CollectionFilterState>> = (
-  state,
-  payload
-) => {
-  const newState = { ...state, ...payload };
-  maybeSetQueryParams(newState);
-  return newState;
-};
-
-const setUsername: ActionHandler<string> = (state, username) =>
-  setQueryParamAndState(state, { username });
-
 const actions = {
   SET_PLAYER_COUNT_RANGE: playerCountRange.getReducer,
-  SET_USERNAME: setUsername,
+  SET_USERNAME: username.getReducer,
   TOGGLE_SHOW_EXPANSIONS: booleanQueryParam.getReducer({
     stateKey: "showExpansions",
   }),
