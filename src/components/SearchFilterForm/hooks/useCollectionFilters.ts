@@ -1,13 +1,10 @@
 import { useReducer } from "react";
-
-const DEFAULT_PLAYER_COUNT_MIN = 1;
-const DEFAULT_PLAYER_COUNT_MAX = Number.POSITIVE_INFINITY;
+import { playerCountRange } from "./playerCountRange";
 
 //#region QueryParams
 
 const QUERY_PARAMS = {
   USERNAME: "username",
-  PLAYER_COUNT: "playerCount",
   SHOW_INVALID_PLAYER_COUNT: "showInvalid",
   SHOW_EXPANSIONS: "showExpansions",
   SHOW_USER_RATINGS: "showUserRatings",
@@ -20,42 +17,6 @@ type QueryParamKey = typeof QUERY_PARAMS[keyof typeof QUERY_PARAMS];
 const getQueryParamValue = (key: QueryParamKey) =>
   new URLSearchParams(document.location.search).get(key) || "";
 
-const convertPlayerCountRangeValueToQueryParam = (
-  playerCountRange: CollectionFilterState["playerCountRange"]
-): string => {
-  const [minRange, maxRange] = playerCountRange;
-
-  return minRange === maxRange
-    ? minRange.toString()
-    : playerCountRange.join("-");
-};
-
-const convertElevenToInfinity = (value: number) =>
-  value >= 11 ? Number.POSITIVE_INFINITY : value;
-
-const convertPlayerCountRangeQueryParamToValue = (
-  value: string | null
-): [number, number] => {
-  if (!value) {
-    return [DEFAULT_PLAYER_COUNT_MIN, DEFAULT_PLAYER_COUNT_MAX];
-  }
-
-  const normalizedValue = value.includes("-") ? value : `${value}-${value}`;
-  const [minRangeStr, maxRangeStr] = normalizedValue.split("-");
-
-  const parsedMinRange = parseInt(minRangeStr, 10);
-  const minRange = isNaN(parsedMinRange)
-    ? DEFAULT_PLAYER_COUNT_MIN
-    : Math.max(Math.min(parsedMinRange, 11), 1);
-
-  const parsedMaxRange = parseInt(maxRangeStr, 10);
-  const maxRange = isNaN(parsedMaxRange)
-    ? DEFAULT_PLAYER_COUNT_MAX
-    : convertElevenToInfinity(Math.max(parsedMaxRange, 1));
-
-  return [minRange, maxRange];
-};
-
 type RatingVisibility = "NO_RATING" | "USER_RATING" | "AVERAGE_RATING";
 const getShowRatings = (): RatingVisibility => {
   if (getQueryParamValue(QUERY_PARAMS.SHOW_USER_RATINGS) === "1")
@@ -67,6 +28,11 @@ const getShowRatings = (): RatingVisibility => {
   return "NO_RATING";
 };
 
+export type FilterControl<T> = {
+  getInitialState: () => T;
+  getReducer: ActionHandler<T>;
+};
+
 const maybeSetQueryParams = (newState: CollectionFilterState) => {
   // if username is set, then also update the query param
   if (newState.username) {
@@ -74,20 +40,6 @@ const maybeSetQueryParams = (newState: CollectionFilterState) => {
 
     // Always set username if it exists
     url.searchParams.set(QUERY_PARAMS.USERNAME, newState.username);
-
-    // Only set the playerCount if not using the default values
-    const [minRange, maxRange] = newState.playerCountRange;
-    if (
-      minRange !== DEFAULT_PLAYER_COUNT_MIN ||
-      maxRange !== DEFAULT_PLAYER_COUNT_MAX
-    ) {
-      url.searchParams.set(
-        QUERY_PARAMS.PLAYER_COUNT,
-        convertPlayerCountRangeValueToQueryParam(newState.playerCountRange)
-      );
-    } else {
-      url.searchParams.delete(QUERY_PARAMS.PLAYER_COUNT);
-    }
 
     if (newState.showInvalidPlayerCount) {
       url.searchParams.set(QUERY_PARAMS.SHOW_INVALID_PLAYER_COUNT, "1");
@@ -129,9 +81,7 @@ const initialFilterState = {
    * - Valid `minRange` values are 1-11.
    * - Valid `maxRange` values are 1-10, or Infinity;
    */
-  playerCountRange: convertPlayerCountRangeQueryParamToValue(
-    getQueryParamValue(QUERY_PARAMS.PLAYER_COUNT)
-  ),
+  playerCountRange: playerCountRange.getInitialState(),
 
   /** If `true`, then show expansions in collection. */
   showExpansions: getQueryParamValue(QUERY_PARAMS.SHOW_EXPANSIONS) === "1",
@@ -185,14 +135,9 @@ const setShowRatings: ActionHandler<CollectionFilterState["showRatings"]> = (
 const toggleShowExpansions: ActionHandler<Partial<undefined>> = (state) =>
   setQueryParamAndState(state, { showExpansions: !state.showExpansions });
 
-const setPlayerCountRange: ActionHandler<[number, number]> = (state, payload) =>
-  setQueryParamAndState(state, {
-    playerCountRange: [payload[0], convertElevenToInfinity(payload[1])],
-  });
-
 const actions = {
   RESET_FILTERS: resetFilters,
-  SET_PLAYER_COUNT_RANGE: setPlayerCountRange,
+  SET_PLAYER_COUNT_RANGE: playerCountRange.getReducer,
   SET_USERNAME: setUsername,
   TOGGLE_SHOW_EXPANSIONS: toggleShowExpansions,
   TOGGLE_SHOW_INVALID_PLAYER_COUNT: toggleShowInvalidPlayerCount,

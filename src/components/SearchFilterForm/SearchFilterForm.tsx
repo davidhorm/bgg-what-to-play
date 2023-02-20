@@ -4,7 +4,7 @@ import { FilterControls } from "./FilterControls";
 import { Header } from "./Header";
 import { PlayerCountSlider } from "./PlayerCountSlider";
 import { UsernameInput } from "./UsernameInput";
-import { useCollectionFilters } from "./useCollectionFilters";
+import { useCollectionFilters } from "./hooks/useCollectionFilters";
 
 export const SearchFilterForm = () => {
   const filter = useCollectionFilters();
