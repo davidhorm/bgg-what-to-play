@@ -1,5 +1,6 @@
 import { useReducer } from "react";
 import { playerCountRange } from "./playerCountRange";
+import { showRatings } from "./showRatings";
 
 //#region QueryParams
 
@@ -7,8 +8,6 @@ const QUERY_PARAMS = {
   USERNAME: "username",
   SHOW_INVALID_PLAYER_COUNT: "showInvalid",
   SHOW_EXPANSIONS: "showExpansions",
-  SHOW_USER_RATINGS: "showUserRatings",
-  SHOW_AVERAGE_RATINGS: "showRatings",
   IS_DEBUG: "debug",
 } as const;
 
@@ -16,17 +15,6 @@ type QueryParamKey = typeof QUERY_PARAMS[keyof typeof QUERY_PARAMS];
 
 const getQueryParamValue = (key: QueryParamKey) =>
   new URLSearchParams(document.location.search).get(key) || "";
-
-type RatingVisibility = "NO_RATING" | "USER_RATING" | "AVERAGE_RATING";
-const getShowRatings = (): RatingVisibility => {
-  if (getQueryParamValue(QUERY_PARAMS.SHOW_USER_RATINGS) === "1")
-    return "USER_RATING";
-
-  if (getQueryParamValue(QUERY_PARAMS.SHOW_AVERAGE_RATINGS) === "1")
-    return "AVERAGE_RATING";
-
-  return "NO_RATING";
-};
 
 export type FilterControl<T> = {
   getInitialState: () => T;
@@ -53,15 +41,6 @@ const maybeSetQueryParams = (newState: CollectionFilterState) => {
       url.searchParams.delete(QUERY_PARAMS.SHOW_EXPANSIONS);
     }
 
-    // Always initially delete the ratings query params, then maybe add them back in
-    url.searchParams.delete(QUERY_PARAMS.SHOW_USER_RATINGS);
-    url.searchParams.delete(QUERY_PARAMS.SHOW_AVERAGE_RATINGS);
-    if (newState.showRatings === "USER_RATING") {
-      url.searchParams.set(QUERY_PARAMS.SHOW_USER_RATINGS, "1");
-    } else if (newState.showRatings === "AVERAGE_RATING") {
-      url.searchParams.set(QUERY_PARAMS.SHOW_AVERAGE_RATINGS, "1");
-    }
-
     history.pushState({}, "", url);
   }
 };
@@ -86,7 +65,12 @@ const initialFilterState = {
   /** If `true`, then show expansions in collection. */
   showExpansions: getQueryParamValue(QUERY_PARAMS.SHOW_EXPANSIONS) === "1",
 
-  showRatings: getShowRatings(),
+  /**
+   * If `"NO_RATING"`, then don't show any ratings in the cards
+   * If `"USER_RATING"`, then only show the User Rating in the card (and use in filtering)
+   * If `"AVERAGE_RATING"`, then only show the Average Rating in the card (and use in filtering)
+   */
+  showRatings: showRatings.getInitialState(),
 
   /** If `true`, then `console.log` messages to help troubleshoot. */
   isDebug: getQueryParamValue(QUERY_PARAMS.IS_DEBUG) === "1",
@@ -94,7 +78,7 @@ const initialFilterState = {
 
 export type CollectionFilterState = typeof initialFilterState;
 
-type ActionHandler<T> = (
+export type ActionHandler<T> = (
   state: CollectionFilterState,
   payload: T
 ) => CollectionFilterState;
@@ -121,17 +105,6 @@ const toggleShowInvalidPlayerCount: ActionHandler<Partial<undefined>> = (
     showInvalidPlayerCount: !state.showInvalidPlayerCount,
   });
 
-const toggleShowRatings: ActionHandler<Partial<undefined>> = (state) =>
-  setQueryParamAndState(state, {
-    showRatings:
-      state.showRatings === "NO_RATING" ? "USER_RATING" : "NO_RATING",
-  });
-
-const setShowRatings: ActionHandler<CollectionFilterState["showRatings"]> = (
-  state,
-  showRatings
-) => setQueryParamAndState(state, { showRatings });
-
 const toggleShowExpansions: ActionHandler<Partial<undefined>> = (state) =>
   setQueryParamAndState(state, { showExpansions: !state.showExpansions });
 
@@ -141,8 +114,8 @@ const actions = {
   SET_USERNAME: setUsername,
   TOGGLE_SHOW_EXPANSIONS: toggleShowExpansions,
   TOGGLE_SHOW_INVALID_PLAYER_COUNT: toggleShowInvalidPlayerCount,
-  TOGGLE_SHOW_RATINGS: toggleShowRatings,
-  SET_SHOW_RATINGS: setShowRatings,
+  TOGGLE_SHOW_RATINGS: showRatings.getToggleShowRatings,
+  SET_SHOW_RATINGS: showRatings.getReducer,
 };
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
