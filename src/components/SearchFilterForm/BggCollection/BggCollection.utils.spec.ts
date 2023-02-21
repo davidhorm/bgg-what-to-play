@@ -1,48 +1,55 @@
-import type { CollectionFilterState, BoardGame } from "@/types";
+import type { CollectionFilterState } from "@/types";
 import { describe, test, expect } from "vitest";
 import { applyFiltersAndSorts } from "./BggCollection.utils";
+import type { SimpleBoardGame } from "./hooks/useGetCollectionQuery.utils";
 
 describe(applyFiltersAndSorts.name, () => {
-  const MOCK_GAME: Partial<BoardGame> = {
+  const buildMockGame = (props: Partial<SimpleBoardGame>): SimpleBoardGame => ({
     name: "Ticket to Ride",
     type: "boardgame",
-    id: 9209,
+    id: 0,
     thumbnail: "thumbnail.png",
-    minPlayers: 2,
-    maxPlayers: 2,
-    minPlaytime: 30,
-    maxPlaytime: 60,
-    recommendedPlayerCount: [],
-    averageWeight: 2.5,
-  };
+    minPlayers: props.minPlayers || 0,
+    maxPlayers: props.maxPlayers || 0,
+    minPlaytime: 0,
+    maxPlaytime: 0,
+    recommendedPlayerCount: props.recommendedPlayerCount || [],
+    averageWeight: 0,
+    userRating: 0,
+    averageRating: 0,
+  });
 
-  const MOCK_FILTERS: CollectionFilterState = {
-    username: "",
-    showInvalidPlayerCount: false,
-    showExpansions: false,
-    showRatings: "NO_RATING",
-    playerCountRange: [1, Number.POSITIVE_INFINITY],
-    playtimeRange: [0, Number.POSITIVE_INFINITY],
-    isDebug: false,
-  };
+  const buildMockFilters = (
+    props: Partial<CollectionFilterState>
+  ): CollectionFilterState => ({
+    username: props.username || "",
+    showInvalidPlayerCount: props.showInvalidPlayerCount || false,
+    showExpansions: props.showExpansions || false,
+    showRatings: props.showRatings || "NO_RATING",
+    playerCountRange: props.playerCountRange || [1, Number.POSITIVE_INFINITY],
+    playtimeRange: props.playtimeRange || [0, Number.POSITIVE_INFINITY],
+    isDebug: props.isDebug || false,
+  });
 
   test.each`
     showInvalidPlayerCount | expectedLength
     ${true}                | ${3}
     ${false}               | ${1}
   `(
-    "GIVEN recommendedPlayerCount length originally 3, WHEN showInvalidPlayerCount=$showInvalidPlayerCount, THEN expect recommendedPlayerCount length = $expectedLength",
+    "GIVEN game has player count range 1-3, but only 2 is valid, WHEN showInvalidPlayerCount=$showInvalidPlayerCount, THEN expect recommendedPlayerCount length = $expectedLength",
     ({ showInvalidPlayerCount, expectedLength }) => {
-      const gameWith3Recs: Partial<BoardGame> = {
-        ...MOCK_GAME,
+      const gameWith3Recs = buildMockGame({
+        minPlayers: 2,
+        maxPlayers: 2,
         recommendedPlayerCount: [
           { playerCountValue: 1 },
           { playerCountValue: 2 },
           { playerCountValue: 3 },
         ] as any,
-      };
-      const filter = { ...MOCK_FILTERS, showInvalidPlayerCount };
-      const actual = applyFiltersAndSorts([gameWith3Recs] as any, filter);
+      });
+
+      const filter = buildMockFilters({ showInvalidPlayerCount });
+      const actual = applyFiltersAndSorts([gameWith3Recs], filter);
       expect(actual[0].recommendedPlayerCount.length).toBe(expectedLength);
     }
   );
