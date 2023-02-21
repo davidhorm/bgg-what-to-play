@@ -180,7 +180,7 @@ export const transformToBoardGame = (
 ) => ({
   /** Board Game's primary name */
   name:
-    collectionData?.name.text ||
+    collectionData?.name.text.toString() ||
     collectionData?.originalname ||
     getPrimaryName(thingData.name),
 
@@ -203,13 +203,16 @@ export const transformToBoardGame = (
   maxPlayers: thingData.maxplayers.value,
 
   /** Board Game's minimum playtime. */
-  minPlaytime: thingData.minplaytime.value,
+  minPlaytime:
+    thingData.minplaytime.value || collectionData?.stats.minplaytime || 0,
 
   /** Board Game's maximum playtime. */
-  maxPlaytime: thingData.maxplaytime.value,
-
-  /** Board Game's average playtime */
-  playingTime: thingData.playingtime.value,
+  maxPlaytime:
+    thingData.maxplaytime.value ||
+    collectionData?.stats.maxplaytime ||
+    thingData.minplaytime.value ||
+    collectionData?.stats.minplaytime ||
+    0,
 
   /** Board Game's average weight */
   averageWeight: +thingData.statistics.ratings.averageweight.value.toFixed(1),

@@ -12,7 +12,6 @@ describe(applyFiltersAndSorts.name, () => {
     maxPlayers: 2,
     minPlaytime: 30,
     maxPlaytime: 60,
-    playingTime: 60,
     recommendedPlayerCount: [],
     averageWeight: 2.5,
   };
@@ -21,7 +20,9 @@ describe(applyFiltersAndSorts.name, () => {
     username: "",
     showInvalidPlayerCount: false,
     showExpansions: false,
+    showRatings: "NO_RATING",
     playerCountRange: [1, Number.POSITIVE_INFINITY],
+    playtimeRange: [0, Number.POSITIVE_INFINITY],
     isDebug: false,
   };
 

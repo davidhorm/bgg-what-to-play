@@ -39,9 +39,10 @@ describe(transformToBoardGame.name, () => {
     minPlayers: 1,
     minPlaytime: 15,
     name: "Agropolis",
-    playingTime: 20,
     averageWeight: 2.5,
     recommendedPlayerCount: [],
+    averageRating: undefined,
+    userRating: undefined,
   };
 
   test("WHEN standard mock ThingItem, THEN transform to expected BoardGame schema", () => {

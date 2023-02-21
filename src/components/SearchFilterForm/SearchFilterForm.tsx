@@ -3,6 +3,7 @@ import { BggCollection } from "./BggCollection";
 import { FilterControls } from "./FilterControls";
 import { Header } from "./Header";
 import { PlayerCountSlider } from "./PlayerCountSlider";
+import { PlaytimeRangeSlider } from "./PlaytimeRangeSlider";
 import { UsernameInput } from "./UsernameInput";
 import { useCollectionFilters } from "./hooks/useCollectionFilters";
 
@@ -22,6 +23,8 @@ export const SearchFilterForm = () => {
         <UsernameInput filter={filter} />
 
         <PlayerCountSlider filter={filter} />
+
+        <PlaytimeRangeSlider filter={filter} />
 
         <FilterControls filter={filter} />
       </Paper>
