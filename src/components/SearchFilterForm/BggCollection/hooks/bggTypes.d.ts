@@ -144,7 +144,7 @@ type Rank = {
 type ValueObject<S extends string> = Record<S, { value: number }>;
 
 type BoardGameThingItem = {
-  type: "boardgame";
+  type: "boardgame" | "boardgameexpansion";
   id: number;
   thumbnail: string;
   image: string;
