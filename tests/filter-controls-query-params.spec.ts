@@ -26,6 +26,10 @@ test.describe("Filter Controls and Query Parameters", () => {
       "240+"
     );
 
+    await expect(page.getByLabel("Minimum Complexity")).toHaveValue("1");
+
+    await expect(page.getByLabel("Maximum Complexity")).toHaveValue("5");
+
     await expect(page.getByLabel("Show expansions")).not.toBeChecked();
 
     await expect(
@@ -45,7 +49,7 @@ test.describe("Filter Controls and Query Parameters", () => {
 
   test("Query Parameters set Filter Control Values", async ({ page }) => {
     await page.goto(
-      "/?username=davidhorm&playerCount=2-10&playtime=15-240&showInvalid=1&showExpansions=1&showUserRatings=1"
+      "/?username=davidhorm&playerCount=2-10&playtime=15-240&complexity=1.1-4.9&showInvalid=1&showExpansions=1&showUserRatings=1"
     );
 
     await expect(page.getByLabel("BGG Username")).toHaveValue("davidhorm");
@@ -57,6 +61,10 @@ test.describe("Filter Controls and Query Parameters", () => {
     await expect(page.getByLabel("Minimum Playtime")).toHaveValue("15");
 
     await expect(page.getByLabel("Maximum Playtime")).toHaveValue("240");
+
+    await expect(page.getByLabel("Minimum Complexity")).toHaveValue("1.1");
+
+    await expect(page.getByLabel("Maximum Complexity")).toHaveValue("4.9");
 
     await expect(page.getByLabel("Show expansions")).toBeChecked();
 

@@ -18,7 +18,7 @@ describe(applyFiltersAndSorts.name, () => {
     recommendedPlayerCount: props?.recommendedPlayerCount ?? [
       { playerCountValue: 1 } as any,
     ],
-    averageWeight: 0,
+    averageWeight: props?.averageWeight ?? 1,
     userRating: 0,
     averageRating: 0,
   });
@@ -32,6 +32,7 @@ describe(applyFiltersAndSorts.name, () => {
     showRatings: props.showRatings ?? "NO_RATING",
     playerCountRange: props.playerCountRange ?? [1, Number.POSITIVE_INFINITY],
     playtimeRange: props.playtimeRange ?? [0, Number.POSITIVE_INFINITY],
+    complexityRange: props.complexityRange ?? [1, 5],
     isDebug: props.isDebug ?? false, // PRO TIP: set to true to help debug tests
   });
 
@@ -165,6 +166,28 @@ describe(applyFiltersAndSorts.name, () => {
       });
 
       const filter = buildMockFilters({ playtimeRange: filterPlaytimeRange });
+      const actual = applyFiltersAndSorts([boardgame], filter);
+      expect(actual.length).toBe(expectedLength);
+    }
+  );
+
+  test.each`
+    boardGameComplexity | filterComplexityRange | expectedLength
+    ${1.1}              | ${[1, 1]}             | ${0}
+    ${1.1}              | ${[1.1, 1.1]}         | ${1}
+    ${1.1}              | ${[1.2, 1.2]}         | ${0}
+    ${1.1}              | ${[1, 1.1]}           | ${1}
+    ${1.1}              | ${[1.1, 1.2]}         | ${1}
+    ${1.2}              | ${[1, 1.1]}           | ${0}
+    ${1.2}              | ${[1.3, 1.4]}         | ${0}
+  `(
+    "GIVEN boardGameComplexity=$boardGameComplexity, WHEN filterComplexityRange=$filterComplexityRange, THEN expectedLength=$expectedLength",
+    ({ boardGameComplexity, filterComplexityRange, expectedLength }) => {
+      const boardgame = buildMockGame({ averageWeight: boardGameComplexity });
+
+      const filter = buildMockFilters({
+        complexityRange: filterComplexityRange,
+      });
       const actual = applyFiltersAndSorts([boardgame], filter);
       expect(actual.length).toBe(expectedLength);
     }

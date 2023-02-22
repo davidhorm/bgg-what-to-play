@@ -1,5 +1,6 @@
 import { useReducer } from "react";
 import { booleanQueryParam } from "./booleanQueryParam";
+import { complexityRange } from "./complexityRange";
 import { playerCountRange } from "./playerCountRange";
 import { playtimeRange } from "./playtimeRange";
 import { showRatings } from "./showRatings";
@@ -31,18 +32,24 @@ const initialFilterState = {
   showInvalidPlayerCount: booleanQueryParam.getInitialState("showInvalid"),
 
   /**
-   * The Player Count `[minRange, maxRange]` the user wants to filter/sort the collection.
+   * The Player Count `[minRange, maxRange]` the user wants to filter the collection.
    * - Valid `minRange` values are 1-11.
    * - Valid `maxRange` values are 1-10, or Infinity;
    */
   playerCountRange: playerCountRange.getInitialState(),
 
   /**
-   * The Play Time `[minRange, maxRange]` the user wants to filter/sort the collection.
+   * The Play Time `[minRange, maxRange]` the user wants to filter the collection.
    * - Valid `minRange` values are 0-240.
    * - Valid `maxRange` values are 0-240, or Infinity;
    */
   playtimeRange: playtimeRange.getInitialState(),
+
+  /**
+   * The Complexity `[minRange, maxRange]` the user wants to filter the collection.
+   * - Valid `minRange` and `maxRange` values are 1-5.
+   */
+  complexityRange: complexityRange.getInitialState(),
 
   /** If `true`, then show expansions in collection. */
   showExpansions: booleanQueryParam.getInitialState("showExpansions"),
@@ -66,6 +73,7 @@ export type ActionHandler<T> = (
 ) => CollectionFilterState;
 
 const actions = {
+  SET_COMPLEXITY: complexityRange.getReducer,
   SET_PLAYER_COUNT_RANGE: playerCountRange.getReducer,
   SET_PLAYTIME_RANGE: playtimeRange.getReducer,
   SET_USERNAME: username.getReducer,

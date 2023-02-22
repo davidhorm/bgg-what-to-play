@@ -101,6 +101,13 @@ const isPlaytimeWithinRange =
       filterState.playtimeRange
     );
 
+const isComplexityWithinRange =
+  (filterState: CollectionFilterState) => (game: SimpleBoardGame) =>
+    isBoardGameRangeWithinFilterRange(
+      [game.averageWeight, game.averageWeight],
+      filterState.complexityRange
+    );
+
 //#region maybeSortByScore
 
 const calcSortScoreSum = (
@@ -146,6 +153,8 @@ export const applyFiltersAndSorts = (
     .map(maybeOutputList(filterState, "isPlayerCountWithinRange"))
     .filter(isPlaytimeWithinRange(filterState))
     .map(maybeOutputList(filterState, "isPlaytimeWithinRange"))
+    .filter(isComplexityWithinRange(filterState))
+    .map(maybeOutputList(filterState, "isComplexityWithinRange"))
     .sort(maybeSortByScore(filterState));
 
 export type BoardGame = ReturnType<typeof applyFiltersAndSorts>[number];

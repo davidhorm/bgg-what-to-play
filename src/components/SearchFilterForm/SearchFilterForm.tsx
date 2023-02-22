@@ -1,5 +1,6 @@
 import Paper from "@mui/material/Paper";
 import { BggCollection } from "./BggCollection";
+import { ComplexitySlider } from "./ComplexitySlider";
 import { FilterControls } from "./FilterControls";
 import { Header } from "./Header";
 import { PlayerCountSlider } from "./PlayerCountSlider";
@@ -25,6 +26,8 @@ export const SearchFilterForm = () => {
         <PlayerCountSlider filter={filter} />
 
         <PlaytimeRangeSlider filter={filter} />
+
+        <ComplexitySlider filter={filter} />
 
         <FilterControls filter={filter} />
       </Paper>
