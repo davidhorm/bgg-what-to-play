@@ -7,7 +7,7 @@ type Props = {
 };
 
 const getAriaLabel = (index: number) =>
-  index === 0 ? "Minimum Time Range" : "Maximum Time Range";
+  index === 0 ? "Minimum Playtime" : "Maximum Playtime";
 
 const getValueLabel = (value: number) =>
   value > 240 ? "240+" : value.toString();

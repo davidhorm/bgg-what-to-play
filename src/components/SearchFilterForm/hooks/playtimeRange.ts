@@ -21,9 +21,12 @@ const convertPlaytimeRangeQueryParamToValue = (
   const [minRangeStr, maxRangeStr] = normalizedValue.split("-");
 
   const parsedMinRange = parseInt(minRangeStr, 10);
+
   const minRange = isNaN(parsedMinRange)
     ? DEFAULT_PLAYTIME_MIN
-    : Math.max(Math.min(parsedMinRange, 241), DEFAULT_PLAYTIME_MIN);
+    : parsedMinRange > 240
+    ? 255
+    : parsedMinRange;
 
   const parsedMaxRange = parseInt(maxRangeStr, 10);
   const maxRange = isNaN(parsedMaxRange)

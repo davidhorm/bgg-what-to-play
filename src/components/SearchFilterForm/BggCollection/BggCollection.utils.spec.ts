@@ -11,8 +11,8 @@ describe(applyFiltersAndSorts.name, () => {
     type: props?.type ?? "boardgame",
     id: 0,
     thumbnail: "thumbnail.png",
-    minPlaytime: 0,
-    maxPlaytime: 0,
+    minPlaytime: props?.minPlaytime ?? 0,
+    maxPlaytime: props?.maxPlaytime ?? 0,
     minPlayers: props?.minPlayers ?? 1,
     maxPlayers: props?.maxPlayers ?? 1,
     recommendedPlayerCount: props?.recommendedPlayerCount ?? [
@@ -129,6 +129,42 @@ describe(applyFiltersAndSorts.name, () => {
       const filter = buildMockFilters({
         playerCountRange: filterPlayerCountRange,
       });
+      const actual = applyFiltersAndSorts([boardgame], filter);
+      expect(actual.length).toBe(expectedLength);
+    }
+  );
+
+  test.each`
+    boardGamePlaytime | filterPlaytimeRange                | expectedLength
+    ${[0, 0]}         | ${[0, 0]}                          | ${1}
+    ${[0, 0]}         | ${[0, 15]}                         | ${1}
+    ${[0, 0]}         | ${[0, Number.POSITIVE_INFINITY]}   | ${1}
+    ${[0, 0]}         | ${[15, 15]}                        | ${0}
+    ${[15, 15]}       | ${[0, 0]}                          | ${0}
+    ${[15, 15]}       | ${[15, 15]}                        | ${1}
+    ${[15, 15]}       | ${[30, 30]}                        | ${0}
+    ${[15, 15]}       | ${[0, 15]}                         | ${1}
+    ${[15, 15]}       | ${[15, 30]}                        | ${1}
+    ${[241, 241]}     | ${[240, 240]}                      | ${0}
+    ${[241, 241]}     | ${[241, Number.POSITIVE_INFINITY]} | ${1}
+    ${[241, 241]}     | ${[240, Number.POSITIVE_INFINITY]} | ${1}
+    ${[60, 75]}       | ${[45, 45]}                        | ${0}
+    ${[60, 75]}       | ${[60, 60]}                        | ${1}
+    ${[60, 75]}       | ${[75, 75]}                        | ${1}
+    ${[60, 75]}       | ${[90, 90]}                        | ${0}
+    ${[60, 75]}       | ${[45, Number.POSITIVE_INFINITY]}  | ${1}
+    ${[60, 75]}       | ${[60, Number.POSITIVE_INFINITY]}  | ${1}
+    ${[60, 75]}       | ${[75, Number.POSITIVE_INFINITY]}  | ${1}
+    ${[60, 75]}       | ${[90, Number.POSITIVE_INFINITY]}  | ${0}
+  `(
+    "GIVEN boardGamePlaytime=$boardGamePlaytime, WHEN filterPlaytimeRange=$filterPlaytimeRange, THEN expectedLength=$expectedLength",
+    ({ boardGamePlaytime, filterPlaytimeRange, expectedLength }) => {
+      const boardgame = buildMockGame({
+        minPlaytime: boardGamePlaytime[0],
+        maxPlaytime: boardGamePlaytime[1],
+      });
+
+      const filter = buildMockFilters({ playtimeRange: filterPlaytimeRange });
       const actual = applyFiltersAndSorts([boardgame], filter);
       expect(actual.length).toBe(expectedLength);
     }
