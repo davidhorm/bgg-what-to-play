@@ -49,54 +49,57 @@ const maybeShowInvalidPlayerCount =
 
 //#endregion maybeShowInvalidPlayerCount
 
-const calcValueIsWithinRanage = (value: number, min: number, max: number) =>
-  min <= value && value <= max;
+const isBoardGameRangeWithinFilterRange = (
+  boardgameRange: [number, number],
+  filterRange: [number, number]
+): boolean => {
+  const [boardgameMin, boardgameMax] = boardgameRange;
+  const [filterMin, filterMax] = filterRange;
+
+  return (
+    (filterMin <= boardgameMin && boardgameMin <= filterMax) ||
+    (filterMin <= boardgameMax && boardgameMax <= filterMax) ||
+    (boardgameMin <= filterMin && filterMin <= boardgameMax) ||
+    (boardgameMin <= filterMax && filterMax <= boardgameMax)
+  );
+};
 
 const addIsPlayerCountWithinRange =
   (filterState: CollectionFilterState) => (game: SimpleBoardGame) => {
     const [minFilterCount, maxFilterCount] = filterState.playerCountRange;
 
-    const minWithinRange =
-      calcValueIsWithinRanage(
-        game.minPlayers,
-        minFilterCount,
-        maxFilterCount
-      ) ||
-      calcValueIsWithinRanage(
-        minFilterCount,
-        game.minPlayers,
-        game.maxPlayers
+    const isPlayerCountWithinRange =
+      isBoardGameRangeWithinFilterRange(
+        [game.minPlayers, game.maxPlayers],
+        filterState.playerCountRange
       ) ||
       // handle edge case for id = 40567
       (filterState.showInvalidPlayerCount && game.minPlayers === 0);
-
-    const maxWithinRange =
-      calcValueIsWithinRanage(
-        game.maxPlayers,
-        minFilterCount,
-        maxFilterCount
-      ) ||
-      calcValueIsWithinRanage(maxFilterCount, game.minPlayers, game.maxPlayers);
 
     return {
       ...game,
 
       /** Is `true` if the Board Game's min or max player count is within the filter's Player Count Range. */
-      isPlayerCountWithinRange: minWithinRange || maxWithinRange,
+      isPlayerCountWithinRange,
 
       /** Board Game's recommended player count according to BGG poll */
       recommendedPlayerCount: game.recommendedPlayerCount.map((rec) => ({
         ...rec,
 
         /** Is `true` if the Poll's Player Count value is within the filter's Player Count Range. */
-        isPlayerCountWithinRange: calcValueIsWithinRanage(
-          rec.playerCountValue,
-          minFilterCount,
-          maxFilterCount
-        ),
+        isPlayerCountWithinRange:
+          minFilterCount <= rec.playerCountValue &&
+          rec.playerCountValue <= maxFilterCount,
       })),
     };
   };
+
+const isPlaytimeWithinRange =
+  (filterState: CollectionFilterState) => (game: SimpleBoardGame) =>
+    isBoardGameRangeWithinFilterRange(
+      [game.minPlaytime, game.maxPlaytime],
+      filterState.playtimeRange
+    );
 
 //#region maybeSortByScore
 
@@ -141,6 +144,8 @@ export const applyFiltersAndSorts = (
     .map(addIsPlayerCountWithinRange(filterState))
     .filter((g) => g.isPlayerCountWithinRange) // Remove games not within Player Count Range
     .map(maybeOutputList(filterState, "isPlayerCountWithinRange"))
+    .filter(isPlaytimeWithinRange(filterState))
+    .map(maybeOutputList(filterState, "isPlaytimeWithinRange"))
     .sort(maybeSortByScore(filterState));
 
 export type BoardGame = ReturnType<typeof applyFiltersAndSorts>[number];

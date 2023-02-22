@@ -51,17 +51,16 @@ const convertPlayerCountRangeValueToQueryParam = (
 
 const getReducer: FilterControl<PlayerCountState>["getReducer"] = (
   state,
-  playerCountRange
+  payload
 ) => {
   if (!state.username) return state;
-
-  const url = new URL(document.location.href);
+  const [minRange, maybeMaxRange] = payload;
+  const maxRange = convertElevenToInfinity(maybeMaxRange);
+  const playerCountRange = [minRange, maxRange] as [number, number];
   const newState = { ...state, playerCountRange };
 
-  // Only set the playerCount if not using the default values
-  const [minRange, maybeMaxRange] = playerCountRange;
-  const maxRange = convertElevenToInfinity(maybeMaxRange);
-
+  // Only set the playerCount query param if not using the default values
+  const url = new URL(document.location.href);
   if (
     minRange !== DEFAULT_PLAYER_COUNT_MIN ||
     maxRange !== DEFAULT_PLAYER_COUNT_MAX
@@ -75,6 +74,7 @@ const getReducer: FilterControl<PlayerCountState>["getReducer"] = (
   }
 
   history.pushState({}, "", url);
+
   return newState;
 };
 

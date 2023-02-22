@@ -4,6 +4,9 @@ const QUERY_PARAM_PLAYTIME = "playtime";
 const DEFAULT_PLAYTIME_MIN = 0;
 const DEFAULT_PLAYTIME_MAX = Number.POSITIVE_INFINITY;
 
+const convertGreaterThan240To241 = (value: number) =>
+  value > 240 ? 241 : value;
+
 const convertGreaterThan240ToInfinity = (value: number) =>
   value > 240 ? Number.POSITIVE_INFINITY : value;
 
@@ -20,7 +23,7 @@ const convertPlaytimeRangeQueryParamToValue = (
   const parsedMinRange = parseInt(minRangeStr, 10);
   const minRange = isNaN(parsedMinRange)
     ? DEFAULT_PLAYTIME_MIN
-    : Math.max(Math.min(parsedMinRange, 11), DEFAULT_PLAYTIME_MIN);
+    : Math.max(Math.min(parsedMinRange, 241), DEFAULT_PLAYTIME_MIN);
 
   const parsedMaxRange = parseInt(maxRangeStr, 10);
   const maxRange = isNaN(parsedMaxRange)
@@ -50,17 +53,17 @@ const convertTimeRangeValueToQueryParam = (
 
 const getReducer: FilterControl<TimeRangeState>["getReducer"] = (
   state,
-  playtimeRange
+  payload
 ) => {
   if (!state.username) return state;
-
-  const url = new URL(document.location.href);
+  const [maybeMinRange, maybeMaxRange] = payload;
+  const minRange = convertGreaterThan240To241(maybeMinRange);
+  const maxRange = convertGreaterThan240ToInfinity(maybeMaxRange);
+  const playtimeRange = [minRange, maxRange] as [number, number];
   const newState = { ...state, playtimeRange };
 
-  // Only set the playerCount if not using the default values
-  const [minRange, maybeMaxRange] = playtimeRange;
-  const maxRange = convertGreaterThan240ToInfinity(maybeMaxRange);
-
+  // Only set the playtime query param if not using the default values
+  const url = new URL(document.location.href);
   if (minRange !== DEFAULT_PLAYTIME_MIN || maxRange !== DEFAULT_PLAYTIME_MAX) {
     url.searchParams.set(
       QUERY_PARAM_PLAYTIME,
@@ -71,6 +74,7 @@ const getReducer: FilterControl<TimeRangeState>["getReducer"] = (
   }
 
   history.pushState({}, "", url);
+
   return newState;
 };
 
