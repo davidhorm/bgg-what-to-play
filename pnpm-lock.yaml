@@ -4,7 +4,7 @@ specifiers:
   '@emotion/react': ^11.10.5
   '@emotion/styled': ^11.10.5
   '@mui/material': ^5.11.0
-  '@playwright/test': ^1.30.0
+  '@playwright/test': ^1.31.0
   '@tanstack/react-query': ^4.20.4
   '@testing-library/react': ^13.4.0
   '@testing-library/user-event': ^14.4.3
@@ -52,7 +52,7 @@ dependencies:
   recharts: 2.2.0_biqbaboplfbrettd7655fr4n2y
 
 devDependencies:
-  '@playwright/test': 1.30.0
+  '@playwright/test': 1.31.0
   '@testing-library/react': 13.4.0_biqbaboplfbrettd7655fr4n2y
   '@testing-library/user-event': 14.4.3
   '@trivago/prettier-plugin-sort-imports': 4.0.0_prettier@2.8.1
@@ -1000,13 +1000,15 @@ packages:
     resolution: {integrity: sha512-Aq58f5HiWdyDlFffbbSjAlv596h/cOnt2DO1w3DOC7OJ5EHs0hd/nycJfiu9RJbT6Yk6F1knnRRXNSpxoIVZ9Q==}
     dev: true
 
-  /@playwright/test/1.30.0:
-    resolution: {integrity: sha512-SVxkQw1xvn/Wk/EvBnqWIq6NLo1AppwbYOjNLmyU0R1RoQ3rLEBtmjTnElcnz8VEtn11fptj1ECxK0tgURhajw==}
+  /@playwright/test/1.31.0:
+    resolution: {integrity: sha512-Ys5s/06Dg9g3zAIdCIb/UOBYim3U7Zjb3DvC6XBtnRmnglH5O47iwYzmtxXu9fhSyzI2Jn28apkXIOD81GgCdw==}
     engines: {node: '>=14'}
     hasBin: true
     dependencies:
       '@types/node': 18.11.18
-      playwright-core: 1.30.0
+      playwright-core: 1.31.0
+    optionalDependencies:
+      fsevents: 2.3.2
     dev: true
 
   /@popperjs/core/2.11.6:
@@ -3782,8 +3784,8 @@ packages:
       pathe: 1.0.0
     dev: true
 
-  /playwright-core/1.30.0:
-    resolution: {integrity: sha512-7AnRmTCf+GVYhHbLJsGUtskWTE33SwMZkybJ0v6rqR1boxq2x36U7p1vDRV7HO2IwTZgmycracLxPEJI49wu4g==}
+  /playwright-core/1.31.0:
+    resolution: {integrity: sha512-/KquBjS5DcASCh8cGeNVHuC0kyb7c9plKTwaKxgOGtxT7+DZO2fjmFvPDBSXslEIK5CeOO/2kk5rOCktFXKEdA==}
     engines: {node: '>=14'}
     hasBin: true
     dev: true
