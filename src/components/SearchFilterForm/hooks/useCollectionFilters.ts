@@ -3,6 +3,7 @@ import { booleanQueryParam } from "./booleanQueryParam";
 import { complexityRange } from "./complexityRange";
 import { playerCountRange } from "./playerCountRange";
 import { playtimeRange } from "./playtimeRange";
+import { ratingsRange } from "./ratingsRange";
 import { showRatings } from "./showRatings";
 import { username } from "./username";
 
@@ -56,10 +57,17 @@ const initialFilterState = {
 
   /**
    * If `"NO_RATING"`, then don't show any ratings in the cards
-   * If `"USER_RATING"`, then only show the User Rating in the card (and use in filtering)
    * If `"AVERAGE_RATING"`, then only show the Average Rating in the card (and use in filtering)
+   * If `"USER_RATING"`, then only show the User Rating in the card (and use in filtering)
    */
   showRatings: showRatings.getInitialState(),
+
+  /**
+   * The Ratings `[minRange, maxRange]` the user wants to filter the collection.
+   * By default, will filter by Average Ratings. But will filter by User Rating if showRatings = "USER_RATING"
+   * - Valid `minRange` and `maxRange` values are 1-10.
+   */
+  ratingsRange: ratingsRange.getInitialState(),
 
   /** If `true`, then `console.log` messages to help troubleshoot. */
   isDebug: booleanQueryParam.getInitialState("debug"),
@@ -87,6 +95,7 @@ const actions = {
   }),
   TOGGLE_SHOW_RATINGS: showRatings.getToggleShowRatings,
   SET_SHOW_RATINGS: showRatings.getReducer,
+  SET_RATINGS: ratingsRange.getReducer,
 };
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */

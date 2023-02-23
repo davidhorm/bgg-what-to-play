@@ -5,6 +5,7 @@ import { FilterControls } from "./FilterControls";
 import { Header } from "./Header";
 import { PlayerCountSlider } from "./PlayerCountSlider";
 import { PlaytimeRangeSlider } from "./PlaytimeRangeSlider";
+import { RatingsSlider } from "./RatingsSlider";
 import { UsernameInput } from "./UsernameInput";
 import { useCollectionFilters } from "./hooks/useCollectionFilters";
 
@@ -28,6 +29,8 @@ export const SearchFilterForm = () => {
         <PlaytimeRangeSlider filter={filter} />
 
         <ComplexitySlider filter={filter} />
+
+        <RatingsSlider filter={filter} />
 
         <FilterControls filter={filter} />
       </Paper>

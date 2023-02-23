@@ -19,8 +19,8 @@ describe(applyFiltersAndSorts.name, () => {
       { playerCountValue: 1 } as any,
     ],
     averageWeight: props?.averageWeight ?? 1,
-    userRating: 0,
-    averageRating: 0,
+    userRating: props?.userRating ?? "N/A",
+    averageRating: props?.averageRating ?? undefined,
   });
 
   const buildMockFilters = (
@@ -29,9 +29,10 @@ describe(applyFiltersAndSorts.name, () => {
     username: props.username ?? "",
     showInvalidPlayerCount: props.showInvalidPlayerCount ?? false,
     showExpansions: props.showExpansions ?? false,
-    showRatings: props.showRatings ?? "NO_RATING",
     playerCountRange: props.playerCountRange ?? [1, Number.POSITIVE_INFINITY],
     playtimeRange: props.playtimeRange ?? [0, Number.POSITIVE_INFINITY],
+    ratingsRange: props.ratingsRange ?? [1, 10],
+    showRatings: props.showRatings ?? "NO_RATING",
     complexityRange: props.complexityRange ?? [1, 5],
     isDebug: props.isDebug ?? false, // PRO TIP: set to true to help debug tests
   });
@@ -187,6 +188,56 @@ describe(applyFiltersAndSorts.name, () => {
 
       const filter = buildMockFilters({
         complexityRange: filterComplexityRange,
+      });
+      const actual = applyFiltersAndSorts([boardgame], filter);
+      expect(actual.length).toBe(expectedLength);
+    }
+  );
+
+  test.each`
+    boardGameWithRatings            | filterRatingsRange | showRatings         | expectedLength
+    ${{ averageRating: 1.1 }}       | ${[1, 1]}          | ${"NO_RATING"}      | ${0}
+    ${{ averageRating: 1.1 }}       | ${[1.1, 1.1]}      | ${"NO_RATING"}      | ${1}
+    ${{ averageRating: 1.1 }}       | ${[1.2, 1.2]}      | ${"NO_RATING"}      | ${0}
+    ${{ averageRating: 1.2 }}       | ${[1, 1.1]}        | ${"NO_RATING"}      | ${0}
+    ${{ averageRating: 1.2 }}       | ${[1.1, 1.2]}      | ${"NO_RATING"}      | ${1}
+    ${{ averageRating: 1.2 }}       | ${[1.2, 1.3]}      | ${"NO_RATING"}      | ${1}
+    ${{ averageRating: 1.2 }}       | ${[1.3, 1.4]}      | ${"NO_RATING"}      | ${0}
+    ${{ averageRating: undefined }} | ${[1, 1]}          | ${"NO_RATING"}      | ${1}
+    ${{ averageRating: undefined }} | ${[1.1, 1.1]}      | ${"NO_RATING"}      | ${0}
+    ${{ averageRating: 1.1 }}       | ${[1, 1]}          | ${"AVERAGE_RATING"} | ${0}
+    ${{ averageRating: 1.1 }}       | ${[1.1, 1.1]}      | ${"AVERAGE_RATING"} | ${1}
+    ${{ averageRating: 1.1 }}       | ${[1.2, 1.2]}      | ${"AVERAGE_RATING"} | ${0}
+    ${{ averageRating: 1.2 }}       | ${[1, 1.1]}        | ${"AVERAGE_RATING"} | ${0}
+    ${{ averageRating: 1.2 }}       | ${[1.1, 1.2]}      | ${"AVERAGE_RATING"} | ${1}
+    ${{ averageRating: 1.2 }}       | ${[1.2, 1.3]}      | ${"AVERAGE_RATING"} | ${1}
+    ${{ averageRating: 1.2 }}       | ${[1.3, 1.4]}      | ${"AVERAGE_RATING"} | ${0}
+    ${{ averageRating: undefined }} | ${[1, 1]}          | ${"AVERAGE_RATING"} | ${1}
+    ${{ averageRating: undefined }} | ${[1.1, 1.1]}      | ${"AVERAGE_RATING"} | ${0}
+    ${{ userRating: 1.1 }}          | ${[1, 1]}          | ${"USER_RATING"}    | ${0}
+    ${{ userRating: 1.1 }}          | ${[1.1, 1.1]}      | ${"USER_RATING"}    | ${1}
+    ${{ userRating: 1.1 }}          | ${[1.2, 1.2]}      | ${"USER_RATING"}    | ${0}
+    ${{ userRating: 1.2 }}          | ${[1, 1.1]}        | ${"USER_RATING"}    | ${0}
+    ${{ userRating: 1.2 }}          | ${[1.1, 1.2]}      | ${"USER_RATING"}    | ${1}
+    ${{ userRating: 1.2 }}          | ${[1.2, 1.3]}      | ${"USER_RATING"}    | ${1}
+    ${{ userRating: 1.2 }}          | ${[1.3, 1.4]}      | ${"USER_RATING"}    | ${0}
+    ${{ userRating: undefined }}    | ${[1, 1]}          | ${"USER_RATING"}    | ${1}
+    ${{ userRating: undefined }}    | ${[1.1, 1.1]}      | ${"USER_RATING"}    | ${0}
+    ${{ userRating: "N/A" }}        | ${[1, 1]}          | ${"USER_RATING"}    | ${1}
+    ${{ userRating: "N/A" }}        | ${[1.1, 1.1]}      | ${"USER_RATING"}    | ${0}
+  `(
+    "GIVEN boardGameWithRatings=$boardGameWithRatings, WHEN filterRatingsRange=$filterRatingsRange and showRatings=$showRatings, THEN expectedLength=$expectedLength",
+    ({
+      boardGameWithRatings,
+      filterRatingsRange,
+      showRatings,
+      expectedLength,
+    }) => {
+      const boardgame = buildMockGame(boardGameWithRatings);
+
+      const filter = buildMockFilters({
+        ratingsRange: filterRatingsRange,
+        showRatings,
       });
       const actual = applyFiltersAndSorts([boardgame], filter);
       expect(actual.length).toBe(expectedLength);

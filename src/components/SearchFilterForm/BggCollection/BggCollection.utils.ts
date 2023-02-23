@@ -108,6 +108,22 @@ const isComplexityWithinRange =
       filterState.complexityRange
     );
 
+const isRatingsWithinRange =
+  (filterState: CollectionFilterState) => (game: SimpleBoardGame) => {
+    const userOrAverageRating =
+      filterState.showRatings === "USER_RATING"
+        ? game.userRating
+        : game.averageRating;
+
+    const rating =
+      typeof userOrAverageRating === "number" ? userOrAverageRating : 1;
+
+    return isBoardGameRangeWithinFilterRange(
+      [rating, rating],
+      filterState.ratingsRange
+    );
+  };
+
 //#region maybeSortByScore
 
 const calcSortScoreSum = (
@@ -155,6 +171,8 @@ export const applyFiltersAndSorts = (
     .map(maybeOutputList(filterState, "isPlaytimeWithinRange"))
     .filter(isComplexityWithinRange(filterState))
     .map(maybeOutputList(filterState, "isComplexityWithinRange"))
+    .filter(isRatingsWithinRange(filterState))
+    .map(maybeOutputList(filterState, "isRatingsWithinRange"))
     .sort(maybeSortByScore(filterState));
 
 export type BoardGame = ReturnType<typeof applyFiltersAndSorts>[number];

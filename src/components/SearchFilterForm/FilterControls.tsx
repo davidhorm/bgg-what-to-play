@@ -48,16 +48,16 @@ export const FilterControls = ({
         }
       >
         <FormControlLabel
-          value="USER_RATING"
-          disabled={filterState.showRatings === "NO_RATING"}
-          control={<Radio />}
-          label="User Ratings"
-        />
-        <FormControlLabel
           value="AVERAGE_RATING"
           disabled={filterState.showRatings === "NO_RATING"}
           control={<Radio />}
           label="Average Ratings"
+        />
+        <FormControlLabel
+          value="USER_RATING"
+          disabled={filterState.showRatings === "NO_RATING"}
+          control={<Radio />}
+          label="User Ratings"
         />
       </RadioGroup>
     </FormGroup>

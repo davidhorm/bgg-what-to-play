@@ -59,7 +59,7 @@ const getReducer: FilterControl<RatingVisibility>["getReducer"] = (
 const getToggleShowRatings: ActionHandler<Partial<undefined>> = (state) =>
   getReducer(
     state,
-    state.showRatings === "NO_RATING" ? "USER_RATING" : "NO_RATING"
+    state.showRatings === "NO_RATING" ? "AVERAGE_RATING" : "NO_RATING"
   );
 
 export const showRatings: FilterControl<RatingVisibility> & {
