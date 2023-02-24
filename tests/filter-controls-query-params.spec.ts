@@ -1,142 +1,191 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Filter Controls and Query Parameters", () => {
-  test("Default Filter Control Values and Query Parameters", async ({
+  test("WHEN no query parameters defined, THEN set the filter controls to their default values", async ({
     page,
   }) => {
     await page.goto("/");
 
-    await expect(page.getByLabel("BGG Username")).toHaveValue("");
+    // Assert textboxes and sliders default values
+    for await (const { label, defaultValue, valueText } of [
+      { label: "BGG Username", defaultValue: "" },
+      { label: "Minimum Player Count", defaultValue: "1" },
+      { label: "Maximum Player Count", defaultValue: "11", valueText: "10+" },
+      { label: "Minimum Playtime", defaultValue: "0" },
+      { label: "Maximum Playtime", defaultValue: "255", valueText: "240+" },
+      { label: "Minimum Complexity", defaultValue: "1" },
+      { label: "Maximum Complexity", defaultValue: "5" },
+      { label: "Minimum Average Ratings", defaultValue: "1" },
+      { label: "Maximum Average Ratings", defaultValue: "10" },
+    ]) {
+      await expect(page.getByLabel(label)).toHaveValue(defaultValue);
 
-    await expect(page.getByLabel("Minimum Player Count")).toHaveValue("1");
+      // Assert Sliders with a INFINITY value in the max end
+      if (valueText) {
+        await expect(page.getByLabel(label)).toHaveAttribute(
+          "aria-valuetext",
+          valueText
+        );
+      }
+    }
 
-    await expect(page.getByLabel("Maximum Player Count")).toHaveValue("11");
-
-    await expect(page.getByLabel("Maximum Player Count")).toHaveAttribute(
-      "aria-valuetext",
-      "10+"
-    );
-
-    await expect(page.getByLabel("Minimum Playtime")).toHaveValue("0");
-
-    await expect(page.getByLabel("Maximum Playtime")).toHaveValue("255");
-
-    await expect(page.getByLabel("Maximum Playtime")).toHaveAttribute(
-      "aria-valuetext",
-      "240+"
-    );
-
-    await expect(page.getByLabel("Minimum Complexity")).toHaveValue("1");
-
-    await expect(page.getByLabel("Maximum Complexity")).toHaveValue("5");
-
-    await expect(page.getByLabel("Minimum Average Ratings")).toHaveValue("1");
-
-    await expect(page.getByLabel("Maximum Average Ratings")).toHaveValue("10");
-
-    await expect(page.getByLabel("Show expansions")).not.toBeChecked();
-
-    await expect(
-      page.getByRole("checkbox", { name: "Show ratings" })
-    ).not.toBeChecked();
-
-    await expect(page.getByLabel("User Ratings")).not.toBeChecked();
-
-    await expect(
-      page.getByLabel("Average Ratings", { exact: true })
-    ).not.toBeChecked();
-
-    await expect(
-      page.getByLabel("Show not recommended player counts")
-    ).not.toBeChecked();
-
-    await expect(
-      page.getByLabel("Show invalid player counts")
-    ).not.toBeChecked();
+    // Assert checkboxes/radio buttons not checked by default
+    for await (const { name, role } of [
+      { name: "Show expansions" },
+      { name: "Show ratings" },
+      { name: "User Ratings", role: "radio" },
+      { name: "Average Ratings", role: "radio" },
+      { name: "Show not recommended player counts" },
+      { name: "Show invalid player counts" },
+    ]) {
+      await expect(
+        page.getByRole((role as any) || "checkbox", { name })
+      ).not.toBeChecked();
+    }
 
     expect(new URL(page.url()).search).toBe("");
   });
 
-  test("Query Parameters set Filter Control Values", async ({ page }) => {
-    await page.goto(
-      [
-        "/?username=davidhorm",
-        "playerCount=2-10",
-        "playtime=15-240",
-        "complexity=1.1-4.9",
-        "ratings=1.1-9.9",
-        "showInvalid=1",
-        "showExpansions=1",
-        "showUserRatings=1",
-        "showNotRec=1",
-      ].join("&")
-    );
+  test("WHEN query parameters has values, THEN set the filter controls to their specified values", async ({
+    page,
+  }) => {
+    const queryParams = [
+      { queryParam: "username", value: "davidhorm", label: "BGG Username" },
+      {
+        queryParam: "playerCount",
+        minValue: "2",
+        maxValue: "10",
+        label: "Player Count",
+      },
+      {
+        queryParam: "playtime",
+        minValue: "15",
+        maxValue: "240",
+        label: "Playtime",
+      },
+      {
+        queryParam: "complexity",
+        minValue: "1.1",
+        maxValue: "4.9",
+        label: "Complexity",
+      },
+      {
+        queryParam: "ratings",
+        minValue: "1.1",
+        maxValue: "9.9",
+        label: "User Ratings",
+      },
+      {
+        queryParam: "showInvalid",
+        value: "checked",
+        label: "Show invalid player counts",
+      },
+      {
+        queryParam: "showExpansions",
+        value: "checked",
+        label: "Show expansions",
+      },
+      {
+        queryParam: "showUserRatings",
+        value: "checked",
+        label: "User Ratings",
+        role: "radio",
+      },
+      {
+        queryParam: "showNotRec",
+        value: "checked",
+        label: "Show not recommended player counts",
+      },
+    ];
 
-    await expect(page.getByLabel("BGG Username")).toHaveValue("davidhorm");
+    const queryParamUrl = queryParams
+      .map(
+        ({ queryParam, value, minValue, maxValue }) =>
+          `${queryParam}=${
+            !!minValue && !!maxValue
+              ? `${minValue}-${maxValue}`
+              : value === "checked"
+              ? "1"
+              : value
+          }`
+      )
+      .join("&");
 
-    await expect(page.getByLabel("Minimum Player Count")).toHaveValue("2");
+    await page.goto(`/?${queryParamUrl}`);
 
-    await expect(page.getByLabel("Maximum Player Count")).toHaveValue("10");
+    for await (const {
+      label,
+      value,
+      minValue,
+      maxValue,
+      role,
+    } of queryParams) {
+      if (!!minValue && !!maxValue) {
+        await expect(page.getByLabel(`Minimum ${label}`)).toHaveValue(minValue);
+        await expect(page.getByLabel(`Maximum ${label}`)).toHaveValue(maxValue);
+      } else if (value === "checked") {
+        await expect(
+          page.getByRole((role as any) || "checkbox", { name: label })
+        ).toBeChecked();
+      } else if (value) {
+        await expect(page.getByLabel(label)).toHaveValue(value);
+      }
+    }
 
-    await expect(page.getByLabel("Minimum Playtime")).toHaveValue("15");
-
-    await expect(page.getByLabel("Maximum Playtime")).toHaveValue("240");
-
-    await expect(page.getByLabel("Minimum Complexity")).toHaveValue("1.1");
-
-    await expect(page.getByLabel("Maximum Complexity")).toHaveValue("4.9");
-
-    await expect(page.getByLabel("Minimum User Ratings")).toHaveValue("1.1");
-
-    await expect(page.getByLabel("Maximum User Ratings")).toHaveValue("9.9");
-
-    await expect(page.getByLabel("Show expansions")).toBeChecked();
-
+    // Assert unique cases
     await expect(
       page.getByRole("checkbox", { name: "Show ratings" })
     ).toBeChecked();
 
     await expect(
-      page.getByLabel("User Ratings", { exact: true })
-    ).toBeChecked();
-
-    await expect(
       page.getByLabel("Average Ratings", { exact: true })
     ).not.toBeChecked();
-
-    await expect(
-      page.getByLabel("Show not recommended player counts")
-    ).toBeChecked();
-
-    await expect(page.getByLabel("Show invalid player counts")).toBeChecked();
   });
 
-  test("Query Parameters with max ranges set Filter Control Values", async ({
+  test("WHEN range query parameters have 'Infinity' as the value, THEN set the filter controls to their specified values", async ({
     page,
   }) => {
-    await page.goto(
-      [
-        "/?username=davidhorm",
-        "playerCount=11-Infinity",
-        "playtime=241-Infinity",
-      ].join("&")
-    );
+    const queryParams = [
+      {
+        queryParamKey: "playerCount",
+        queryParamMinValue: "11",
+        label: "Player Count",
+        sliderValue: "11",
+        sliderValueText: "10+",
+      },
+      {
+        queryParamKey: "playtime",
+        queryParamMinValue: "241",
+        label: "Playtime",
+        sliderValue: "255",
+        sliderValueText: "240+",
+      },
+    ];
 
-    const minPlayerCount = page.getByLabel("Minimum Player Count");
-    await expect(minPlayerCount).toHaveValue("11");
-    await expect(minPlayerCount).toHaveAttribute("aria-valuetext", "10+");
+    const queryParamUrl = queryParams
+      .map(
+        ({ queryParamKey, queryParamMinValue }) =>
+          `${queryParamKey}=${queryParamMinValue}-Infinity`
+      )
+      .join("&");
 
-    const maxPlayerCount = page.getByLabel("Maximum Player Count");
-    await expect(maxPlayerCount).toHaveValue("11");
-    await expect(maxPlayerCount).toHaveAttribute("aria-valuetext", "10+");
+    await page.goto(`/?username=davidhorm&${queryParamUrl}`);
 
-    const minPlaytime = page.getByLabel("Minimum Playtime");
-    await expect(minPlaytime).toHaveValue("255");
-    await expect(minPlaytime).toHaveAttribute("aria-valuetext", "240+");
+    for await (const { label, sliderValue, sliderValueText } of queryParams) {
+      const minSlider = page.getByLabel(`Minimum ${label}`);
+      await expect(minSlider).toHaveValue(sliderValue);
+      await expect(minSlider).toHaveAttribute(
+        "aria-valuetext",
+        sliderValueText
+      );
 
-    const maxPlaytime = page.getByLabel("Maximum Playtime");
-    await expect(maxPlaytime).toHaveValue("255");
-    await expect(maxPlaytime).toHaveAttribute("aria-valuetext", "240+");
+      const maxSlider = page.getByLabel(`Maximum ${label}`);
+      await expect(maxSlider).toHaveValue(sliderValue);
+      await expect(maxSlider).toHaveAttribute(
+        "aria-valuetext",
+        sliderValueText
+      );
+    }
   });
 
   [
@@ -170,7 +219,7 @@ test.describe("Filter Controls and Query Parameters", () => {
     },
   ].forEach(
     ({ queryParam, ratingType, minValue, maxValue, showRatingsChecked }) =>
-      test(`Query Parameters '${queryParam}' will set Filter Control Values to ${ratingType} Ratings`, async ({
+      test(`WHEN navigating to '${queryParam}', THEN set filter controls to ${ratingType} Ratings`, async ({
         page,
       }) => {
         await page.goto(`/?username=davidhorm${queryParam}`);
