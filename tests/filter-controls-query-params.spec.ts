@@ -59,7 +59,17 @@ test.describe("Filter Controls and Query Parameters", () => {
 
   test("Query Parameters set Filter Control Values", async ({ page }) => {
     await page.goto(
-      "/?username=davidhorm&playerCount=2-10&playtime=15-240&complexity=1.1-4.9&ratings=1.1-9.9&showInvalid=1&showExpansions=1&showUserRatings=1&showNotRec=1"
+      [
+        "/?username=davidhorm",
+        "playerCount=2-10",
+        "playtime=15-240",
+        "complexity=1.1-4.9",
+        "ratings=1.1-9.9",
+        "showInvalid=1",
+        "showExpansions=1",
+        "showUserRatings=1",
+        "showNotRec=1",
+      ].join("&")
     );
 
     await expect(page.getByLabel("BGG Username")).toHaveValue("davidhorm");
@@ -105,7 +115,11 @@ test.describe("Filter Controls and Query Parameters", () => {
     page,
   }) => {
     await page.goto(
-      "/?username=davidhorm&playerCount=11-Infinity&playtime=241-Infinity"
+      [
+        "/?username=davidhorm",
+        "playerCount=11-Infinity",
+        "playtime=241-Infinity",
+      ].join("&")
     );
 
     const minPlayerCount = page.getByLabel("Minimum Player Count");
