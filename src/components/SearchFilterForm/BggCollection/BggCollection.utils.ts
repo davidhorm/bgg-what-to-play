@@ -64,23 +64,13 @@ const isBoardGameRangeWithinFilterRange = (
   );
 };
 
+/** Used to determine which bar to highlight in the graph */
 const addIsPlayerCountWithinRange =
   (filterState: CollectionFilterState) => (game: SimpleBoardGame) => {
     const [minFilterCount, maxFilterCount] = filterState.playerCountRange;
 
-    const isPlayerCountWithinRange =
-      isBoardGameRangeWithinFilterRange(
-        [game.minPlayers, game.maxPlayers],
-        filterState.playerCountRange
-      ) ||
-      // handle edge case for id = 40567
-      (filterState.showInvalidPlayerCount && game.minPlayers === 0);
-
     return {
       ...game,
-
-      /** Is `true` if the Board Game's min or max player count is within the filter's Player Count Range. */
-      isPlayerCountWithinRange,
 
       /** Board Game's recommended player count according to BGG poll */
       recommendedPlayerCount: game.recommendedPlayerCount.map((rec) => ({
@@ -93,6 +83,15 @@ const addIsPlayerCountWithinRange =
       })),
     };
   };
+
+const isMinMaxPlayerRangeWithinRange =
+  (filterState: CollectionFilterState) => (game: SimpleBoardGame) =>
+    isBoardGameRangeWithinFilterRange(
+      [game.minPlayers, game.maxPlayers],
+      filterState.playerCountRange
+    ) ||
+    // handle edge case for id = 40567
+    (filterState.showInvalidPlayerCount && game.minPlayers === 0);
 
 const isPlaytimeWithinRange =
   (filterState: CollectionFilterState) => (game: SimpleBoardGame) =>
@@ -161,18 +160,18 @@ export const applyFiltersAndSorts = (
 ) =>
   games
     ?.map(maybeOutputList(filterState, "All Games"))
-    .filter(maybeShowExpansions(filterState))
+    .filter(maybeShowExpansions(filterState)) // Show as many things as needed from here
     .map(maybeOutputList(filterState, "maybeShowExpansions"))
     .map(maybeShowInvalidPlayerCount(filterState))
-    .map(addIsPlayerCountWithinRange(filterState))
-    .filter((g) => g.isPlayerCountWithinRange) // Remove games not within Player Count Range
-    .map(maybeOutputList(filterState, "isPlayerCountWithinRange"))
+    .filter(isMinMaxPlayerRangeWithinRange(filterState)) // Start removing things as needed from here
+    .map(maybeOutputList(filterState, "isMinMaxPlayerRangeWithinRange"))
     .filter(isPlaytimeWithinRange(filterState))
     .map(maybeOutputList(filterState, "isPlaytimeWithinRange"))
     .filter(isComplexityWithinRange(filterState))
     .map(maybeOutputList(filterState, "isComplexityWithinRange"))
     .filter(isRatingsWithinRange(filterState))
     .map(maybeOutputList(filterState, "isRatingsWithinRange"))
+    .map(addIsPlayerCountWithinRange(filterState)) // Add any calculations from here
     .sort(maybeSortByScore(filterState));
 
 export type BoardGame = ReturnType<typeof applyFiltersAndSorts>[number];
