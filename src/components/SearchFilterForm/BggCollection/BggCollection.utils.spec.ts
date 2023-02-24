@@ -96,30 +96,40 @@ describe(applyFiltersAndSorts.name, () => {
     }
   );
 
-  // TODO: FIX ${[2, 4]} | ${[3, 3]} | ${0}
   test.each`
-    boardGamePlayerCount | filterPlayerCountRange           | expectedLength
-    ${[2, 3, 4]}         | ${[1, 1]}                        | ${0}
-    ${[2, 3, 4]}         | ${[2, 2]}                        | ${1}
-    ${[2, 3, 4]}         | ${[3, 3]}                        | ${1}
-    ${[2, 3, 4]}         | ${[4, 4]}                        | ${1}
-    ${[2, 3, 4]}         | ${[1, 2]}                        | ${1}
-    ${[2, 3, 4]}         | ${[4, Number.POSITIVE_INFINITY]} | ${1}
-    ${[2, 3, 4]}         | ${[5, Number.POSITIVE_INFINITY]} | ${0}
-    ${[3]}               | ${[1, 2]}                        | ${0}
-    ${[3]}               | ${[2, 3]}                        | ${1}
-    ${[3]}               | ${[3, 4]}                        | ${1}
-    ${[3]}               | ${[4, 5]}                        | ${0}
-    ${[4]}               | ${[3, Number.POSITIVE_INFINITY]} | ${1}
-    ${[4]}               | ${[4, Number.POSITIVE_INFINITY]} | ${1}
-    ${[4]}               | ${[5, Number.POSITIVE_INFINITY]} | ${0}
-    ${[2, 4]}            | ${[1, 1]}                        | ${0}
-    ${[2, 4]}            | ${[2, 2]}                        | ${1}
-    ${[2, 4]}            | ${[4, 4]}                        | ${1}
-    ${[2, 4]}            | ${[5, 5]}                        | ${0}
+    boardGamePlayerCount | filterPlayerCountRange           | expectedLength | expectedIsPlayerCountWithinRange
+    ${[2, 3, 4]}         | ${[1, 1]}                        | ${0}           | ${0}
+    ${[2, 3, 4]}         | ${[2, 2]}                        | ${1}           | ${1}
+    ${[2, 3, 4]}         | ${[3, 3]}                        | ${1}           | ${1}
+    ${[2, 3, 4]}         | ${[4, 4]}                        | ${1}           | ${1}
+    ${[2, 3, 4]}         | ${[1, 2]}                        | ${1}           | ${1}
+    ${[2, 3, 4]}         | ${[4, Number.POSITIVE_INFINITY]} | ${1}           | ${1}
+    ${[2, 3, 4]}         | ${[5, Number.POSITIVE_INFINITY]} | ${0}           | ${0}
+    ${[3]}               | ${[1, 2]}                        | ${0}           | ${0}
+    ${[3]}               | ${[2, 3]}                        | ${1}           | ${1}
+    ${[3]}               | ${[3, 4]}                        | ${1}           | ${1}
+    ${[3]}               | ${[4, 5]}                        | ${0}           | ${0}
+    ${[4]}               | ${[3, Number.POSITIVE_INFINITY]} | ${1}           | ${1}
+    ${[4]}               | ${[4, Number.POSITIVE_INFINITY]} | ${1}           | ${1}
+    ${[4]}               | ${[5, Number.POSITIVE_INFINITY]} | ${0}           | ${0}
+    ${[2, 4]}            | ${[1, 1]}                        | ${0}           | ${0}
+    ${[2, 4]}            | ${[2, 2]}                        | ${1}           | ${1 /* TODO: FIX ${[2, 4]} | ${[3, 3]} | ${0} */}
+    ${[2, 4]}            | ${[4, 4]}                        | ${1}           | ${1}
+    ${[2, 4]}            | ${[5, 5]}                        | ${0}           | ${0}
+    ${[1, 2, 3]}         | ${[1, Number.POSITIVE_INFINITY]} | ${1}           | ${3}
+    ${[1, 2, 3]}         | ${[2, Number.POSITIVE_INFINITY]} | ${1}           | ${2}
+    ${[1, 2, 3]}         | ${[3, Number.POSITIVE_INFINITY]} | ${1}           | ${1}
+    ${[1, 2, 3]}         | ${[1, 3]}                        | ${1}           | ${3}
+    ${[1, 2, 3]}         | ${[1, 2]}                        | ${1}           | ${2}
+    ${[1, 2, 3]}         | ${[1, 1]}                        | ${1}           | ${1}
   `(
-    "GIVEN boardGamePlayerCount=$boardGamePlayerCount, WHEN filterPlayerCountRange=$filterPlayerCountRange, THEN expectedLength=$expectedLength",
-    ({ boardGamePlayerCount, filterPlayerCountRange, expectedLength }) => {
+    "GIVEN boardGamePlayerCount=$boardGamePlayerCount, WHEN filterPlayerCountRange=$filterPlayerCountRange, THEN expectedLength=$expectedLength, and count of isPlayerCountWithinRange=$expectedIsPlayerCountWithinRange",
+    ({
+      boardGamePlayerCount,
+      filterPlayerCountRange,
+      expectedLength,
+      expectedIsPlayerCountWithinRange,
+    }) => {
       const boardgame = buildMockGame({
         minPlayers: boardGamePlayerCount[0],
         maxPlayers: boardGamePlayerCount.at(-1),
@@ -132,7 +142,16 @@ describe(applyFiltersAndSorts.name, () => {
         playerCountRange: filterPlayerCountRange,
       });
       const actual = applyFiltersAndSorts([boardgame], filter);
+
       expect(actual.length).toBe(expectedLength);
+
+      if (expectedLength) {
+        expect(
+          actual[0].recommendedPlayerCount.filter(
+            (r) => r.isPlayerCountWithinRange
+          ).length
+        ).toBe(expectedIsPlayerCountWithinRange);
+      }
     }
   );
 
