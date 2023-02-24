@@ -117,15 +117,22 @@ const flattenSuggestedNumPlayersResult = ({
   ...reduceValueAndNumVotesToObjectProperties(result),
 });
 
-const addSortScore = (
+const calcPercentAndAddSortScore = (
   playerRec: ReturnType<typeof flattenSuggestedNumPlayersResult>
 ) => {
   const { Best, Recommended, ["Not Recommended"]: notRec } = playerRec;
   const totalVotes = Best + Recommended + notRec;
-  const bestPercent = Math.round((Best * 100) / totalVotes + Best * 2);
-  const recPercent = Math.round((Recommended * 100) / totalVotes + Recommended);
-  const notRecPercent = Math.round((notRec * 100) / totalVotes + notRec);
-  const maybeSortScore = bestPercent + recPercent - notRecPercent;
+
+  const BestPercent = Math.round((Best * 100) / totalVotes);
+  const bestScore = Best * 2 + BestPercent;
+
+  const RecommendedPercent = Math.round((Recommended * 100) / totalVotes);
+  const recScore = RecommendedPercent + Recommended;
+
+  const NotRecommendedPercent = Math.round((notRec * 100) / totalVotes);
+  const notRecScore = NotRecommendedPercent + notRec;
+
+  const maybeSortScore = bestScore + recScore - notRecScore;
   const sortScore =
     totalVotes === 0 || Number.isNaN(maybeSortScore)
       ? Number.NEGATIVE_INFINITY
@@ -133,6 +140,15 @@ const addSortScore = (
 
   return {
     ...playerRec,
+
+    /** Percentage of users voting this player count as the best. */
+    BestPercent,
+
+    /** Percentage of users recommending this player count. */
+    RecommendedPercent,
+
+    /** Percentage of users not recommending this player count. */
+    NotRecommendedPercent,
 
     /** 2xBest Raw + Best % + Recommended Raw + Recommended % - Not Recommended Row - Not Recommended % */
     sortScore,
@@ -152,7 +168,9 @@ const addSortScore = (
  * { "Best": 42, "Not Recommended": -37 }
  * ```
  */
-const makeNotRecommendedNegative = (i: ReturnType<typeof addSortScore>) => ({
+const makeNotRecommendedNegative = (
+  i: ReturnType<typeof calcPercentAndAddSortScore>
+) => ({
   ...i,
 
   /** Number of people who voted "Not Recommended" to play this game at this player count. */
@@ -169,7 +187,7 @@ const transformToRecommendedPlayerCount = (
   return Array.isArray(recommendations)
     ? recommendations
         .map(flattenSuggestedNumPlayersResult)
-        .map(addSortScore)
+        .map(calcPercentAndAddSortScore)
         .map(makeNotRecommendedNegative)
     : [];
 };
