@@ -142,6 +142,44 @@ test.describe("Filter Controls and Query Parameters", () => {
     ).not.toBeChecked();
   });
 
+  test("WHEN range query parameters have a single value, THEN set the filter controls to their specified values", async ({
+    page,
+  }) => {
+    const queryParams = [
+      {
+        queryParam: "playerCount",
+        value: "9",
+        label: "Player Count",
+      },
+      {
+        queryParam: "playtime",
+        value: "180",
+        label: "Playtime",
+      },
+      {
+        queryParam: "complexity",
+        value: "2.5",
+        label: "Complexity",
+      },
+      {
+        queryParam: "ratings",
+        value: "9.8",
+        label: "Average Ratings",
+      },
+    ];
+
+    const queryParamUrl = queryParams
+      .map(({ queryParam, value }) => `${queryParam}=${value}`)
+      .join("&");
+
+    await page.goto(`/?${queryParamUrl}`);
+
+    for await (const { label, value } of queryParams) {
+      await expect(page.getByLabel(`Minimum ${label}`)).toHaveValue(value);
+      await expect(page.getByLabel(`Maximum ${label}`)).toHaveValue(value);
+    }
+  });
+
   test("WHEN range query parameters have 'Infinity' as the value, THEN set the filter controls to their specified values", async ({
     page,
   }) => {
