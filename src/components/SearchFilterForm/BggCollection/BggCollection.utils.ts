@@ -123,6 +123,16 @@ const isRatingsWithinRange =
     );
   };
 
+const maybeShowNotRecommended =
+  (filterState: CollectionFilterState) =>
+  (game: ReturnType<ReturnType<typeof addIsPlayerCountWithinRange>>) =>
+    filterState.showNotRecommended || filterState.showInvalidPlayerCount
+      ? true
+      : game.recommendedPlayerCount.filter(
+          (rec) =>
+            rec.isPlayerCountWithinRange && rec.NotRecommendedPercent <= 50
+        ).length > 0;
+
 //#region maybeSortByScore
 
 const calcSortScoreSum = (
@@ -172,6 +182,8 @@ export const applyFiltersAndSorts = (
     .filter(isRatingsWithinRange(filterState))
     .map(maybeOutputList(filterState, "isRatingsWithinRange"))
     .map(addIsPlayerCountWithinRange(filterState)) // Add any calculations from here
+    .filter(maybeShowNotRecommended(filterState)) // But do one more filter based on isPlayerCountWithinRange
+    .map(maybeOutputList(filterState, "maybeShowNotRecommended"))
     .sort(maybeSortByScore(filterState));
 
 export type BoardGame = ReturnType<typeof applyFiltersAndSorts>[number];

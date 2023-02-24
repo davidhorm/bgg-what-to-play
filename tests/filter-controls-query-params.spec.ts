@@ -47,6 +47,10 @@ test.describe("Filter Controls and Query Parameters", () => {
     ).not.toBeChecked();
 
     await expect(
+      page.getByLabel("Show not recommended player counts")
+    ).not.toBeChecked();
+
+    await expect(
       page.getByLabel("Show invalid player counts")
     ).not.toBeChecked();
 
@@ -55,7 +59,7 @@ test.describe("Filter Controls and Query Parameters", () => {
 
   test("Query Parameters set Filter Control Values", async ({ page }) => {
     await page.goto(
-      "/?username=davidhorm&playerCount=2-10&playtime=15-240&complexity=1.1-4.9&ratings=1.1-9.9&showInvalid=1&showExpansions=1&showUserRatings=1"
+      "/?username=davidhorm&playerCount=2-10&playtime=15-240&complexity=1.1-4.9&ratings=1.1-9.9&showInvalid=1&showExpansions=1&showUserRatings=1&showNotRec=1"
     );
 
     await expect(page.getByLabel("BGG Username")).toHaveValue("davidhorm");
@@ -89,6 +93,10 @@ test.describe("Filter Controls and Query Parameters", () => {
     await expect(
       page.getByLabel("Average Ratings", { exact: true })
     ).not.toBeChecked();
+
+    await expect(
+      page.getByLabel("Show not recommended player counts")
+    ).toBeChecked();
 
     await expect(page.getByLabel("Show invalid player counts")).toBeChecked();
   });

@@ -69,6 +69,9 @@ const initialFilterState = {
    */
   ratingsRange: ratingsRange.getInitialState(),
 
+  /** If `true`, then show games where all of the filtered player counts are not recommended. */
+  showNotRecommended: booleanQueryParam.getInitialState("showNotRec"),
+
   /** If `true`, then `console.log` messages to help troubleshoot. */
   isDebug: booleanQueryParam.getInitialState("debug"),
 };
@@ -89,13 +92,20 @@ const actions = {
   TOGGLE_SHOW_EXPANSIONS: booleanQueryParam.getReducer({
     stateKey: "showExpansions",
   }),
+
   TOGGLE_SHOW_INVALID_PLAYER_COUNT: booleanQueryParam.getReducer({
     stateKey: "showInvalidPlayerCount",
     queryParamKey: "showInvalid",
   }),
+
   TOGGLE_SHOW_RATINGS: showRatings.getToggleShowRatings,
   SET_SHOW_RATINGS: showRatings.getReducer,
   SET_RATINGS: ratingsRange.getReducer,
+
+  TOGGLE_SHOW_NOT_RECOMMENDED_PLAYER_COUNT: booleanQueryParam.getReducer({
+    stateKey: "showNotRecommended",
+    queryParamKey: "showNotRec",
+  }),
 };
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */

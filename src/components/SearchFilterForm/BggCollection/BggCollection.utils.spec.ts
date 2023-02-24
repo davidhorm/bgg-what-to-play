@@ -16,7 +16,7 @@ describe(applyFiltersAndSorts.name, () => {
     minPlayers: props?.minPlayers ?? 1,
     maxPlayers: props?.maxPlayers ?? 1,
     recommendedPlayerCount: props?.recommendedPlayerCount ?? [
-      { playerCountValue: 1 } as any,
+      { playerCountValue: 1, NotRecommendedPercent: 0 } as any,
     ],
     averageWeight: props?.averageWeight ?? 1,
     userRating: props?.userRating ?? "N/A",
@@ -34,6 +34,7 @@ describe(applyFiltersAndSorts.name, () => {
     ratingsRange: props.ratingsRange ?? [1, 10],
     showRatings: props.showRatings ?? "NO_RATING",
     complexityRange: props.complexityRange ?? [1, 5],
+    showNotRecommended: props.showNotRecommended ?? false,
     isDebug: props.isDebug ?? false, // PRO TIP: set to true to help debug tests
   });
 
@@ -48,9 +49,9 @@ describe(applyFiltersAndSorts.name, () => {
         minPlayers: 2,
         maxPlayers: 2,
         recommendedPlayerCount: [
-          { playerCountValue: 1 },
-          { playerCountValue: 2 },
-          { playerCountValue: 3 },
+          { playerCountValue: 1, NotRecommendedPercent: 0 },
+          { playerCountValue: 2, NotRecommendedPercent: 0 },
+          { playerCountValue: 3, NotRecommendedPercent: 0 },
         ] as any,
       });
 
@@ -134,7 +135,10 @@ describe(applyFiltersAndSorts.name, () => {
         minPlayers: boardGamePlayerCount[0],
         maxPlayers: boardGamePlayerCount.at(-1),
         recommendedPlayerCount: boardGamePlayerCount.map(
-          (playerCountValue: number) => ({ playerCountValue })
+          (playerCountValue: number) => ({
+            playerCountValue,
+            NotRecommendedPercent: 0,
+          })
         ) as any,
       });
 
@@ -258,6 +262,29 @@ describe(applyFiltersAndSorts.name, () => {
         ratingsRange: filterRatingsRange,
         showRatings,
       });
+      const actual = applyFiltersAndSorts([boardgame], filter);
+      expect(actual.length).toBe(expectedLength);
+    }
+  );
+
+  const halfBest = { playerCountValue: 1, NotRecommendedPercent: 50 };
+  const notRec = { playerCountValue: 1, NotRecommendedPercent: 51 };
+  test.each`
+    recommendedPlayerCount  | showNotRecommended | expectedLength
+    ${[notRec]}             | ${false}           | ${0}
+    ${[notRec, notRec]}     | ${false}           | ${0}
+    ${[notRec]}             | ${true}            | ${1}
+    ${[notRec, notRec]}     | ${true}            | ${1}
+    ${[halfBest, notRec]}   | ${true}            | ${1}
+    ${[halfBest, notRec]}   | ${false}           | ${1}
+    ${[halfBest, halfBest]} | ${false}           | ${1}
+    ${[halfBest, halfBest]} | ${true}            | ${1}
+  `(
+    "GIVEN recommendedPlayerCount=$recommendedPlayerCount, WHEN showNotRecommended=$showNotRecommended, THEN expectedLength=$expectedLength",
+    ({ recommendedPlayerCount, showNotRecommended, expectedLength }) => {
+      const boardgame = buildMockGame({ recommendedPlayerCount });
+
+      const filter = buildMockFilters({ showNotRecommended });
       const actual = applyFiltersAndSorts([boardgame], filter);
       expect(actual.length).toBe(expectedLength);
     }
