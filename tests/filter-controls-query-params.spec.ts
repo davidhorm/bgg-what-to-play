@@ -285,4 +285,58 @@ test.describe("Filter Controls and Query Parameters", () => {
         }
       })
   );
+
+  test("WHEN user searches in search form, THEN url reflects filter params", async ({
+    page,
+  }) => {
+    await page.goto("/");
+
+    // Fill out the searchbox, and tick the sliders in one
+    for await (const { label, fill, press } of [
+      { label: "BGG Username", fill: "davidhorm" },
+      { label: "Minimum Player Count", press: "ArrowRight" },
+      { label: "Maximum Player Count", press: "ArrowLeft" },
+      { label: "Minimum Playtime", press: "ArrowRight" },
+      { label: "Maximum Playtime", press: "ArrowLeft" },
+      { label: "Minimum Complexity", press: "ArrowRight" },
+      { label: "Maximum Complexity", press: "ArrowLeft" },
+      { label: "Minimum Average Ratings", press: "ArrowRight" },
+      { label: "Maximum Average Ratings", press: "ArrowLeft" },
+    ]) {
+      if (fill) {
+        await page.getByLabel(label).fill(fill);
+      }
+
+      if (press) {
+        await page.getByLabel(label).press(press);
+      }
+    }
+
+    // Check all the boxes
+    for await (const { name, role } of [
+      { name: "Show expansions" },
+      { name: "Show ratings" },
+      { name: "User Ratings", role: "radio" },
+      { name: "Show not recommended player counts" },
+      { name: "Show invalid player counts" },
+    ]) {
+      await page.getByRole((role as any) || "checkbox", { name }).check();
+    }
+
+    await page.getByLabel("Search").click();
+
+    const expectedUrl = [
+      "?username=davidhorm",
+      "playerCount=2-10",
+      "playtime=15-240",
+      "complexity=1.1-4.9",
+      "ratings=1.1-9.9",
+      "showExpansions=1",
+      "showNotRec=1",
+      "showInvalid=1",
+      "showUserRatings=1",
+    ].join("&");
+
+    await expect(new URL(page.url()).search).toBe(expectedUrl);
+  });
 });

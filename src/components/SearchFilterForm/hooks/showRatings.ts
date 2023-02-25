@@ -1,5 +1,4 @@
 import type {
-  ActionHandler,
   CollectionFilterState,
   FilterControl,
 } from "./useCollectionFilters";
@@ -27,45 +26,30 @@ const getInitialState = (): RatingVisibility => {
   return "NO_RATING";
 };
 
-const setQueryParams = (newState: CollectionFilterState) => {
-  const url = new URL(document.location.href);
-
-  // Always initially delete the ratings query params, then maybe add them back in
-  url.searchParams.delete(QUERY_PARAM_SHOW_USER_RATINGS);
-  url.searchParams.delete(QUERY_PARAM_SHOW_AVERAGE_RATINGS);
-
-  if (newState.showRatings === "USER_RATING") {
-    url.searchParams.set(QUERY_PARAM_SHOW_USER_RATINGS, "1");
-  } else if (newState.showRatings === "AVERAGE_RATING") {
-    url.searchParams.set(QUERY_PARAM_SHOW_AVERAGE_RATINGS, "1");
-  }
-
-  history.pushState({}, "", url);
-};
-
-const getReducer: FilterControl<RatingVisibility>["getReducer"] = (
-  state,
-  showRatings
+const setQueryParam: FilterControl<RatingVisibility>["setQueryParam"] = (
+  searchParams,
+  state
 ) => {
-  if (!state.username) return state;
+  // Always initially delete the ratings query params, then maybe add them back in
+  searchParams.delete(QUERY_PARAM_SHOW_USER_RATINGS);
+  searchParams.delete(QUERY_PARAM_SHOW_AVERAGE_RATINGS);
 
-  const newState = { ...state, showRatings };
-
-  setQueryParams(newState);
-
-  return newState;
+  if (state.showRatings === "USER_RATING") {
+    searchParams.set(QUERY_PARAM_SHOW_USER_RATINGS, "1");
+  } else if (state.showRatings === "AVERAGE_RATING") {
+    searchParams.set(QUERY_PARAM_SHOW_AVERAGE_RATINGS, "1");
+  }
 };
-
-const getToggleShowRatings: ActionHandler<Partial<undefined>> = (state) =>
-  getReducer(
-    state,
-    state.showRatings === "NO_RATING" ? "AVERAGE_RATING" : "NO_RATING"
-  );
 
 export const showRatings: FilterControl<RatingVisibility> & {
-  getToggleShowRatings: typeof getToggleShowRatings;
+  getToggleShowRatings: (state: CollectionFilterState) => CollectionFilterState;
 } = {
   getInitialState,
-  getReducer,
-  getToggleShowRatings,
+  getReducedState: (state, showRatings) => ({ ...state, showRatings }),
+  getToggleShowRatings: (state) => ({
+    ...state,
+    showRatings:
+      state.showRatings === "NO_RATING" ? "AVERAGE_RATING" : "NO_RATING",
+  }),
+  setQueryParam,
 };

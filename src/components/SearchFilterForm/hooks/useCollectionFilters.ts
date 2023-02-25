@@ -10,27 +10,44 @@ import { username } from "./username";
 /** Interface to abstract filter control logic. Needs to be able to provide initial state, and a reducer to set state */
 export type FilterControl<T> = {
   getInitialState: () => T;
-  getReducer: ActionHandler<T>;
+  getReducedState: ActionHandler<T>;
+  setQueryParam: (
+    searchParams: URLSearchParams,
+    state: CollectionFilterState
+  ) => void;
 };
 
 /** Interface to abstract boolean filter controls. */
 export type BooleanFilterControl = {
   getInitialState: (queryParamKey: string) => boolean;
-  getReducer: (props: {
+  getReducedState: (
     /** Key in CollectionFilterState used to store the value */
-    stateKey: keyof CollectionFilterState;
-
-    /** The key used in the query parameter. If empty, then use `stateKey` */
-    queryParamKey?: string;
-  }) => ActionHandler<Partial<undefined>>;
+    stateKey: keyof CollectionFilterState
+  ) => ActionHandler<Partial<undefined>>;
+  setQueryParam: (
+    searchParams: URLSearchParams,
+    queryParamKey: string,
+    value: boolean
+  ) => void;
 };
+
+const QUERY_PARAMS = {
+  SHOW_INVALID_PLAYER_COUNT: "showInvalid",
+  SHOW_EXPANSIONS: "showExpansions",
+  SHOW_USER_RATINGS: "showUserRatings",
+  SHOW_AVERAGE_RATINGS: "showRatings",
+  SHOW_NOT_RECOMMENDED: "showNotRec",
+  IS_DEBUG: "debug",
+} as const;
 
 const initialFilterState = {
   /** The username defined in the query param, or submitted in the input. */
   username: username.getInitialState(),
 
   /** If `true`, then show the invalid Player Count outside of the game's actual min/max Player Count. */
-  showInvalidPlayerCount: booleanQueryParam.getInitialState("showInvalid"),
+  showInvalidPlayerCount: booleanQueryParam.getInitialState(
+    QUERY_PARAMS.SHOW_INVALID_PLAYER_COUNT
+  ),
 
   /**
    * The Player Count `[minRange, maxRange]` the user wants to filter the collection.
@@ -53,7 +70,9 @@ const initialFilterState = {
   complexityRange: complexityRange.getInitialState(),
 
   /** If `true`, then show expansions in collection. */
-  showExpansions: booleanQueryParam.getInitialState("showExpansions"),
+  showExpansions: booleanQueryParam.getInitialState(
+    QUERY_PARAMS.SHOW_EXPANSIONS
+  ),
 
   /**
    * If `"NO_RATING"`, then don't show any ratings in the cards
@@ -70,10 +89,12 @@ const initialFilterState = {
   ratingsRange: ratingsRange.getInitialState(),
 
   /** If `true`, then show games where all of the filtered player counts are not recommended. */
-  showNotRecommended: booleanQueryParam.getInitialState("showNotRec"),
+  showNotRecommended: booleanQueryParam.getInitialState(
+    QUERY_PARAMS.SHOW_NOT_RECOMMENDED
+  ),
 
   /** If `true`, then `console.log` messages to help troubleshoot. */
-  isDebug: booleanQueryParam.getInitialState("debug"),
+  isDebug: booleanQueryParam.getInitialState(QUERY_PARAMS.IS_DEBUG),
 };
 
 export type CollectionFilterState = typeof initialFilterState;
@@ -84,28 +105,60 @@ export type ActionHandler<T> = (
 ) => CollectionFilterState;
 
 const actions = {
-  SET_COMPLEXITY: complexityRange.getReducer,
-  SET_PLAYER_COUNT_RANGE: playerCountRange.getReducer,
-  SET_PLAYTIME_RANGE: playtimeRange.getReducer,
-  SET_USERNAME: username.getReducer,
-
-  TOGGLE_SHOW_EXPANSIONS: booleanQueryParam.getReducer({
-    stateKey: "showExpansions",
-  }),
-
-  TOGGLE_SHOW_INVALID_PLAYER_COUNT: booleanQueryParam.getReducer({
-    stateKey: "showInvalidPlayerCount",
-    queryParamKey: "showInvalid",
-  }),
+  SET_COMPLEXITY: complexityRange.getReducedState,
+  SET_PLAYER_COUNT_RANGE: playerCountRange.getReducedState,
+  SET_PLAYTIME_RANGE: playtimeRange.getReducedState,
+  SET_USERNAME: username.getReducedState,
 
   TOGGLE_SHOW_RATINGS: showRatings.getToggleShowRatings,
-  SET_SHOW_RATINGS: showRatings.getReducer,
-  SET_RATINGS: ratingsRange.getReducer,
+  SET_SHOW_RATINGS: showRatings.getReducedState,
+  SET_RATINGS: ratingsRange.getReducedState,
 
-  TOGGLE_SHOW_NOT_RECOMMENDED_PLAYER_COUNT: booleanQueryParam.getReducer({
-    stateKey: "showNotRecommended",
-    queryParamKey: "showNotRec",
-  }),
+  TOGGLE_SHOW_EXPANSIONS: booleanQueryParam.getReducedState("showExpansions"),
+  TOGGLE_SHOW_INVALID_PLAYER_COUNT: booleanQueryParam.getReducedState(
+    "showInvalidPlayerCount"
+  ),
+  TOGGLE_SHOW_NOT_RECOMMENDED_PLAYER_COUNT:
+    booleanQueryParam.getReducedState("showNotRecommended"),
+};
+
+const maybeSetQueryParam = (state: CollectionFilterState) => {
+  if (!state.username) return;
+
+  const url = new URL(document.location.href);
+
+  username.setQueryParam(url.searchParams, state);
+  playerCountRange.setQueryParam(url.searchParams, state);
+  playtimeRange.setQueryParam(url.searchParams, state);
+  complexityRange.setQueryParam(url.searchParams, state);
+  ratingsRange.setQueryParam(url.searchParams, state);
+  showRatings.setQueryParam(url.searchParams, state);
+
+  booleanQueryParam.setQueryParam(
+    url.searchParams,
+    QUERY_PARAMS.SHOW_EXPANSIONS,
+    state.showExpansions
+  );
+
+  booleanQueryParam.setQueryParam(
+    url.searchParams,
+    QUERY_PARAMS.SHOW_NOT_RECOMMENDED,
+    state.showNotRecommended
+  );
+
+  booleanQueryParam.setQueryParam(
+    url.searchParams,
+    QUERY_PARAMS.SHOW_INVALID_PLAYER_COUNT,
+    state.showInvalidPlayerCount
+  );
+
+  booleanQueryParam.setQueryParam(
+    url.searchParams,
+    QUERY_PARAMS.IS_DEBUG,
+    state.isDebug
+  );
+
+  history.pushState({}, "", url);
 };
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
@@ -126,11 +179,18 @@ type CreateActions<T extends typeof actions> = {
 type Action = CreateActions<typeof actions>;
 
 /** Reducer pattern based off of https://stackoverflow.com/questions/74884329/how-to-derive-action-type-from-mapping-object-for-usereducer-dispatch-type-safet */
-const reducer: ActionHandler<Action> = (state, action): CollectionFilterState =>
-  (actions[action.type] as ActionHandler<typeof action["payload"]>)(
-    state,
-    action.payload
-  );
+const reducer: ActionHandler<Action> = (
+  state,
+  action
+): CollectionFilterState => {
+  const newState = (
+    actions[action.type] as ActionHandler<typeof action["payload"]>
+  )(state, action.payload);
+
+  maybeSetQueryParam(newState);
+
+  return newState;
+};
 
 export const useCollectionFilters = () => {
   const [filterState, filterDispatch] = useReducer(reducer, initialFilterState);

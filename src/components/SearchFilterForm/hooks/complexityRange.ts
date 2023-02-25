@@ -42,35 +42,35 @@ const convertRangeValueToQueryParam = (range: ComplexityState): string => {
   return minRange === maxRange ? minRange.toString() : range.join("-");
 };
 
-const getReducer: FilterControl<ComplexityState>["getReducer"] = (
+const getReducedState: FilterControl<ComplexityState>["getReducedState"] = (
   state,
   payload
 ) => {
-  if (!state.username) return state;
   const [minRange, maxRange] = payload;
   const complexityRange = [minRange, maxRange] as [number, number];
-  const newState = { ...state, complexityRange };
+  return { ...state, complexityRange };
+};
 
-  // Only set the playerCount query param if not using the default values
-  const url = new URL(document.location.href);
+const setQueryParam: FilterControl<ComplexityState>["setQueryParam"] = (
+  searchParams,
+  state
+) => {
+  // Only set the complexity query param if not using the default values
   if (
-    minRange !== DEFAULT_COMPLEXITY_MIN ||
-    maxRange !== DEFAULT_COMPLEXITY_MAX
+    state.complexityRange[0] !== DEFAULT_COMPLEXITY_MIN ||
+    state.complexityRange[1] !== DEFAULT_COMPLEXITY_MAX
   ) {
-    url.searchParams.set(
+    searchParams.set(
       QUERY_PARAM_COMPLEXITY,
-      convertRangeValueToQueryParam(complexityRange)
+      convertRangeValueToQueryParam(state.complexityRange)
     );
   } else {
-    url.searchParams.delete(QUERY_PARAM_COMPLEXITY);
+    searchParams.delete(QUERY_PARAM_COMPLEXITY);
   }
-
-  history.pushState({}, "", url);
-
-  return newState;
 };
 
 export const complexityRange: FilterControl<ComplexityState> = {
   getInitialState,
-  getReducer,
+  getReducedState,
+  setQueryParam,
 };

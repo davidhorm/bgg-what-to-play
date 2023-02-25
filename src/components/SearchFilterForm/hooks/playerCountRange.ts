@@ -1,8 +1,10 @@
+import * as _ from "lodash-es";
 import type { FilterControl } from "./useCollectionFilters";
 
 const QUERY_PARAM_PLAYER_COUNT = "playerCount";
 const DEFAULT_PLAYER_COUNT_MIN = 1;
 const DEFAULT_PLAYER_COUNT_MAX = Number.POSITIVE_INFINITY;
+const DEFAULT_PLAYER_COUNT_MAX_TICK = 11;
 
 const convertElevenToInfinity = (value: number) =>
   value >= 11 ? Number.POSITIVE_INFINITY : value;
@@ -20,12 +22,22 @@ const convertPlayerCountRangeQueryParamToValue = (
   const parsedMinRange = parseInt(minRangeStr, 10);
   const minRange = isNaN(parsedMinRange)
     ? DEFAULT_PLAYER_COUNT_MIN
-    : Math.max(Math.min(parsedMinRange, 11), 1);
+    : _.clamp(
+        parsedMinRange,
+        DEFAULT_PLAYER_COUNT_MIN,
+        DEFAULT_PLAYER_COUNT_MAX_TICK
+      );
 
   const parsedMaxRange = parseInt(maxRangeStr, 10);
   const maxRange = isNaN(parsedMaxRange)
     ? DEFAULT_PLAYER_COUNT_MAX
-    : convertElevenToInfinity(Math.max(parsedMaxRange, 1));
+    : convertElevenToInfinity(
+        _.clamp(
+          parsedMaxRange,
+          DEFAULT_PLAYER_COUNT_MIN,
+          DEFAULT_PLAYER_COUNT_MAX_TICK
+        )
+      );
 
   return [minRange, maxRange];
 };
@@ -49,36 +61,36 @@ const convertPlayerCountRangeValueToQueryParam = (
     : playerCountRange.join("-");
 };
 
-const getReducer: FilterControl<PlayerCountState>["getReducer"] = (
+const getReducedState: FilterControl<PlayerCountState>["getReducedState"] = (
   state,
   payload
 ) => {
-  if (!state.username) return state;
   const [minRange, maybeMaxRange] = payload;
   const maxRange = convertElevenToInfinity(maybeMaxRange);
   const playerCountRange = [minRange, maxRange] as [number, number];
-  const newState = { ...state, playerCountRange };
+  return { ...state, playerCountRange };
+};
 
+const setQueryParam: FilterControl<PlayerCountState>["setQueryParam"] = (
+  searchParams,
+  state
+) => {
   // Only set the playerCount query param if not using the default values
-  const url = new URL(document.location.href);
   if (
-    minRange !== DEFAULT_PLAYER_COUNT_MIN ||
-    maxRange !== DEFAULT_PLAYER_COUNT_MAX
+    state.playerCountRange[0] !== DEFAULT_PLAYER_COUNT_MIN ||
+    state.playerCountRange[1] !== DEFAULT_PLAYER_COUNT_MAX
   ) {
-    url.searchParams.set(
+    searchParams.set(
       QUERY_PARAM_PLAYER_COUNT,
-      convertPlayerCountRangeValueToQueryParam(playerCountRange)
+      convertPlayerCountRangeValueToQueryParam(state.playerCountRange)
     );
   } else {
-    url.searchParams.delete(QUERY_PARAM_PLAYER_COUNT);
+    searchParams.delete(QUERY_PARAM_PLAYER_COUNT);
   }
-
-  history.pushState({}, "", url);
-
-  return newState;
 };
 
 export const playerCountRange: FilterControl<PlayerCountState> = {
   getInitialState,
-  getReducer,
+  getReducedState,
+  setQueryParam,
 };

@@ -41,32 +41,35 @@ const convertRangeValueToQueryParam = (range: RatingsState): string => {
   return minRange === maxRange ? minRange.toString() : range.join("-");
 };
 
-const getReducer: FilterControl<RatingsState>["getReducer"] = (
+const getReducedState: FilterControl<RatingsState>["getReducedState"] = (
   state,
   payload
 ) => {
-  if (!state.username) return state;
   const [minRange, maxRange] = payload;
   const ratingsRange = [minRange, maxRange] as [number, number];
-  const newState = { ...state, ratingsRange };
+  return { ...state, ratingsRange };
+};
 
-  // Only set the playerCount query param if not using the default values
-  const url = new URL(document.location.href);
-  if (minRange !== DEFAULT_RATINGS_MIN || maxRange !== DEFAULT_RATINGS_MAX) {
-    url.searchParams.set(
+const setQueryParam: FilterControl<RatingsState>["setQueryParam"] = (
+  searchParams,
+  state
+) => {
+  // Only set the ratings query param if not using the default values
+  if (
+    state.ratingsRange[0] !== DEFAULT_RATINGS_MIN ||
+    state.ratingsRange[1] !== DEFAULT_RATINGS_MAX
+  ) {
+    searchParams.set(
       QUERY_PARAM_RATINGS,
-      convertRangeValueToQueryParam(ratingsRange)
+      convertRangeValueToQueryParam(state.ratingsRange)
     );
   } else {
-    url.searchParams.delete(QUERY_PARAM_RATINGS);
+    searchParams.delete(QUERY_PARAM_RATINGS);
   }
-
-  history.pushState({}, "", url);
-
-  return newState;
 };
 
 export const ratingsRange: FilterControl<RatingsState> = {
   getInitialState,
-  getReducer,
+  getReducedState,
+  setQueryParam,
 };

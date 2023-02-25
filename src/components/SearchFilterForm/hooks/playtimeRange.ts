@@ -3,6 +3,7 @@ import type { FilterControl } from "./useCollectionFilters";
 const QUERY_PARAM_PLAYTIME = "playtime";
 const DEFAULT_PLAYTIME_MIN = 0;
 const DEFAULT_PLAYTIME_MAX = Number.POSITIVE_INFINITY;
+const DEFAULT_PLAYTIME_MAX_TICK = 255;
 
 const convertGreaterThan240To241 = (value: number) =>
   value > 240 ? 241 : value;
@@ -25,7 +26,7 @@ const convertPlaytimeRangeQueryParamToValue = (
   const minRange = isNaN(parsedMinRange)
     ? DEFAULT_PLAYTIME_MIN
     : parsedMinRange > 240
-    ? 255
+    ? DEFAULT_PLAYTIME_MAX_TICK
     : parsedMinRange;
 
   const parsedMaxRange = parseInt(maxRangeStr, 10);
@@ -54,34 +55,37 @@ const convertTimeRangeValueToQueryParam = (
   return minRange === maxRange ? minRange.toString() : timeRange.join("-");
 };
 
-const getReducer: FilterControl<TimeRangeState>["getReducer"] = (
+const getReducedState: FilterControl<TimeRangeState>["getReducedState"] = (
   state,
   payload
 ) => {
-  if (!state.username) return state;
   const [maybeMinRange, maybeMaxRange] = payload;
   const minRange = convertGreaterThan240To241(maybeMinRange);
   const maxRange = convertGreaterThan240ToInfinity(maybeMaxRange);
   const playtimeRange = [minRange, maxRange] as [number, number];
-  const newState = { ...state, playtimeRange };
+  return { ...state, playtimeRange };
+};
 
+const setQueryParam: FilterControl<TimeRangeState>["setQueryParam"] = (
+  searchParams,
+  state
+) => {
   // Only set the playtime query param if not using the default values
-  const url = new URL(document.location.href);
-  if (minRange !== DEFAULT_PLAYTIME_MIN || maxRange !== DEFAULT_PLAYTIME_MAX) {
-    url.searchParams.set(
+  if (
+    state.playtimeRange[0] !== DEFAULT_PLAYTIME_MIN ||
+    state.playtimeRange[1] !== DEFAULT_PLAYTIME_MAX
+  ) {
+    searchParams.set(
       QUERY_PARAM_PLAYTIME,
-      convertTimeRangeValueToQueryParam(playtimeRange)
+      convertTimeRangeValueToQueryParam(state.playtimeRange)
     );
   } else {
-    url.searchParams.delete(QUERY_PARAM_PLAYTIME);
+    searchParams.delete(QUERY_PARAM_PLAYTIME);
   }
-
-  history.pushState({}, "", url);
-
-  return newState;
 };
 
 export const playtimeRange: FilterControl<TimeRangeState> = {
   getInitialState,
-  getReducer,
+  getReducedState,
+  setQueryParam,
 };
