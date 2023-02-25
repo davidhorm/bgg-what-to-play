@@ -42,13 +42,10 @@ const decodeHtmlCharCodes = (str: string) =>
     String.fromCharCode(charCode)
   );
 
-const getPrimaryName = (name: Name | Name[]) => {
-  const primaryName = Array.isArray(name)
-    ? name.filter((n) => n.type === "primary")[0]
-    : name;
-
-  return decodeHtmlCharCodes(primaryName.value.toString());
-};
+const getPrimaryName = (name: Name | Name[]) =>
+  Array.isArray(name)
+    ? name.filter((n) => n.type === "primary")[0].value.toString()
+    : name.value.toString();
 
 /**
  * Transforms the following array
@@ -196,11 +193,14 @@ export const transformToBoardGame = (
   thingData: Thing["items"]["item"][number],
   collectionData?: Collection["items"]["item"][number]
 ) => ({
+  // TODO: unit test special characters, and numbers as titles
+  // TODO: fix game id = 93194; name "011"
   /** Board Game's primary name */
-  name:
+  name: decodeHtmlCharCodes(
     collectionData?.name.text.toString() ||
-    collectionData?.originalname ||
-    getPrimaryName(thingData.name),
+      collectionData?.originalname ||
+      getPrimaryName(thingData.name)
+  ),
 
   /** BGG' Board Game Thing ID */
   id: thingData.id,
