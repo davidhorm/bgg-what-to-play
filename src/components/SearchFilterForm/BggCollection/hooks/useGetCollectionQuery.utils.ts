@@ -121,15 +121,16 @@ const calcPercentAndAddSortScore = (
   const totalVotes = Best + Recommended + notRec;
 
   const BestPercent = Math.round((Best * 100) / totalVotes);
-  const bestScore = Best * 2 + BestPercent;
-
   const RecommendedPercent = Math.round((Recommended * 100) / totalVotes);
-  const recScore = RecommendedPercent + Recommended;
-
   const NotRecommendedPercent = Math.round((notRec * 100) / totalVotes);
-  const notRecScore = NotRecommendedPercent + notRec;
 
-  const maybeSortScore = bestScore + recScore - notRecScore;
+  const maybeSortScore = Math.round(
+    Math.min(Math.sqrt(Best), 10) +
+      BestPercent +
+      RecommendedPercent * 0.8 -
+      NotRecommendedPercent * 0.8
+  );
+
   const sortScore =
     totalVotes === 0 || Number.isNaN(maybeSortScore)
       ? Number.NEGATIVE_INFINITY
