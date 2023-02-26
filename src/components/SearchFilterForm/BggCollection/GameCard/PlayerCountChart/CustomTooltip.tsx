@@ -6,14 +6,13 @@ export const CustomTooltip = (
 
   const {
     Best,
+    BestPercent,
     Recommended,
+    RecommendedPercent,
     ["Not Recommended"]: notRecNeg,
+    NotRecommendedPercent,
   } = payload[0].payload;
   const notRec = Math.abs(notRecNeg);
-  const total = Best + Recommended + notRec;
-
-  const getPercentage = (value: number) =>
-    ` (${Math.round((value / total) * 100)}%)`;
 
   return (
     <div className="bg-white/90 p-1 text-left text-sm">
@@ -24,7 +23,7 @@ export const CustomTooltip = (
             😍:
           </span>
           <span className="table-cell px-1 text-right">{Best}</span>
-          <span className="table-cell text-right">{getPercentage(Best)}</span>
+          <span className="table-cell text-right">{BestPercent}%</span>
         </li>
         <li className="table-row">
           <span
@@ -35,9 +34,7 @@ export const CustomTooltip = (
             🙂:
           </span>
           <span className="table-cell px-1 text-right">{Recommended}</span>
-          <span className="table-cell text-right">
-            {getPercentage(Recommended)}
-          </span>
+          <span className="table-cell text-right">{RecommendedPercent}%</span>
         </li>
         <li className="table-row">
           <span
@@ -48,7 +45,9 @@ export const CustomTooltip = (
             😓:
           </span>
           <span className="table-cell px-1 text-right">{notRec}</span>
-          <span className="table-cell text-right">{getPercentage(notRec)}</span>
+          <span className="table-cell text-right">
+            {NotRecommendedPercent}%
+          </span>
         </li>
       </ul>
     </div>

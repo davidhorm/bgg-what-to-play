@@ -11,6 +11,7 @@ import {
 
 // TODO: handle querying array of usernames (p3)
 // TODO: handle querying other things like geeklists (p3)
+// TODO: invalidate when new username (p3)
 
 export const useGetCollectionQuery = (
   username: string,

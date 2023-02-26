@@ -53,7 +53,9 @@ export const GameCard = ({ game, filterState }: Props) => (
           <dt className="text-xs text-gray-500">Time (minutes)</dt>
           <dd className="mb-2 ml-0 text-2xl">
             {game.minPlaytime === game.maxPlaytime
-              ? `${game.maxPlaytime}`
+              ? game.maxPlaytime === 0
+                ? "N/A"
+                : `${game.maxPlaytime}`
               : `${game.minPlaytime} - ${game.maxPlaytime}`}
           </dd>
 

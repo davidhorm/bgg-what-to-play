@@ -42,13 +42,10 @@ const decodeHtmlCharCodes = (str: string) =>
     String.fromCharCode(charCode)
   );
 
-const getPrimaryName = (name: Name | Name[]) => {
-  const primaryName = Array.isArray(name)
-    ? name.filter((n) => n.type === "primary")[0]
-    : name;
-
-  return decodeHtmlCharCodes(primaryName.value.toString());
-};
+const getPrimaryName = (name: Name | Name[]) =>
+  Array.isArray(name)
+    ? name.filter((n) => n.type === "primary")[0].value.toString()
+    : name.value.toString();
 
 /**
  * Transforms the following array
@@ -117,15 +114,23 @@ const flattenSuggestedNumPlayersResult = ({
   ...reduceValueAndNumVotesToObjectProperties(result),
 });
 
-const addSortScore = (
+const calcPercentAndAddSortScore = (
   playerRec: ReturnType<typeof flattenSuggestedNumPlayersResult>
 ) => {
   const { Best, Recommended, ["Not Recommended"]: notRec } = playerRec;
   const totalVotes = Best + Recommended + notRec;
-  const bestPercent = Math.round((Best * 100) / totalVotes + Best * 2);
-  const recPercent = Math.round((Recommended * 100) / totalVotes + Recommended);
-  const notRecPercent = Math.round((notRec * 100) / totalVotes + notRec);
-  const maybeSortScore = bestPercent + recPercent - notRecPercent;
+
+  const BestPercent = Math.round((Best * 100) / totalVotes);
+  const RecommendedPercent = Math.round((Recommended * 100) / totalVotes);
+  const NotRecommendedPercent = Math.round((notRec * 100) / totalVotes);
+
+  const maybeSortScore = Math.round(
+    Math.min(Math.sqrt(Best), 10) +
+      BestPercent +
+      RecommendedPercent * 0.8 -
+      NotRecommendedPercent * 0.8
+  );
+
   const sortScore =
     totalVotes === 0 || Number.isNaN(maybeSortScore)
       ? Number.NEGATIVE_INFINITY
@@ -133,6 +138,15 @@ const addSortScore = (
 
   return {
     ...playerRec,
+
+    /** Percentage of users voting this player count as the best. */
+    BestPercent,
+
+    /** Percentage of users recommending this player count. */
+    RecommendedPercent,
+
+    /** Percentage of users not recommending this player count. */
+    NotRecommendedPercent,
 
     /** 2xBest Raw + Best % + Recommended Raw + Recommended % - Not Recommended Row - Not Recommended % */
     sortScore,
@@ -152,7 +166,9 @@ const addSortScore = (
  * { "Best": 42, "Not Recommended": -37 }
  * ```
  */
-const makeNotRecommendedNegative = (i: ReturnType<typeof addSortScore>) => ({
+const makeNotRecommendedNegative = (
+  i: ReturnType<typeof calcPercentAndAddSortScore>
+) => ({
   ...i,
 
   /** Number of people who voted "Not Recommended" to play this game at this player count. */
@@ -169,7 +185,7 @@ const transformToRecommendedPlayerCount = (
   return Array.isArray(recommendations)
     ? recommendations
         .map(flattenSuggestedNumPlayersResult)
-        .map(addSortScore)
+        .map(calcPercentAndAddSortScore)
         .map(makeNotRecommendedNegative)
     : [];
 };
@@ -178,11 +194,14 @@ export const transformToBoardGame = (
   thingData: Thing["items"]["item"][number],
   collectionData?: Collection["items"]["item"][number]
 ) => ({
+  // TODO: unit test special characters, and numbers as titles
+  // TODO: fix game id = 93194; name "011"
   /** Board Game's primary name */
-  name:
-    collectionData?.name.text ||
-    collectionData?.originalname ||
-    getPrimaryName(thingData.name),
+  name: decodeHtmlCharCodes(
+    collectionData?.name.text.toString() ||
+      collectionData?.originalname ||
+      getPrimaryName(thingData.name)
+  ),
 
   /** BGG' Board Game Thing ID */
   id: thingData.id,
@@ -203,13 +222,16 @@ export const transformToBoardGame = (
   maxPlayers: thingData.maxplayers.value,
 
   /** Board Game's minimum playtime. */
-  minPlaytime: thingData.minplaytime.value,
+  minPlaytime:
+    thingData.minplaytime.value || collectionData?.stats.minplaytime || 0,
 
   /** Board Game's maximum playtime. */
-  maxPlaytime: thingData.maxplaytime.value,
-
-  /** Board Game's average playtime */
-  playingTime: thingData.playingtime.value,
+  maxPlaytime:
+    thingData.maxplaytime.value ||
+    collectionData?.stats.maxplaytime ||
+    thingData.minplaytime.value ||
+    collectionData?.stats.minplaytime ||
+    0,
 
   /** Board Game's average weight */
   averageWeight: +thingData.statistics.ratings.averageweight.value.toFixed(1),

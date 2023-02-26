@@ -13,16 +13,6 @@ export const FilterControls = ({
   filter: { filterState, filterDispatch },
 }: Props) => (
   <div className="mt-1">
-    <FormControlLabel
-      label="Show expansions"
-      control={
-        <Checkbox
-          checked={filterState.showExpansions}
-          onChange={() => filterDispatch({ type: "TOGGLE_SHOW_EXPANSIONS" })}
-        />
-      }
-    />
-
     <FormGroup row>
       <FormControlLabel
         id="show-ratings"
@@ -48,19 +38,41 @@ export const FilterControls = ({
         }
       >
         <FormControlLabel
-          value="USER_RATING"
-          disabled={filterState.showRatings === "NO_RATING"}
-          control={<Radio />}
-          label="User Ratings"
-        />
-        <FormControlLabel
           value="AVERAGE_RATING"
           disabled={filterState.showRatings === "NO_RATING"}
           control={<Radio />}
           label="Average Ratings"
         />
+        <FormControlLabel
+          value="USER_RATING"
+          disabled={filterState.showRatings === "NO_RATING"}
+          control={<Radio />}
+          label="User Ratings"
+        />
       </RadioGroup>
     </FormGroup>
+
+    <FormControlLabel
+      label="Show expansions"
+      control={
+        <Checkbox
+          checked={filterState.showExpansions}
+          onChange={() => filterDispatch({ type: "TOGGLE_SHOW_EXPANSIONS" })}
+        />
+      }
+    />
+
+    <FormControlLabel
+      label="Show not recommended player counts"
+      control={
+        <Checkbox
+          checked={filterState.showNotRecommended}
+          onChange={() =>
+            filterDispatch({ type: "TOGGLE_SHOW_NOT_RECOMMENDED_PLAYER_COUNT" })
+          }
+        />
+      }
+    />
 
     <FormControlLabel
       label="Show invalid player counts"

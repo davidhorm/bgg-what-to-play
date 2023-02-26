@@ -4,7 +4,22 @@ This repo is deployed to https://davidhorm.github.io/bgg-what-to-play/.
 
 Website to visualize your [BGG](https://boardgamegeek.com/) collection to better figure out which board game to play based on number of players and game length.
 
-![What To Play demo](./public/bgg-what-to-play-demo-v1.gif)
+![What To Play demo](./public/bgg-what-to-play-demo-v1.2.gif)
+
+## Features
+
+- Filter by:
+
+  - Player count
+  - Playtime
+  - Complexity
+  - Average or User Ratings
+
+- Hide by default, but can show:
+  - Average or User Ratings
+  - Expansions
+  - Not recommended player counts
+  - Invalid player counts
 
 ## Getting Started
 

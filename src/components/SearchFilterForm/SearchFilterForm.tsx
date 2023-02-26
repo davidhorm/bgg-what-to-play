@@ -1,10 +1,13 @@
 import Paper from "@mui/material/Paper";
 import { BggCollection } from "./BggCollection";
+import { ComplexitySlider } from "./ComplexitySlider";
 import { FilterControls } from "./FilterControls";
 import { Header } from "./Header";
 import { PlayerCountSlider } from "./PlayerCountSlider";
+import { PlaytimeRangeSlider } from "./PlaytimeRangeSlider";
+import { RatingsSlider } from "./RatingsSlider";
 import { UsernameInput } from "./UsernameInput";
-import { useCollectionFilters } from "./useCollectionFilters";
+import { useCollectionFilters } from "./hooks/useCollectionFilters";
 
 export const SearchFilterForm = () => {
   const filter = useCollectionFilters();
@@ -22,6 +25,12 @@ export const SearchFilterForm = () => {
         <UsernameInput filter={filter} />
 
         <PlayerCountSlider filter={filter} />
+
+        <PlaytimeRangeSlider filter={filter} />
+
+        <ComplexitySlider filter={filter} />
+
+        <RatingsSlider filter={filter} />
 
         <FilterControls filter={filter} />
       </Paper>

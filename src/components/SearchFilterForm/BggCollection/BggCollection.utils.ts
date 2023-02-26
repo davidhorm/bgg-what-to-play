@@ -49,54 +49,91 @@ const maybeShowInvalidPlayerCount =
 
 //#endregion maybeShowInvalidPlayerCount
 
-const calcValueIsWithinRanage = (value: number, min: number, max: number) =>
-  min <= value && value <= max;
+const isBoardGameRangeWithinFilterRange = (
+  boardgameRange: [number, number],
+  filterRange: [number, number]
+): boolean => {
+  const [boardgameMin, boardgameMax] = boardgameRange;
+  const [filterMin, filterMax] = filterRange;
 
+  return (
+    (filterMin <= boardgameMin && boardgameMin <= filterMax) ||
+    (filterMin <= boardgameMax && boardgameMax <= filterMax) ||
+    (boardgameMin <= filterMin && filterMin <= boardgameMax) ||
+    (boardgameMin <= filterMax && filterMax <= boardgameMax)
+  );
+};
+
+/** Used to determine which bar to highlight in the graph */
 const addIsPlayerCountWithinRange =
   (filterState: CollectionFilterState) => (game: SimpleBoardGame) => {
     const [minFilterCount, maxFilterCount] = filterState.playerCountRange;
 
-    const minWithinRange =
-      calcValueIsWithinRanage(
-        game.minPlayers,
-        minFilterCount,
-        maxFilterCount
-      ) ||
-      calcValueIsWithinRanage(
-        minFilterCount,
-        game.minPlayers,
-        game.maxPlayers
-      ) ||
-      // handle edge case for id = 40567
-      (filterState.showInvalidPlayerCount && game.minPlayers === 0);
-
-    const maxWithinRange =
-      calcValueIsWithinRanage(
-        game.maxPlayers,
-        minFilterCount,
-        maxFilterCount
-      ) ||
-      calcValueIsWithinRanage(maxFilterCount, game.minPlayers, game.maxPlayers);
-
     return {
       ...game,
-
-      /** Is `true` if the Board Game's min or max player count is within the filter's Player Count Range. */
-      isPlayerCountWithinRange: minWithinRange || maxWithinRange,
 
       /** Board Game's recommended player count according to BGG poll */
       recommendedPlayerCount: game.recommendedPlayerCount.map((rec) => ({
         ...rec,
 
         /** Is `true` if the Poll's Player Count value is within the filter's Player Count Range. */
-        isPlayerCountWithinRange: calcValueIsWithinRanage(
-          rec.playerCountValue,
-          minFilterCount,
-          maxFilterCount
-        ),
+        isPlayerCountWithinRange:
+          minFilterCount <= rec.playerCountValue &&
+          rec.playerCountValue <= maxFilterCount,
       })),
     };
   };
+
+const isMinMaxPlayerRangeWithinRange =
+  (filterState: CollectionFilterState) => (game: SimpleBoardGame) =>
+    isBoardGameRangeWithinFilterRange(
+      [game.minPlayers, game.maxPlayers],
+      filterState.playerCountRange
+    ) ||
+    // handle edge case for id = 40567
+    (filterState.showInvalidPlayerCount && game.minPlayers === 0);
+
+const isPlaytimeWithinRange =
+  (filterState: CollectionFilterState) => (game: SimpleBoardGame) =>
+    isBoardGameRangeWithinFilterRange(
+      [game.minPlaytime, game.maxPlaytime],
+      filterState.playtimeRange
+    );
+
+const isComplexityWithinRange =
+  (filterState: CollectionFilterState) => (game: SimpleBoardGame) =>
+    isBoardGameRangeWithinFilterRange(
+      [game.averageWeight, game.averageWeight],
+      filterState.complexityRange
+    );
+
+const isRatingsWithinRange =
+  (filterState: CollectionFilterState) => (game: SimpleBoardGame) => {
+    const userOrAverageRating =
+      filterState.showRatings === "USER_RATING"
+        ? game.userRating
+        : game.averageRating;
+
+    const rating =
+      typeof userOrAverageRating === "number" ? userOrAverageRating : 1;
+
+    return isBoardGameRangeWithinFilterRange(
+      [rating, rating],
+      filterState.ratingsRange
+    );
+  };
+
+const maybeShowNotRecommended =
+  (filterState: CollectionFilterState) =>
+  (game: ReturnType<ReturnType<typeof addIsPlayerCountWithinRange>>) =>
+    filterState.showNotRecommended || filterState.showInvalidPlayerCount
+      ? true
+      : game.recommendedPlayerCount.filter(
+          (rec) =>
+            rec.isPlayerCountWithinRange &&
+            (rec.NotRecommendedPercent <= 50 ||
+              Number.isNaN(rec.NotRecommendedPercent)) // Show games even if no data because technically not "not rec'd"
+        ).length > 0;
 
 //#region maybeSortByScore
 
@@ -135,12 +172,20 @@ export const applyFiltersAndSorts = (
 ) =>
   games
     ?.map(maybeOutputList(filterState, "All Games"))
-    .filter(maybeShowExpansions(filterState))
+    .filter(maybeShowExpansions(filterState)) // Show as many things as needed from here
     .map(maybeOutputList(filterState, "maybeShowExpansions"))
     .map(maybeShowInvalidPlayerCount(filterState))
-    .map(addIsPlayerCountWithinRange(filterState))
-    .filter((g) => g.isPlayerCountWithinRange) // Remove games not within Player Count Range
-    .map(maybeOutputList(filterState, "isPlayerCountWithinRange"))
+    .filter(isMinMaxPlayerRangeWithinRange(filterState)) // Start removing things as needed from here
+    .map(maybeOutputList(filterState, "isMinMaxPlayerRangeWithinRange"))
+    .filter(isPlaytimeWithinRange(filterState))
+    .map(maybeOutputList(filterState, "isPlaytimeWithinRange"))
+    .filter(isComplexityWithinRange(filterState))
+    .map(maybeOutputList(filterState, "isComplexityWithinRange"))
+    .filter(isRatingsWithinRange(filterState))
+    .map(maybeOutputList(filterState, "isRatingsWithinRange"))
+    .map(addIsPlayerCountWithinRange(filterState)) // Add any calculations from here
+    .filter(maybeShowNotRecommended(filterState)) // But do one more filter based on isPlayerCountWithinRange
+    .map(maybeOutputList(filterState, "maybeShowNotRecommended"))
     .sort(maybeSortByScore(filterState));
 
 export type BoardGame = ReturnType<typeof applyFiltersAndSorts>[number];
