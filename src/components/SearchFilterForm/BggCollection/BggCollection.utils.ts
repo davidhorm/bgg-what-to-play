@@ -184,7 +184,7 @@ export const applyFiltersAndSorts = (
     .filter(isRatingsWithinRange(filterState))
     .map(maybeOutputList(filterState, "isRatingsWithinRange"))
     .map(addIsPlayerCountWithinRange(filterState)) // Add any calculations from here
-    .filter(maybeShowNotRecommended(filterState)) // But do one more filter based on isPlayerCountWithinRange -   // TODO: fix maybe show "no data" so that it isn't hidden by default
+    .filter(maybeShowNotRecommended(filterState)) // But do one more filter based on isPlayerCountWithinRange
     .map(maybeOutputList(filterState, "maybeShowNotRecommended"))
     .sort(maybeSortByScore(filterState));
 

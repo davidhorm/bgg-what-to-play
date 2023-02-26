@@ -31,11 +31,11 @@ export const PlaytimeRangeSlider = ({
 
   return (
     <div className="mt-2 mr-6 flex flex-col">
-      <label htmlFor="time-range" className="text-sm">
+      <label htmlFor="playtime-range" className="text-sm">
         Filter by Time (minutes)
       </label>
       <Slider
-        id="time-range"
+        id="playtime-range"
         className="mx-4"
         getAriaLabel={getAriaLabel}
         getAriaValueText={getValueLabel}
