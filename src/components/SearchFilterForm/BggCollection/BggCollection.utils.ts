@@ -130,7 +130,9 @@ const maybeShowNotRecommended =
       ? true
       : game.recommendedPlayerCount.filter(
           (rec) =>
-            rec.isPlayerCountWithinRange && rec.NotRecommendedPercent <= 50
+            rec.isPlayerCountWithinRange &&
+            (rec.NotRecommendedPercent <= 50 ||
+              Number.isNaN(rec.NotRecommendedPercent)) // Show games even if no data because technically not "not rec'd"
         ).length > 0;
 
 //#region maybeSortByScore
@@ -182,7 +184,7 @@ export const applyFiltersAndSorts = (
     .filter(isRatingsWithinRange(filterState))
     .map(maybeOutputList(filterState, "isRatingsWithinRange"))
     .map(addIsPlayerCountWithinRange(filterState)) // Add any calculations from here
-    .filter(maybeShowNotRecommended(filterState)) // But do one more filter based on isPlayerCountWithinRange
+    .filter(maybeShowNotRecommended(filterState)) // But do one more filter based on isPlayerCountWithinRange -   // TODO: fix maybe show "no data" so that it isn't hidden by default
     .map(maybeOutputList(filterState, "maybeShowNotRecommended"))
     .sort(maybeSortByScore(filterState));
 

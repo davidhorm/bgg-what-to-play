@@ -267,8 +267,9 @@ describe(applyFiltersAndSorts.name, () => {
     }
   );
 
-  const halfBest = { playerCountValue: 1, NotRecommendedPercent: 50 };
-  const notRec = { playerCountValue: 1, NotRecommendedPercent: 51 };
+  const halfBest = { NotRecommendedPercent: 50, playerCountValue: 1 };
+  const notRec = { NotRecommendedPercent: 51, playerCountValue: 1 };
+  const noData = { NotRecommendedPercent: Number.NaN, playerCountValue: 1 };
   test.each`
     recommendedPlayerCount  | showNotRecommended | expectedLength
     ${[notRec]}             | ${false}           | ${0}
@@ -279,6 +280,7 @@ describe(applyFiltersAndSorts.name, () => {
     ${[halfBest, notRec]}   | ${false}           | ${1}
     ${[halfBest, halfBest]} | ${false}           | ${1}
     ${[halfBest, halfBest]} | ${true}            | ${1}
+    ${[noData]}             | ${false}           | ${1}
   `(
     "GIVEN recommendedPlayerCount=$recommendedPlayerCount, WHEN showNotRecommended=$showNotRecommended, THEN expectedLength=$expectedLength",
     ({ recommendedPlayerCount, showNotRecommended, expectedLength }) => {
