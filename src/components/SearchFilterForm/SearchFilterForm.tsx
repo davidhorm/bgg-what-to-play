@@ -1,3 +1,4 @@
+import { useCollectionFilters } from "@/services/filter-sort-services";
 import Paper from "@mui/material/Paper";
 import { BggCollection } from "./BggCollection";
 import { ComplexitySlider } from "./ComplexitySlider";
@@ -7,7 +8,6 @@ import { PlayerCountSlider } from "./PlayerCountSlider";
 import { PlaytimeRangeSlider } from "./PlaytimeRangeSlider";
 import { RatingsSlider } from "./RatingsSlider";
 import { UsernameInput } from "./UsernameInput";
-import { useCollectionFilters } from "./hooks/useCollectionFilters";
 
 export const SearchFilterForm = () => {
   const filter = useCollectionFilters();
