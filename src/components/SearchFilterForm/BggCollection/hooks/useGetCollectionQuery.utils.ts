@@ -264,6 +264,7 @@ const parser = new XMLParser({
   removeNSPrefix: true,
   allowBooleanAttributes: true,
   parseAttributeValue: true,
+  numberParseOptions: { hex: false, leadingZeros: false },
   isArray: (tagName, jpath, isLeafNode, isAttribute) =>
     ["items.item", "items.item.stats.rating.ranks.rank"].includes(jpath),
 });

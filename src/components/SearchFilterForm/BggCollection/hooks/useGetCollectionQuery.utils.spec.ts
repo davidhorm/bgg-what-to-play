@@ -1,7 +1,9 @@
+import { server, rest } from "@/mocks";
 import { describe, test, expect } from "vitest";
 import { Thing } from "./bggTypes";
 import {
-  transformToBoardGame, // hasSuggestedPlayersVotes,
+  transformToBoardGame,
+  fetchBggCollection,
 } from "./useGetCollectionQuery.utils";
 
 const MOCK_THING_ITEM: Partial<Thing["items"]["item"][number]> = {
@@ -190,5 +192,27 @@ describe(transformToBoardGame.name, () => {
       ...EXPECTED_BOARD_GAME,
       name: "Can't Stop",
     });
+  });
+});
+
+describe.only(fetchBggCollection.name, () => {
+  test("hello", async () => {
+    server.use(
+      rest.get("https://bgg.cc/xmlapi2/collection", (req, res, ctx) => {
+        console.log("hello world?");
+
+        const gameWithNumberAsName = `
+<items>
+  <item objecttype="thing" objectid="93194" subtype="boardgame" collid="60952918">
+    <name sortindex="1">011</name>
+  </item>
+</items>`;
+
+        return res.once(ctx.status(200), ctx.xml(gameWithNumberAsName));
+      })
+    );
+
+    const response = await fetchBggCollection("mock_username", false);
+    expect(response.items.item[0].name.text).toBe("011");
   });
 });
