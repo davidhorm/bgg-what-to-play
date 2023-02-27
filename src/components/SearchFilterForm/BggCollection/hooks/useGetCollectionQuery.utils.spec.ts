@@ -195,12 +195,10 @@ describe(transformToBoardGame.name, () => {
   });
 });
 
-describe.only(fetchBggCollection.name, () => {
-  test("hello", async () => {
+describe(fetchBggCollection.name, () => {
+  test("WHEN <name>011</name>, THEN returns { name: { text: '011' } }", async () => {
     server.use(
       rest.get("https://bgg.cc/xmlapi2/collection", (req, res, ctx) => {
-        console.log("hello world?");
-
         const gameWithNumberAsName = `
 <items>
   <item objecttype="thing" objectid="93194" subtype="boardgame" collid="60952918">
