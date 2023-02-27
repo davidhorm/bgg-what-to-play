@@ -1,6 +1,6 @@
 {
   "name": "bgg-what-to-play",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Website to visualize your BGG collection by player count recommendation.",
   "keywords": [
     "vite",
@@ -39,8 +39,9 @@
     "@emotion/styled": "^11.10.5",
     "@mui/material": "^5.11.0",
     "@tanstack/react-query": "^4.20.4",
-    "fast-xml-parser": "^4.0.12",
+    "fast-xml-parser": "^4.1.3",
     "lodash-es": "^4.17.21",
+    "node-fetch": "^3.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-intersection-observer": "^9.4.1",
