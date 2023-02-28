@@ -1,10 +1,19 @@
 import * as _ from "lodash-es";
-import type { FilterControl } from "./useCollectionFilters";
+import {
+  getAriaLabel,
+  getQueryParamValue,
+  maybeSetQueryParam,
+} from "./slider-utils";
+import type { SliderControl } from "./useCollectionFilters";
 
 const QUERY_PARAM_PLAYER_COUNT = "playerCount";
 const DEFAULT_PLAYER_COUNT_MIN = 1;
 const DEFAULT_PLAYER_COUNT_MAX = Number.POSITIVE_INFINITY;
 const DEFAULT_PLAYER_COUNT_MAX_TICK = 11;
+const DEFAULT_RANGE = [DEFAULT_PLAYER_COUNT_MIN, DEFAULT_PLAYER_COUNT_MAX] as [
+  number,
+  number
+];
 
 const convertElevenToInfinity = (value: number) =>
   value >= 11 ? Number.POSITIVE_INFINITY : value;
@@ -13,7 +22,7 @@ const convertPlayerCountRangeQueryParamToValue = (
   value: string | null
 ): [number, number] => {
   if (!value) {
-    return [DEFAULT_PLAYER_COUNT_MIN, DEFAULT_PLAYER_COUNT_MAX];
+    return DEFAULT_RANGE;
   }
 
   const normalizedValue = value.includes("-") ? value : `${value}-${value}`;
@@ -44,53 +53,46 @@ const convertPlayerCountRangeQueryParamToValue = (
 
 const getInitialState = () =>
   convertPlayerCountRangeQueryParamToValue(
-    new URLSearchParams(document.location.search).get(
-      QUERY_PARAM_PLAYER_COUNT
-    ) || ""
+    getQueryParamValue(QUERY_PARAM_PLAYER_COUNT)
   );
 
-type PlayerCountState = ReturnType<typeof getInitialState>;
-
-const convertPlayerCountRangeValueToQueryParam = (
-  playerCountRange: PlayerCountState
-): string => {
-  const [minRange, maxRange] = playerCountRange;
-
-  return minRange === maxRange
-    ? minRange.toString()
-    : playerCountRange.join("-");
-};
-
-const getReducedState: FilterControl<PlayerCountState>["getReducedState"] = (
-  state,
-  payload
-) => {
+const getReducedState: SliderControl["getReducedState"] = (state, payload) => {
   const [minRange, maybeMaxRange] = payload;
   const maxRange = convertElevenToInfinity(maybeMaxRange);
   const playerCountRange = [minRange, maxRange] as [number, number];
   return { ...state, playerCountRange };
 };
 
-const setQueryParam: FilterControl<PlayerCountState>["setQueryParam"] = (
-  searchParams,
-  state
-) => {
-  // Only set the playerCount query param if not using the default values
-  if (
-    state.playerCountRange[0] !== DEFAULT_PLAYER_COUNT_MIN ||
-    state.playerCountRange[1] !== DEFAULT_PLAYER_COUNT_MAX
-  ) {
-    searchParams.set(
-      QUERY_PARAM_PLAYER_COUNT,
-      convertPlayerCountRangeValueToQueryParam(state.playerCountRange)
-    );
-  } else {
-    searchParams.delete(QUERY_PARAM_PLAYER_COUNT);
-  }
-};
+const setQueryParam: SliderControl["setQueryParam"] = (searchParams, state) =>
+  maybeSetQueryParam(
+    searchParams,
+    state.playerCountRange,
+    DEFAULT_RANGE,
+    QUERY_PARAM_PLAYER_COUNT
+  );
 
-export const playerCountRange: FilterControl<PlayerCountState> = {
+const getValueLabel = (value: number) =>
+  value > 10 ? "10+" : value.toString();
+
+const marks = Array.from({ length: 11 }, (_, i) => i + 1).map((value) => ({
+  value,
+  label: getValueLabel(value),
+}));
+
+const getSliderProps: SliderControl["getSliderProps"] = () => ({
+  getAriaLabel: getAriaLabel("Player Count"),
+  getAriaValueText: getValueLabel,
+  valueLabelFormat: getValueLabel,
+  min: DEFAULT_PLAYER_COUNT_MIN,
+  max: DEFAULT_PLAYER_COUNT_MAX_TICK,
+  marks,
+  scale: convertElevenToInfinity,
+});
+
+export const playerCountService: SliderControl = {
   getInitialState,
   getReducedState,
   setQueryParam,
+  getSliderLabel: () => "Filter by Player Count",
+  getSliderProps,
 };

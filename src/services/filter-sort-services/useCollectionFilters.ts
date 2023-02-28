@@ -1,9 +1,10 @@
-import { useReducer } from "react";
+import { useState, useReducer, ComponentProps } from "react";
+import Slider from "@mui/material/Slider";
 import { booleanQueryParam } from "./booleanQueryParam";
-import { complexityRange } from "./complexityRange";
-import { playerCountRange } from "./playerCountRange";
-import { playtimeRange } from "./playtimeRange";
-import { ratingsRange } from "./ratingsRange";
+import { complexityService } from "./complexityService";
+import { playerCountService } from "./playerCountService";
+import { playtimeService } from "./playtimeService";
+import { ratingsService } from "./ratingsService";
 import { showRatings } from "./showRatings";
 import { username } from "./username";
 
@@ -15,6 +16,13 @@ export type FilterControl<T> = {
     searchParams: URLSearchParams,
     state: CollectionFilterState
   ) => void;
+};
+
+export type SliderControl = FilterControl<[number, number]> & {
+  getSliderLabel: (filterState: CollectionFilterState) => string;
+  getSliderProps: (
+    filterState: CollectionFilterState
+  ) => ComponentProps<typeof Slider>;
 };
 
 /** Interface to abstract boolean filter controls. */
@@ -54,20 +62,20 @@ const initialFilterState = {
    * - Valid `minRange` values are 1-11.
    * - Valid `maxRange` values are 1-10, or Infinity;
    */
-  playerCountRange: playerCountRange.getInitialState(),
+  playerCountRange: playerCountService.getInitialState(),
 
   /**
    * The Play Time `[minRange, maxRange]` the user wants to filter the collection.
    * - Valid `minRange` values are 0-240.
    * - Valid `maxRange` values are 0-240, or Infinity;
    */
-  playtimeRange: playtimeRange.getInitialState(),
+  playtimeRange: playtimeService.getInitialState(),
 
   /**
    * The Complexity `[minRange, maxRange]` the user wants to filter the collection.
    * - Valid `minRange` and `maxRange` values are 1-5.
    */
-  complexityRange: complexityRange.getInitialState(),
+  complexityRange: complexityService.getInitialState(),
 
   /** If `true`, then show expansions in collection. */
   showExpansions: booleanQueryParam.getInitialState(
@@ -86,7 +94,7 @@ const initialFilterState = {
    * By default, will filter by Average Ratings. But will filter by User Rating if showRatings = "USER_RATING"
    * - Valid `minRange` and `maxRange` values are 1-10.
    */
-  ratingsRange: ratingsRange.getInitialState(),
+  ratingsRange: ratingsService.getInitialState(),
 
   /** If `true`, then show games where all of the filtered player counts are not recommended. */
   showNotRecommended: booleanQueryParam.getInitialState(
@@ -105,14 +113,14 @@ export type ActionHandler<T> = (
 ) => CollectionFilterState;
 
 const actions = {
-  SET_COMPLEXITY: complexityRange.getReducedState,
-  SET_PLAYER_COUNT_RANGE: playerCountRange.getReducedState,
-  SET_PLAYTIME_RANGE: playtimeRange.getReducedState,
+  SET_COMPLEXITY: complexityService.getReducedState,
+  SET_PLAYER_COUNT_RANGE: playerCountService.getReducedState,
+  SET_PLAYTIME_RANGE: playtimeService.getReducedState,
   SET_USERNAME: username.getReducedState,
 
   TOGGLE_SHOW_RATINGS: showRatings.getToggleShowRatings,
   SET_SHOW_RATINGS: showRatings.getReducedState,
-  SET_RATINGS: ratingsRange.getReducedState,
+  SET_RATINGS: ratingsService.getReducedState,
 
   TOGGLE_SHOW_EXPANSIONS: booleanQueryParam.getReducedState("showExpansions"),
   TOGGLE_SHOW_INVALID_PLAYER_COUNT: booleanQueryParam.getReducedState(
@@ -122,16 +130,43 @@ const actions = {
     booleanQueryParam.getReducedState("showNotRecommended"),
 };
 
+/**
+ * Collection of SliderControl and their action type to set their value.
+ * So that we can transform to `initialSliderValues` and `sliderControls`
+ */
+const sliderSetActions: Array<{
+  sliderControl: SliderControl;
+  setAction: keyof typeof actions;
+}> = [
+  {
+    sliderControl: playerCountService,
+    setAction: "SET_PLAYER_COUNT_RANGE",
+  },
+  { sliderControl: playtimeService, setAction: "SET_PLAYTIME_RANGE" },
+  { sliderControl: complexityService, setAction: "SET_COMPLEXITY" },
+  { sliderControl: ratingsService, setAction: "SET_RATINGS" },
+];
+
+/** Creates an array of initial states for the slider value local state */
+const initialSliderValues: Record<string, [number, number]> =
+  sliderSetActions.reduce(
+    (prevVal, currVal, index) => ({
+      ...prevVal,
+      [index]: currVal.sliderControl.getInitialState(),
+    }),
+    {}
+  );
+
 const maybeSetQueryParam = (state: CollectionFilterState) => {
   if (!state.username) return;
 
   const url = new URL(document.location.href);
 
   username.setQueryParam(url.searchParams, state);
-  playerCountRange.setQueryParam(url.searchParams, state);
-  playtimeRange.setQueryParam(url.searchParams, state);
-  complexityRange.setQueryParam(url.searchParams, state);
-  ratingsRange.setQueryParam(url.searchParams, state);
+  playerCountService.setQueryParam(url.searchParams, state);
+  playtimeService.setQueryParam(url.searchParams, state);
+  complexityService.setQueryParam(url.searchParams, state);
+  ratingsService.setQueryParam(url.searchParams, state);
   showRatings.setQueryParam(url.searchParams, state);
 
   booleanQueryParam.setQueryParam(
@@ -194,8 +229,42 @@ const reducer: ActionHandler<Action> = (
 
 export const useCollectionFilters = () => {
   const [filterState, filterDispatch] = useReducer(reducer, initialFilterState);
+  const [sliderValues, setSliderValues] = useState(initialSliderValues);
 
-  return { filterState, filterDispatch };
+  const sliderControls: Array<{
+    sliderLabel: string;
+    sliderProps: ComponentProps<typeof Slider>;
+  }> = sliderSetActions.map(
+    (
+      { sliderControl: { getSliderLabel, getSliderProps }, setAction },
+      index
+    ) => ({
+      sliderLabel: getSliderLabel(filterState),
+      sliderProps: {
+        ...getSliderProps(filterState),
+
+        /** Local state of the UI */
+        value: sliderValues[index],
+
+        /** When changing, then only set the local state to update the UI */
+        onChange: (_, value) =>
+          setSliderValues({
+            ...sliderValues,
+            [index]: value as [number, number],
+          }),
+
+        /** When the change is committed (i.e. Mouse Up), then update the reducer state */
+        onChangeCommitted: (_, value) => {
+          filterDispatch({
+            type: setAction as any,
+            payload: value as [number, number],
+          });
+        },
+      },
+    })
+  );
+
+  return { filterState, filterDispatch, sliderControls };
 };
 
 export type CollectionFilterReducer = ReturnType<typeof useCollectionFilters>;

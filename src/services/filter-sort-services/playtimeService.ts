@@ -1,9 +1,18 @@
-import type { FilterControl } from "./useCollectionFilters";
+import {
+  getAriaLabel,
+  getQueryParamValue,
+  maybeSetQueryParam,
+} from "./slider-utils";
+import type { SliderControl } from "./useCollectionFilters";
 
 const QUERY_PARAM_PLAYTIME = "playtime";
 const DEFAULT_PLAYTIME_MIN = 0;
 const DEFAULT_PLAYTIME_MAX = Number.POSITIVE_INFINITY;
 const DEFAULT_PLAYTIME_MAX_TICK = 255;
+const DEFAULT_RANGE = [DEFAULT_PLAYTIME_MIN, DEFAULT_PLAYTIME_MAX] as [
+  number,
+  number
+];
 
 const convertGreaterThan240To241 = (value: number) =>
   value > 240 ? 241 : value;
@@ -15,7 +24,7 @@ const convertPlaytimeRangeQueryParamToValue = (
   value: string | null
 ): [number, number] => {
   if (!value) {
-    return [DEFAULT_PLAYTIME_MIN, DEFAULT_PLAYTIME_MAX];
+    return DEFAULT_RANGE;
   }
 
   const normalizedValue = value.includes("-") ? value : `${value}-${value}`;
@@ -41,24 +50,10 @@ const convertPlaytimeRangeQueryParamToValue = (
 
 const getInitialState = () =>
   convertPlaytimeRangeQueryParamToValue(
-    new URLSearchParams(document.location.search).get(QUERY_PARAM_PLAYTIME) ||
-      ""
+    getQueryParamValue(QUERY_PARAM_PLAYTIME)
   );
 
-type TimeRangeState = ReturnType<typeof getInitialState>;
-
-const convertTimeRangeValueToQueryParam = (
-  timeRange: TimeRangeState
-): string => {
-  const [minRange, maxRange] = timeRange;
-
-  return minRange === maxRange ? minRange.toString() : timeRange.join("-");
-};
-
-const getReducedState: FilterControl<TimeRangeState>["getReducedState"] = (
-  state,
-  payload
-) => {
+const getReducedState: SliderControl["getReducedState"] = (state, payload) => {
   const [maybeMinRange, maybeMaxRange] = payload;
   const minRange = convertGreaterThan240To241(maybeMinRange);
   const maxRange = convertGreaterThan240ToInfinity(maybeMaxRange);
@@ -66,26 +61,42 @@ const getReducedState: FilterControl<TimeRangeState>["getReducedState"] = (
   return { ...state, playtimeRange };
 };
 
-const setQueryParam: FilterControl<TimeRangeState>["setQueryParam"] = (
-  searchParams,
-  state
-) => {
-  // Only set the playtime query param if not using the default values
-  if (
-    state.playtimeRange[0] !== DEFAULT_PLAYTIME_MIN ||
-    state.playtimeRange[1] !== DEFAULT_PLAYTIME_MAX
-  ) {
-    searchParams.set(
-      QUERY_PARAM_PLAYTIME,
-      convertTimeRangeValueToQueryParam(state.playtimeRange)
-    );
-  } else {
-    searchParams.delete(QUERY_PARAM_PLAYTIME);
-  }
-};
+const setQueryParam: SliderControl["setQueryParam"] = (searchParams, state) =>
+  maybeSetQueryParam(
+    searchParams,
+    state.playtimeRange,
+    DEFAULT_RANGE,
+    QUERY_PARAM_PLAYTIME
+  );
 
-export const playtimeRange: FilterControl<TimeRangeState> = {
+const getValueLabel = (value: number) =>
+  value > 240 ? "240+" : value.toString();
+
+const marks = Array.from({ length: 18 }, (_, index) => index * 15).map(
+  (value) => ({
+    value,
+    label: [0, 60, 120, 180, 240, 255].includes(value)
+      ? getValueLabel(value)
+      : "",
+  })
+);
+
+const getSliderProps: SliderControl["getSliderProps"] = () => ({
+  getAriaLabel: getAriaLabel("Playtime"),
+  getAriaValueText: getValueLabel,
+  valueLabelFormat: getValueLabel,
+  valueLabelDisplay: "auto",
+  min: DEFAULT_PLAYTIME_MIN,
+  max: DEFAULT_PLAYTIME_MAX_TICK,
+  marks: marks,
+  step: 15,
+  scale: convertGreaterThan240ToInfinity,
+});
+
+export const playtimeService: SliderControl = {
   getInitialState,
   getReducedState,
   setQueryParam,
+  getSliderLabel: () => "Filter by Time (minutes)",
+  getSliderProps,
 };
