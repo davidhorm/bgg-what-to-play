@@ -4,7 +4,7 @@ test.describe("Filter Controls and Query Parameters", () => {
   test("WHEN no query parameters defined, THEN set the filter controls to their default values", async ({
     page,
   }) => {
-    await page.goto("/");
+    await page.goto("./");
 
     // Assert textboxes and sliders default values
     for await (const { label, defaultValue, valueText } of [
@@ -111,7 +111,7 @@ test.describe("Filter Controls and Query Parameters", () => {
       )
       .join("&");
 
-    await page.goto(`/?${queryParamUrl}`);
+    await page.goto(`./?${queryParamUrl}`);
 
     for await (const {
       label,
@@ -172,7 +172,7 @@ test.describe("Filter Controls and Query Parameters", () => {
       .map(({ queryParam, value }) => `${queryParam}=${value}`)
       .join("&");
 
-    await page.goto(`/?${queryParamUrl}`);
+    await page.goto(`./?${queryParamUrl}`);
 
     for await (const { label, value } of queryParams) {
       await expect(page.getByLabel(`Minimum ${label}`)).toHaveValue(value);
@@ -207,7 +207,7 @@ test.describe("Filter Controls and Query Parameters", () => {
       )
       .join("&");
 
-    await page.goto(`/?username=davidhorm&${queryParamUrl}`);
+    await page.goto(`./?username=davidhorm&${queryParamUrl}`);
 
     for await (const { label, sliderValue, sliderValueText } of queryParams) {
       const minSlider = page.getByLabel(`Minimum ${label}`);
@@ -260,7 +260,7 @@ test.describe("Filter Controls and Query Parameters", () => {
       test(`WHEN navigating to '${queryParam}', THEN set filter controls to ${ratingType} Ratings`, async ({
         page,
       }) => {
-        await page.goto(`/?username=davidhorm${queryParam}`);
+        await page.goto(`./?username=davidhorm${queryParam}`);
 
         await expect(
           page.getByLabel(`Minimum ${ratingType} Ratings`)
@@ -289,7 +289,7 @@ test.describe("Filter Controls and Query Parameters", () => {
   test("WHEN user searches in search form, THEN url reflects filter params", async ({
     page,
   }) => {
-    await page.goto("/");
+    await page.goto("./");
 
     // Fill out the searchbox, and tick the sliders in one
     for await (const { label, fill, press } of [
