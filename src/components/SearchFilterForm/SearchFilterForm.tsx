@@ -8,11 +8,11 @@ import { UsernameInput } from "./UsernameInput";
 
 export const SearchFilterForm = () => {
   const filter = useCollectionFilters();
-  const { sliderControls } = filter;
+  const { usernameControl, sliderControls } = filter;
 
   return (
     <main className="p-4">
-      {!filter.filterState.username && <Header />}
+      {!usernameControl.username && <Header />}
 
       <Paper
         elevation={1}
@@ -20,7 +20,7 @@ export const SearchFilterForm = () => {
         component="section"
         aria-label="Filter controls"
       >
-        <UsernameInput filter={filter} />
+        <UsernameInput {...usernameControl} />
 
         {sliderControls.map(({ sliderLabel, sliderProps }) => (
           <div key={sliderLabel} className="mt-2 mr-6 flex flex-col">

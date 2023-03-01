@@ -5,20 +5,17 @@ import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import { ReactComponent as MagnifyingGlassIcon } from "./magnifying-glass.svg";
 
-type Props = {
-  filter: CollectionFilterReducer;
-};
-
 export const UsernameInput = ({
-  filter: { filterState, filterDispatch },
-}: Props) => {
-  const [usernameInput, setUsernameInput] = useState(filterState.username);
+  username,
+  setUsername,
+}: CollectionFilterReducer["usernameControl"]) => {
+  const [usernameInput, setUsernameInput] = useState(username);
 
   return (
     <form
       role="search"
       onSubmit={(e) => {
-        filterDispatch({ type: "SET_USERNAME", payload: usernameInput });
+        setUsername(usernameInput);
         e.preventDefault();
       }}
     >

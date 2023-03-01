@@ -264,7 +264,16 @@ export const useCollectionFilters = () => {
     })
   );
 
-  return { filterState, filterDispatch, sliderControls };
+  return {
+    filterState,
+    filterDispatch,
+    usernameControl: {
+      username: filterState.username,
+      setUsername: (payload: string) =>
+        filterDispatch({ type: "SET_USERNAME", payload }),
+    },
+    sliderControls,
+  };
 };
 
 export type CollectionFilterReducer = ReturnType<typeof useCollectionFilters>;
