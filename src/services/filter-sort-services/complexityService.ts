@@ -48,7 +48,6 @@ const getReducedState: SliderControl["getReducedState"] = (state, payload) => {
   return { ...state, complexityRange };
 };
 
-// TODO: can this also be in utils?
 const setQueryParam: SliderControl["setQueryParam"] = (searchParams, state) =>
   maybeSetQueryParam(
     searchParams,
