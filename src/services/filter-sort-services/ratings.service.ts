@@ -5,8 +5,8 @@ import {
   getValueLabel,
   maybeSetQueryParam,
   isBoardGameRangeWithinFilterRange,
-} from "./slider-utils";
-import type { SliderControl } from "./useCollectionFilters";
+} from "./slider-control.utils";
+import type { SliderFilterControl } from "./useCollectionFilters";
 
 const QUERY_PARAM_RATINGS = "ratings";
 const DEFAULT_RATINGS_MIN = 1;
@@ -42,13 +42,19 @@ const convertRangeQueryParamToValue = (
 const getInitialState = () =>
   convertRangeQueryParamToValue(getQueryParamValue(QUERY_PARAM_RATINGS));
 
-const getReducedState: SliderControl["getReducedState"] = (state, payload) => {
+const getReducedState: SliderFilterControl["getReducedState"] = (
+  state,
+  payload
+) => {
   const [minRange, maxRange] = payload;
   const ratingsRange = [minRange, maxRange] as [number, number];
   return { ...state, ratingsRange };
 };
 
-const setQueryParam: SliderControl["setQueryParam"] = (searchParams, state) =>
+const setQueryParam: SliderFilterControl["setQueryParam"] = (
+  searchParams,
+  state
+) =>
   maybeSetQueryParam(
     searchParams,
     state.ratingsRange,
@@ -74,7 +80,9 @@ const marks = Array.from({ length: 101 }, (_, index) => ({
   label: index % 10 === 0 ? (index / 10).toString() : "",
 }));
 
-const getSliderProps: SliderControl["getSliderProps"] = (filterState) => ({
+const getSliderProps: SliderFilterControl["getSliderProps"] = (
+  filterState
+) => ({
   valueLabelDisplay: "auto",
   getAriaLabel: getAriaLabel(filterState),
   getAriaValueText: getValueLabel,
@@ -85,7 +93,7 @@ const getSliderProps: SliderControl["getSliderProps"] = (filterState) => ({
   marks,
 });
 
-const isWithinRange: SliderControl["isWithinRange"] =
+const isWithinRange: SliderFilterControl["isWithinRange"] =
   (filterState) => (game) => {
     const userOrAverageRating =
       filterState.showRatings === "USER_RATING"
@@ -103,7 +111,7 @@ const isWithinRange: SliderControl["isWithinRange"] =
     );
   };
 
-export const ratingsService: SliderControl = {
+export const ratingsService: SliderFilterControl = {
   getInitialState,
   getReducedState,
   setQueryParam,

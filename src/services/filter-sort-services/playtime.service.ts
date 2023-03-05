@@ -3,8 +3,8 @@ import {
   getQueryParamValue,
   maybeSetQueryParam,
   isBoardGameRangeWithinFilterRange,
-} from "./slider-utils";
-import type { SliderControl } from "./useCollectionFilters";
+} from "./slider-control.utils";
+import type { SliderFilterControl } from "./useCollectionFilters";
 
 const QUERY_PARAM_PLAYTIME = "playtime";
 const DEFAULT_PLAYTIME_MIN = 0;
@@ -54,7 +54,10 @@ const getInitialState = () =>
     getQueryParamValue(QUERY_PARAM_PLAYTIME)
   );
 
-const getReducedState: SliderControl["getReducedState"] = (state, payload) => {
+const getReducedState: SliderFilterControl["getReducedState"] = (
+  state,
+  payload
+) => {
   const [maybeMinRange, maybeMaxRange] = payload;
   const minRange = convertGreaterThan240To241(maybeMinRange);
   const maxRange = convertGreaterThan240ToInfinity(maybeMaxRange);
@@ -62,7 +65,10 @@ const getReducedState: SliderControl["getReducedState"] = (state, payload) => {
   return { ...state, playtimeRange };
 };
 
-const setQueryParam: SliderControl["setQueryParam"] = (searchParams, state) =>
+const setQueryParam: SliderFilterControl["setQueryParam"] = (
+  searchParams,
+  state
+) =>
   maybeSetQueryParam(
     searchParams,
     state.playtimeRange,
@@ -82,7 +88,7 @@ const marks = Array.from({ length: 18 }, (_, index) => index * 15).map(
   })
 );
 
-const getSliderProps: SliderControl["getSliderProps"] = () => ({
+const getSliderProps: SliderFilterControl["getSliderProps"] = () => ({
   getAriaLabel: getAriaLabel("Playtime"),
   getAriaValueText: getValueLabel,
   valueLabelFormat: getValueLabel,
@@ -94,13 +100,14 @@ const getSliderProps: SliderControl["getSliderProps"] = () => ({
   scale: convertGreaterThan240ToInfinity,
 });
 
-const isWithinRange: SliderControl["isWithinRange"] = (filterState) => (game) =>
-  isBoardGameRangeWithinFilterRange(
-    [game.minPlaytime, game.maxPlaytime],
-    filterState.playtimeRange
-  );
+const isWithinRange: SliderFilterControl["isWithinRange"] =
+  (filterState) => (game) =>
+    isBoardGameRangeWithinFilterRange(
+      [game.minPlaytime, game.maxPlaytime],
+      filterState.playtimeRange
+    );
 
-export const playtimeService: SliderControl = {
+export const playtimeService: SliderFilterControl = {
   getInitialState,
   getReducedState,
   setQueryParam,

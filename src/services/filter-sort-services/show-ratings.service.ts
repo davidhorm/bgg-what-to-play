@@ -41,7 +41,7 @@ const setQueryParam: FilterControl<RatingVisibility>["setQueryParam"] = (
   }
 };
 
-export const showRatings: FilterControl<RatingVisibility> & {
+export const showRatingsService: FilterControl<RatingVisibility> & {
   getToggleShowRatings: (state: CollectionFilterState) => CollectionFilterState;
 } = {
   getInitialState,

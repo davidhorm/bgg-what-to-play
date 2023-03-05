@@ -2,12 +2,12 @@ import { useReducer, ComponentProps } from "react";
 import type { SimpleBoardGame } from "@/types";
 import Slider from "@mui/material/Slider";
 import { booleanQueryParam } from "./booleanQueryParam";
-import { complexityService } from "./complexityService";
-import { playerCountService } from "./playerCountService";
-import { playtimeService } from "./playtimeService";
-import { ratingsService } from "./ratingsService";
-import { showRatings } from "./showRatings";
-import { username } from "./username";
+import { complexityService } from "./complexity.service";
+import { playerCountService } from "./player-count.service";
+import { playtimeService } from "./playtime.service";
+import { ratingsService } from "./ratings.service";
+import { showRatingsService } from "./show-ratings.service";
+import { usernameService } from "./username.service";
 
 /** Interface to abstract filter control logic. Needs to be able to provide initial state, and a reducer to set state */
 export type FilterControl<T> = {
@@ -19,7 +19,7 @@ export type FilterControl<T> = {
   ) => void;
 };
 
-export type SliderControl = FilterControl<[number, number]> & {
+export type SliderFilterControl = FilterControl<[number, number]> & {
   getSliderLabel: (filterState: CollectionFilterState) => string;
   getSliderProps: (
     filterState: CollectionFilterState
@@ -54,7 +54,7 @@ const QUERY_PARAMS = {
 
 const initialFilterState = {
   /** The username defined in the query param, or submitted in the input. */
-  username: username.getInitialState(),
+  username: usernameService.getInitialState(),
 
   /** If `true`, then show the invalid Player Count outside of the game's actual min/max Player Count. */
   showInvalidPlayerCount: booleanQueryParam.getInitialState(
@@ -91,7 +91,7 @@ const initialFilterState = {
    * If `"AVERAGE_RATING"`, then only show the Average Rating in the card (and use in filtering)
    * If `"USER_RATING"`, then only show the User Rating in the card (and use in filtering)
    */
-  showRatings: showRatings.getInitialState(),
+  showRatings: showRatingsService.getInitialState(),
 
   /**
    * The Ratings `[minRange, maxRange]` the user wants to filter the collection.
@@ -120,10 +120,10 @@ const actions = {
   SET_COMPLEXITY: complexityService.getReducedState,
   SET_PLAYER_COUNT_RANGE: playerCountService.getReducedState,
   SET_PLAYTIME_RANGE: playtimeService.getReducedState,
-  SET_USERNAME: username.getReducedState,
+  SET_USERNAME: usernameService.getReducedState,
 
-  TOGGLE_SHOW_RATINGS: showRatings.getToggleShowRatings,
-  SET_SHOW_RATINGS: showRatings.getReducedState,
+  TOGGLE_SHOW_RATINGS: showRatingsService.getToggleShowRatings,
+  SET_SHOW_RATINGS: showRatingsService.getReducedState,
   SET_RATINGS: ratingsService.getReducedState,
 
   TOGGLE_SHOW_EXPANSIONS: booleanQueryParam.getReducedState("showExpansions"),
@@ -139,7 +139,7 @@ const actions = {
  * So that we can transform to `initialSliderValues` and `sliderControls`
  */
 const sliderSetActions: Array<{
-  sliderControl: SliderControl;
+  sliderControl: SliderFilterControl;
   setAction: keyof typeof actions;
 }> = [
   {
@@ -168,12 +168,12 @@ const maybeSetQueryParam = (state: CollectionFilterState) => {
 
   const url = new URL(document.location.href);
 
-  username.setQueryParam(url.searchParams, state);
+  usernameService.setQueryParam(url.searchParams, state);
   playerCountService.setQueryParam(url.searchParams, state);
   playtimeService.setQueryParam(url.searchParams, state);
   complexityService.setQueryParam(url.searchParams, state);
   ratingsService.setQueryParam(url.searchParams, state);
-  showRatings.setQueryParam(url.searchParams, state);
+  showRatingsService.setQueryParam(url.searchParams, state);
 
   booleanQueryParam.setQueryParam(
     url.searchParams,

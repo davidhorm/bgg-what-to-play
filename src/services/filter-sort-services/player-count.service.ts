@@ -4,8 +4,8 @@ import {
   getQueryParamValue,
   maybeSetQueryParam,
   isBoardGameRangeWithinFilterRange,
-} from "./slider-utils";
-import type { SliderControl } from "./useCollectionFilters";
+} from "./slider-control.utils";
+import type { SliderFilterControl } from "./useCollectionFilters";
 
 const QUERY_PARAM_PLAYER_COUNT = "playerCount";
 const DEFAULT_PLAYER_COUNT_MIN = 1;
@@ -57,14 +57,20 @@ const getInitialState = () =>
     getQueryParamValue(QUERY_PARAM_PLAYER_COUNT)
   );
 
-const getReducedState: SliderControl["getReducedState"] = (state, payload) => {
+const getReducedState: SliderFilterControl["getReducedState"] = (
+  state,
+  payload
+) => {
   const [minRange, maybeMaxRange] = payload;
   const maxRange = convertElevenToInfinity(maybeMaxRange);
   const playerCountRange = [minRange, maxRange] as [number, number];
   return { ...state, playerCountRange };
 };
 
-const setQueryParam: SliderControl["setQueryParam"] = (searchParams, state) =>
+const setQueryParam: SliderFilterControl["setQueryParam"] = (
+  searchParams,
+  state
+) =>
   maybeSetQueryParam(
     searchParams,
     state.playerCountRange,
@@ -80,7 +86,7 @@ const marks = Array.from({ length: 11 }, (_, i) => i + 1).map((value) => ({
   label: getValueLabel(value),
 }));
 
-const getSliderProps: SliderControl["getSliderProps"] = () => ({
+const getSliderProps: SliderFilterControl["getSliderProps"] = () => ({
   getAriaLabel: getAriaLabel("Player Count"),
   getAriaValueText: getValueLabel,
   valueLabelFormat: getValueLabel,
@@ -90,15 +96,16 @@ const getSliderProps: SliderControl["getSliderProps"] = () => ({
   scale: convertElevenToInfinity,
 });
 
-const isWithinRange: SliderControl["isWithinRange"] = (filterState) => (game) =>
-  isBoardGameRangeWithinFilterRange(
-    [game.minPlayers, game.maxPlayers],
-    filterState.playerCountRange
-  ) ||
-  // handle edge case for id = 40567
-  (filterState.showInvalidPlayerCount && game.minPlayers === 0);
+const isWithinRange: SliderFilterControl["isWithinRange"] =
+  (filterState) => (game) =>
+    isBoardGameRangeWithinFilterRange(
+      [game.minPlayers, game.maxPlayers],
+      filterState.playerCountRange
+    ) ||
+    // handle edge case for id = 40567
+    (filterState.showInvalidPlayerCount && game.minPlayers === 0);
 
-export const playerCountService: SliderControl = {
+export const playerCountService: SliderFilterControl = {
   getInitialState,
   getReducedState,
   setQueryParam,
