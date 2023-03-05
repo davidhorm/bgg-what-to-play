@@ -4,6 +4,7 @@ import {
   getQueryParamValue,
   getValueLabel,
   maybeSetQueryParam,
+  isBoardGameRangeWithinFilterRange,
 } from "./slider-utils";
 import type { SliderControl } from "./useCollectionFilters";
 
@@ -84,10 +85,29 @@ const getSliderProps: SliderControl["getSliderProps"] = (filterState) => ({
   marks,
 });
 
+const isWithinRange: SliderControl["isWithinRange"] =
+  (filterState) => (game) => {
+    const userOrAverageRating =
+      filterState.showRatings === "USER_RATING"
+        ? game.userRating
+        : game.averageRating;
+
+    const rating =
+      typeof userOrAverageRating === "number"
+        ? userOrAverageRating
+        : DEFAULT_RATINGS_MIN;
+
+    return isBoardGameRangeWithinFilterRange(
+      [rating, rating],
+      filterState.ratingsRange
+    );
+  };
+
 export const ratingsService: SliderControl = {
   getInitialState,
   getReducedState,
   setQueryParam,
   getSliderLabel: (filterState) => `Filter by ${getLabelByFilter(filterState)}`,
   getSliderProps,
+  isWithinRange,
 };

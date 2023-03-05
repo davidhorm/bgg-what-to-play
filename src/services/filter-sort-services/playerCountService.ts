@@ -3,6 +3,7 @@ import {
   getAriaLabel,
   getQueryParamValue,
   maybeSetQueryParam,
+  isBoardGameRangeWithinFilterRange,
 } from "./slider-utils";
 import type { SliderControl } from "./useCollectionFilters";
 
@@ -89,10 +90,19 @@ const getSliderProps: SliderControl["getSliderProps"] = () => ({
   scale: convertElevenToInfinity,
 });
 
+const isWithinRange: SliderControl["isWithinRange"] = (filterState) => (game) =>
+  isBoardGameRangeWithinFilterRange(
+    [game.minPlayers, game.maxPlayers],
+    filterState.playerCountRange
+  ) ||
+  // handle edge case for id = 40567
+  (filterState.showInvalidPlayerCount && game.minPlayers === 0);
+
 export const playerCountService: SliderControl = {
   getInitialState,
   getReducedState,
   setQueryParam,
   getSliderLabel: () => "Filter by Player Count",
   getSliderProps,
+  isWithinRange,
 };

@@ -1,16 +1,16 @@
-import type { CollectionFilterState } from "@/types";
+import type { CollectionFilterReducer } from "@/types";
 import { AcceptedResponse } from "./AcceptedResponse";
-import { applyFiltersAndSorts } from "./BggCollection.utils";
 import { FilterStatus } from "./FilterStatus";
 import { GameCard } from "./GameCard";
 import { MissingSomethingResponse } from "./MissingSomethingResponse";
 import { useGetCollectionQuery } from "./hooks/useGetCollectionQuery";
 
-type Props = {
-  filterState: CollectionFilterState;
-};
+type Props = Pick<
+  CollectionFilterReducer,
+  "filterState" | "applyFiltersAndSorts"
+>;
 
-export const BggCollection = ({ filterState }: Props) => {
+export const BggCollection = ({ filterState, applyFiltersAndSorts }: Props) => {
   const { data, pubdate, loadingMessage, error } = useGetCollectionQuery(
     filterState.username,
     filterState.showExpansions
@@ -25,7 +25,7 @@ export const BggCollection = ({ filterState }: Props) => {
       <MissingSomethingResponse message="You have zero games in your collection?" />
     );
 
-  const filteredGames = applyFiltersAndSorts(data, filterState);
+  const filteredGames = applyFiltersAndSorts(data);
 
   return (
     <div>

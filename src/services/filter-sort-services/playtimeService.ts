@@ -2,6 +2,7 @@ import {
   getAriaLabel,
   getQueryParamValue,
   maybeSetQueryParam,
+  isBoardGameRangeWithinFilterRange,
 } from "./slider-utils";
 import type { SliderControl } from "./useCollectionFilters";
 
@@ -93,10 +94,17 @@ const getSliderProps: SliderControl["getSliderProps"] = () => ({
   scale: convertGreaterThan240ToInfinity,
 });
 
+const isWithinRange: SliderControl["isWithinRange"] = (filterState) => (game) =>
+  isBoardGameRangeWithinFilterRange(
+    [game.minPlaytime, game.maxPlaytime],
+    filterState.playtimeRange
+  );
+
 export const playtimeService: SliderControl = {
   getInitialState,
   getReducedState,
   setQueryParam,
   getSliderLabel: () => "Filter by Time (minutes)",
   getSliderProps,
+  isWithinRange,
 };

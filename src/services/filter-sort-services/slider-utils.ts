@@ -25,3 +25,18 @@ export const maybeSetQueryParam = (
     searchParams.delete(queryParamKey);
   }
 };
+
+export const isBoardGameRangeWithinFilterRange = (
+  boardgameRange: [number, number],
+  filterRange: [number, number]
+): boolean => {
+  const [boardgameMin, boardgameMax] = boardgameRange;
+  const [filterMin, filterMax] = filterRange;
+
+  return (
+    (filterMin <= boardgameMin && boardgameMin <= filterMax) ||
+    (filterMin <= boardgameMax && boardgameMax <= filterMax) ||
+    (boardgameMin <= filterMin && filterMin <= boardgameMax) ||
+    (boardgameMin <= filterMax && filterMax <= boardgameMax)
+  );
+};

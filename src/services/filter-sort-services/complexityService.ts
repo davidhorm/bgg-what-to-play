@@ -4,6 +4,7 @@ import {
   getQueryParamValue,
   getValueLabel,
   maybeSetQueryParam,
+  isBoardGameRangeWithinFilterRange,
 } from "./slider-utils";
 import type { SliderControl } from "./useCollectionFilters";
 
@@ -72,10 +73,17 @@ const getSliderProps: SliderControl["getSliderProps"] = () => ({
   marks,
 });
 
+const isWithinRange: SliderControl["isWithinRange"] = (filterState) => (game) =>
+  isBoardGameRangeWithinFilterRange(
+    [game.averageWeight, game.averageWeight],
+    filterState.complexityRange
+  );
+
 export const complexityService: SliderControl = {
   getInitialState,
   getReducedState,
   setQueryParam,
   getSliderLabel: () => "Filter by Complexity",
   getSliderProps,
+  isWithinRange,
 };

@@ -1,4 +1,5 @@
-import { useState, useReducer, ComponentProps } from "react";
+import { useReducer, ComponentProps } from "react";
+import type { SimpleBoardGame } from "@/types";
 import Slider from "@mui/material/Slider";
 import { booleanQueryParam } from "./booleanQueryParam";
 import { complexityService } from "./complexityService";
@@ -23,6 +24,9 @@ export type SliderControl = FilterControl<[number, number]> & {
   getSliderProps: (
     filterState: CollectionFilterState
   ) => ComponentProps<typeof Slider>;
+  isWithinRange: (
+    filterState: CollectionFilterState
+  ) => (game: SimpleBoardGame) => boolean;
 };
 
 /** Interface to abstract boolean filter controls. */
@@ -157,6 +161,8 @@ const initialSliderValues: Record<string, [number, number]> =
     {}
   );
 
+//#region reducer
+
 const maybeSetQueryParam = (state: CollectionFilterState) => {
   if (!state.username) return;
 
@@ -227,31 +233,158 @@ const reducer: ActionHandler<Action> = (
   return newState;
 };
 
+//#endregion reducer
+
+//#region apply
+
+const maybeOutputList =
+  <T extends SimpleBoardGame>(
+    filterState: CollectionFilterState,
+    groupLabel: string
+  ) =>
+  (game: T, index: number, array: T[]) => {
+    if (filterState.isDebug && index === 0) {
+      console.groupCollapsed(groupLabel);
+      console.table(array.map(({ id, name }) => ({ id, name })));
+      console.groupEnd();
+    }
+
+    return game;
+  };
+
+const maybeShowExpansions =
+  (filterState: CollectionFilterState) => (game: SimpleBoardGame) => {
+    if (filterState.showExpansions) return true;
+
+    return game.type === "boardgame";
+  };
+
+//#region maybeShowInvalidPlayerCount
+
+const removeRecsLessThan =
+  (minPlayers: SimpleBoardGame["minPlayers"]) =>
+  (rec: SimpleBoardGame["recommendedPlayerCount"][number]): boolean =>
+    rec.playerCountValue >= minPlayers;
+
+const removeRecsMoreThan =
+  (maxPlayers: SimpleBoardGame["maxPlayers"]) =>
+  (rec: SimpleBoardGame["recommendedPlayerCount"][number]): boolean =>
+    rec.playerCountValue <= maxPlayers;
+
+const maybeShowInvalidPlayerCount =
+  (filterState: CollectionFilterState) =>
+  (game: SimpleBoardGame): SimpleBoardGame =>
+    filterState.showInvalidPlayerCount
+      ? game
+      : {
+          ...game,
+          recommendedPlayerCount: game.recommendedPlayerCount
+            .filter(removeRecsLessThan(game.minPlayers))
+            .filter(removeRecsMoreThan(game.maxPlayers)),
+        };
+
+//#endregion maybeShowInvalidPlayerCount
+
+/** Used to determine which bar to highlight in the graph */
+const addIsPlayerCountWithinRange =
+  (filterState: CollectionFilterState) => (game: SimpleBoardGame) => {
+    const [minFilterCount, maxFilterCount] = filterState.playerCountRange;
+
+    return {
+      ...game,
+
+      /** Board Game's recommended player count according to BGG poll */
+      recommendedPlayerCount: game.recommendedPlayerCount.map((rec) => ({
+        ...rec,
+
+        /** Is `true` if the Poll's Player Count value is within the filter's Player Count Range. */
+        isPlayerCountWithinRange:
+          minFilterCount <= rec.playerCountValue &&
+          rec.playerCountValue <= maxFilterCount,
+      })),
+    };
+  };
+
+const maybeShowNotRecommended =
+  (filterState: CollectionFilterState) =>
+  (game: ReturnType<ReturnType<typeof addIsPlayerCountWithinRange>>) =>
+    filterState.showNotRecommended || filterState.showInvalidPlayerCount
+      ? true
+      : game.recommendedPlayerCount.filter(
+          (rec) =>
+            rec.isPlayerCountWithinRange &&
+            (rec.NotRecommendedPercent <= 50 ||
+              Number.isNaN(rec.NotRecommendedPercent)) // Show games even if no data because technically not "not rec'd"
+        ).length > 0;
+
+//#region maybeSortByScore
+
+const calcSortScoreSum = (
+  game: SimpleBoardGame,
+  minRange: number,
+  maxRange: number
+): number =>
+  game.recommendedPlayerCount
+    .filter(
+      (g) => minRange <= g.playerCountValue && g.playerCountValue <= maxRange
+    )
+    .reduce((prev, curr) => curr.sortScore + prev, 0);
+
+const maybeSortByScore =
+  (filterState: CollectionFilterState) =>
+  (gameA: SimpleBoardGame, gameB: SimpleBoardGame): number => {
+    // if using non-default player range, then sort by score
+    const [minRange, maxRange] = filterState.playerCountRange;
+    if (minRange !== 1 || maxRange !== Number.POSITIVE_INFINITY) {
+      return (
+        calcSortScoreSum(gameB, minRange, maxRange) -
+        calcSortScoreSum(gameA, minRange, maxRange)
+      );
+    }
+
+    // else sort by game name by default.
+    return gameA.name.localeCompare(gameB.name);
+  };
+
+//#endregion maybeSortByScore
+
+export const applyFiltersAndSorts =
+  (filterState: CollectionFilterState) => (games: SimpleBoardGame[]) =>
+    games
+      ?.map(maybeOutputList(filterState, "All Games"))
+      .filter(maybeShowExpansions(filterState)) // Show as many things as needed from here
+      .map(maybeOutputList(filterState, "maybeShowExpansions"))
+      .map(maybeShowInvalidPlayerCount(filterState))
+      .filter(playerCountService.isWithinRange(filterState)) // Start removing things as needed from here
+      .map(maybeOutputList(filterState, "isMinMaxPlayerRangeWithinRange"))
+      .filter(playtimeService.isWithinRange(filterState))
+      .map(maybeOutputList(filterState, "isPlaytimeWithinRange"))
+      .filter(complexityService.isWithinRange(filterState))
+      .map(maybeOutputList(filterState, "isComplexityWithinRange"))
+      .filter(ratingsService.isWithinRange(filterState))
+      .map(maybeOutputList(filterState, "isRatingsWithinRange"))
+      .map(addIsPlayerCountWithinRange(filterState)) // Add any calculations from here
+      .filter(maybeShowNotRecommended(filterState)) // But do one more filter based on isPlayerCountWithinRange
+      .map(maybeOutputList(filterState, "maybeShowNotRecommended"))
+      .sort(maybeSortByScore(filterState));
+
+export type BoardGame = ReturnType<
+  ReturnType<typeof applyFiltersAndSorts>
+>[number];
+
+//#endregion apply
+
 export const useCollectionFilters = () => {
   const [filterState, filterDispatch] = useReducer(reducer, initialFilterState);
-  const [sliderValues, setSliderValues] = useState(initialSliderValues);
 
   const sliderControls: Array<{
     sliderLabel: string;
     sliderProps: ComponentProps<typeof Slider>;
   }> = sliderSetActions.map(
-    (
-      { sliderControl: { getSliderLabel, getSliderProps }, setAction },
-      index
-    ) => ({
+    ({ sliderControl: { getSliderLabel, getSliderProps }, setAction }) => ({
       sliderLabel: getSliderLabel(filterState),
       sliderProps: {
         ...getSliderProps(filterState),
-
-        /** Local state of the UI */
-        value: sliderValues[index],
-
-        /** When changing, then only set the local state to update the UI */
-        onChange: (_, value) =>
-          setSliderValues({
-            ...sliderValues,
-            [index]: value as [number, number],
-          }),
 
         /** When the change is committed (i.e. Mouse Up), then update the reducer state */
         onChangeCommitted: (_, value) => {
@@ -273,6 +406,8 @@ export const useCollectionFilters = () => {
         filterDispatch({ type: "SET_USERNAME", payload }),
     },
     sliderControls,
+    initialSliderValues,
+    applyFiltersAndSorts: applyFiltersAndSorts(filterState),
   };
 };
 
