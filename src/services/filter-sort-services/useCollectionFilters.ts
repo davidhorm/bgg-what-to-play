@@ -1,11 +1,14 @@
 import { useReducer, ComponentProps } from "react";
 import type { SimpleBoardGame } from "@/types";
 import Slider from "@mui/material/Slider";
-import { booleanQueryParam } from "./booleanQueryParam";
 import { complexityService } from "./complexity.service";
+import { isDebugService } from "./is-debug.service";
 import { playerCountService } from "./player-count.service";
 import { playtimeService } from "./playtime.service";
 import { ratingsService } from "./ratings.service";
+import { showExpansionsService } from "./show-expansions.service";
+import { showInvalidPlayerCountService } from "./show-invalid-player-count.service";
+import { showNotRecommendedService } from "./show-not-recommended.service";
 import { showRatingsService } from "./show-ratings.service";
 import { usernameService } from "./username.service";
 
@@ -30,36 +33,19 @@ export type SliderFilterControl = FilterControl<[number, number]> & {
 };
 
 /** Interface to abstract boolean filter controls. */
-export type BooleanFilterControl = {
-  getInitialState: (queryParamKey: string) => boolean;
-  getReducedState: (
-    /** Key in CollectionFilterState used to store the value */
-    stateKey: keyof CollectionFilterState
-  ) => ActionHandler<Partial<undefined>>;
-  setQueryParam: (
-    searchParams: URLSearchParams,
-    queryParamKey: string,
-    value: boolean
-  ) => void;
+export type BooleanFilterControl = Pick<
+  FilterControl<boolean>,
+  "getInitialState" | "setQueryParam"
+> & {
+  toggleReducedState: ActionHandler<Partial<undefined>>;
 };
-
-const QUERY_PARAMS = {
-  SHOW_INVALID_PLAYER_COUNT: "showInvalid",
-  SHOW_EXPANSIONS: "showExpansions",
-  SHOW_USER_RATINGS: "showUserRatings",
-  SHOW_AVERAGE_RATINGS: "showRatings",
-  SHOW_NOT_RECOMMENDED: "showNotRec",
-  IS_DEBUG: "debug",
-} as const;
 
 const initialFilterState = {
   /** The username defined in the query param, or submitted in the input. */
   username: usernameService.getInitialState(),
 
   /** If `true`, then show the invalid Player Count outside of the game's actual min/max Player Count. */
-  showInvalidPlayerCount: booleanQueryParam.getInitialState(
-    QUERY_PARAMS.SHOW_INVALID_PLAYER_COUNT
-  ),
+  showInvalidPlayerCount: showInvalidPlayerCountService.getInitialState(),
 
   /**
    * The Player Count `[minRange, maxRange]` the user wants to filter the collection.
@@ -82,9 +68,7 @@ const initialFilterState = {
   complexityRange: complexityService.getInitialState(),
 
   /** If `true`, then show expansions in collection. */
-  showExpansions: booleanQueryParam.getInitialState(
-    QUERY_PARAMS.SHOW_EXPANSIONS
-  ),
+  showExpansions: showExpansionsService.getInitialState(),
 
   /**
    * If `"NO_RATING"`, then don't show any ratings in the cards
@@ -101,12 +85,10 @@ const initialFilterState = {
   ratingsRange: ratingsService.getInitialState(),
 
   /** If `true`, then show games where all of the filtered player counts are not recommended. */
-  showNotRecommended: booleanQueryParam.getInitialState(
-    QUERY_PARAMS.SHOW_NOT_RECOMMENDED
-  ),
+  showNotRecommended: showNotRecommendedService.getInitialState(),
 
   /** If `true`, then `console.log` messages to help troubleshoot. */
-  isDebug: booleanQueryParam.getInitialState(QUERY_PARAMS.IS_DEBUG),
+  isDebug: isDebugService.getInitialState(),
 };
 
 export type CollectionFilterState = typeof initialFilterState;
@@ -126,12 +108,13 @@ const actions = {
   SET_SHOW_RATINGS: showRatingsService.getReducedState,
   SET_RATINGS: ratingsService.getReducedState,
 
-  TOGGLE_SHOW_EXPANSIONS: booleanQueryParam.getReducedState("showExpansions"),
-  TOGGLE_SHOW_INVALID_PLAYER_COUNT: booleanQueryParam.getReducedState(
-    "showInvalidPlayerCount"
-  ),
+  TOGGLE_SHOW_EXPANSIONS: showExpansionsService.toggleReducedState,
+
+  TOGGLE_SHOW_INVALID_PLAYER_COUNT:
+    showInvalidPlayerCountService.toggleReducedState,
+
   TOGGLE_SHOW_NOT_RECOMMENDED_PLAYER_COUNT:
-    booleanQueryParam.getReducedState("showNotRecommended"),
+    showNotRecommendedService.toggleReducedState,
 };
 
 /**
@@ -175,29 +158,13 @@ const maybeSetQueryParam = (state: CollectionFilterState) => {
   ratingsService.setQueryParam(url.searchParams, state);
   showRatingsService.setQueryParam(url.searchParams, state);
 
-  booleanQueryParam.setQueryParam(
-    url.searchParams,
-    QUERY_PARAMS.SHOW_EXPANSIONS,
-    state.showExpansions
-  );
+  showExpansionsService.setQueryParam(url.searchParams, state);
 
-  booleanQueryParam.setQueryParam(
-    url.searchParams,
-    QUERY_PARAMS.SHOW_NOT_RECOMMENDED,
-    state.showNotRecommended
-  );
+  showNotRecommendedService.setQueryParam(url.searchParams, state);
 
-  booleanQueryParam.setQueryParam(
-    url.searchParams,
-    QUERY_PARAMS.SHOW_INVALID_PLAYER_COUNT,
-    state.showInvalidPlayerCount
-  );
+  showInvalidPlayerCountService.setQueryParam(url.searchParams, state);
 
-  booleanQueryParam.setQueryParam(
-    url.searchParams,
-    QUERY_PARAMS.IS_DEBUG,
-    state.isDebug
-  );
+  isDebugService.setQueryParam(url.searchParams, state);
 
   history.pushState({}, "", url);
 };
