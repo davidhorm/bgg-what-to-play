@@ -38,6 +38,9 @@ export type BooleanFilterControl = Pick<
   "getInitialState" | "setQueryParam"
 > & {
   toggleReducedState: ActionHandler<Partial<undefined>>;
+  maybeShow: (
+    filterState: CollectionFilterState
+  ) => (game: SimpleBoardGame) => boolean;
 };
 
 const initialFilterState = {
@@ -219,39 +222,6 @@ const maybeOutputList =
     return game;
   };
 
-const maybeShowExpansions =
-  (filterState: CollectionFilterState) => (game: SimpleBoardGame) => {
-    if (filterState.showExpansions) return true;
-
-    return game.type === "boardgame";
-  };
-
-//#region maybeShowInvalidPlayerCount
-
-const removeRecsLessThan =
-  (minPlayers: SimpleBoardGame["minPlayers"]) =>
-  (rec: SimpleBoardGame["recommendedPlayerCount"][number]): boolean =>
-    rec.playerCountValue >= minPlayers;
-
-const removeRecsMoreThan =
-  (maxPlayers: SimpleBoardGame["maxPlayers"]) =>
-  (rec: SimpleBoardGame["recommendedPlayerCount"][number]): boolean =>
-    rec.playerCountValue <= maxPlayers;
-
-const maybeShowInvalidPlayerCount =
-  (filterState: CollectionFilterState) =>
-  (game: SimpleBoardGame): SimpleBoardGame =>
-    filterState.showInvalidPlayerCount
-      ? game
-      : {
-          ...game,
-          recommendedPlayerCount: game.recommendedPlayerCount
-            .filter(removeRecsLessThan(game.minPlayers))
-            .filter(removeRecsMoreThan(game.maxPlayers)),
-        };
-
-//#endregion maybeShowInvalidPlayerCount
-
 /** Used to determine which bar to highlight in the graph */
 const addIsPlayerCountWithinRange =
   (filterState: CollectionFilterState) => (game: SimpleBoardGame) => {
@@ -271,18 +241,6 @@ const addIsPlayerCountWithinRange =
       })),
     };
   };
-
-const maybeShowNotRecommended =
-  (filterState: CollectionFilterState) =>
-  (game: ReturnType<ReturnType<typeof addIsPlayerCountWithinRange>>) =>
-    filterState.showNotRecommended || filterState.showInvalidPlayerCount
-      ? true
-      : game.recommendedPlayerCount.filter(
-          (rec) =>
-            rec.isPlayerCountWithinRange &&
-            (rec.NotRecommendedPercent <= 50 ||
-              Number.isNaN(rec.NotRecommendedPercent)) // Show games even if no data because technically not "not rec'd"
-        ).length > 0;
 
 //#region maybeSortByScore
 
@@ -319,9 +277,9 @@ export const applyFiltersAndSorts =
   (filterState: CollectionFilterState) => (games: SimpleBoardGame[]) =>
     games
       ?.map(maybeOutputList(filterState, "All Games"))
-      .filter(maybeShowExpansions(filterState)) // Show as many things as needed from here
+      .filter(showExpansionsService.maybeShow(filterState)) // Show as many things as needed from here
       .map(maybeOutputList(filterState, "maybeShowExpansions"))
-      .map(maybeShowInvalidPlayerCount(filterState))
+      .map(showInvalidPlayerCountService.maybeShow(filterState))
       .filter(playerCountService.isWithinRange(filterState)) // Start removing things as needed from here
       .map(maybeOutputList(filterState, "isMinMaxPlayerRangeWithinRange"))
       .filter(playtimeService.isWithinRange(filterState))
@@ -331,7 +289,7 @@ export const applyFiltersAndSorts =
       .filter(ratingsService.isWithinRange(filterState))
       .map(maybeOutputList(filterState, "isRatingsWithinRange"))
       .map(addIsPlayerCountWithinRange(filterState)) // Add any calculations from here
-      .filter(maybeShowNotRecommended(filterState)) // But do one more filter based on isPlayerCountWithinRange
+      .filter(showNotRecommendedService.maybeShow(filterState)) // But do one more filter based on isPlayerCountWithinRange
       .map(maybeOutputList(filterState, "maybeShowNotRecommended"))
       .sort(maybeSortByScore(filterState));
 
