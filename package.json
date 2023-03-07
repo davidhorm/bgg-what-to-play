@@ -29,7 +29,7 @@
     "coverage": "vitest run --coverage",
     "test": "pnpm run test:unit run && pnpm run test:e2e",
     "test:unit": "vitest",
-    "test:e2e": "playwright test",
+    "test:e2e": "pnpm dlx playwright test",
     "codegen": "concurrently --kill-others \"vite\" \"pnpm dlx playwright codegen\"",
     "predeploy": "pnpm run build",
     "deploy": "gh-pages -d dist"
@@ -48,7 +48,7 @@
     "recharts": "^2.2.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.31.1",
+    "@playwright/test": "^1.31.2",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^14.4.3",
     "@trivago/prettier-plugin-sort-imports": "^4.0.0",
