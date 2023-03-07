@@ -1,6 +1,6 @@
 {
   "name": "bgg-what-to-play",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Website to visualize your BGG collection by player count recommendation.",
   "keywords": [
     "vite",
