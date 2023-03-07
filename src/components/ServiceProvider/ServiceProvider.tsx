@@ -1,5 +1,6 @@
 import type { PropsWithChildren, ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { FilterAndSortProvider } from "./FilterAndSortProvider";
 import { StyleProvider } from "./StyleProvider";
 
 const queryClient = new QueryClient({
@@ -24,7 +25,9 @@ type Props = {
 
 export const ServiceProvider = ({ children, mockQueryClient }: Props) => (
   <QueryClientProvider client={mockQueryClient || queryClient}>
-    <StyleProvider>{children}</StyleProvider>
+    <StyleProvider>
+      <FilterAndSortProvider>{children}</FilterAndSortProvider>
+    </StyleProvider>
   </QueryClientProvider>
 );
 

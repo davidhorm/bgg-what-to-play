@@ -1,4 +1,5 @@
-import type { BoardGame, CollectionFilterState } from "@/types";
+import { useFilterState } from "@/components/ServiceProvider";
+import type { BoardGame } from "@/types";
 import { useInView } from "react-intersection-observer";
 import {
   Bar,
@@ -24,17 +25,16 @@ const colorFillByRec: Record<Recommendation, [string, string]> = {
 };
 
 type Props = Pick<BoardGame, "recommendedPlayerCount"> & {
-  filterState: CollectionFilterState;
   gameId: number;
 };
 
 const getFill = (
   isPlayerCountWithinRange: Props["recommendedPlayerCount"][number]["isPlayerCountWithinRange"],
-  filterState: CollectionFilterState,
+  playerCountRange: [number, number],
   recommendation: Recommendation
 ) => {
   const [defaultColor, fadedColor] = colorFillByRec[recommendation];
-  const [minRange, maxRange] = filterState.playerCountRange;
+  const [minRange, maxRange] = playerCountRange;
 
   if (minRange !== 1 || maxRange !== Number.POSITIVE_INFINITY) {
     return isPlayerCountWithinRange ? defaultColor : fadedColor;
@@ -43,13 +43,12 @@ const getFill = (
   return defaultColor;
 };
 
-export const PlayerCountChart = ({
-  recommendedPlayerCount,
-  filterState,
-  gameId,
-}: Props) => {
+export const PlayerCountChart = ({ recommendedPlayerCount, gameId }: Props) => {
   const { ref, inView } = useInView();
   const prefersReducedMotion = usePrefersReducedMotion();
+  const {
+    filterState: { playerCountRange },
+  } = useFilterState();
 
   return (
     <div ref={ref} className="h-36">
@@ -104,7 +103,7 @@ export const PlayerCountChart = ({
                           key={`${recommendation}-${playerCount.playerCountValue}-${playerCountIndex}`}
                           fill={getFill(
                             playerCount.isPlayerCountWithinRange,
-                            filterState,
+                            playerCountRange,
                             recommendation as Recommendation
                           )}
                         />

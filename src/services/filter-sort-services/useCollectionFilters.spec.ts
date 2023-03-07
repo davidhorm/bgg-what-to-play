@@ -1,6 +1,10 @@
-import type { CollectionFilterState, SimpleBoardGame } from "@/types";
+import type { SimpleBoardGame } from "@/types";
 import { describe, test, expect } from "vitest";
-import { applyFiltersAndSorts } from "./useCollectionFilters";
+import {
+  applyFiltersAndSorts,
+  initialFilterState,
+  CollectionFilterState,
+} from "./useCollectionFilters";
 
 describe(applyFiltersAndSorts.name, () => {
   const buildMockGame = (
@@ -25,16 +29,8 @@ describe(applyFiltersAndSorts.name, () => {
   const buildMockFilters = (
     props: Partial<CollectionFilterState>
   ): CollectionFilterState => ({
-    username: props.username ?? "",
-    showInvalidPlayerCount: props.showInvalidPlayerCount ?? false,
-    showExpansions: props.showExpansions ?? false,
-    playerCountRange: props.playerCountRange ?? [1, Number.POSITIVE_INFINITY],
-    playtimeRange: props.playtimeRange ?? [0, Number.POSITIVE_INFINITY],
-    ratingsRange: props.ratingsRange ?? [1, 10],
-    showRatings: props.showRatings ?? "NO_RATING",
-    complexityRange: props.complexityRange ?? [1, 5],
-    showNotRecommended: props.showNotRecommended ?? false,
-    isDebug: props.isDebug ?? false, // PRO TIP: set to true to help debug tests
+    ...initialFilterState,
+    ...props,
   });
 
   test.each`

@@ -1,13 +1,15 @@
-import type { CollectionFilterState } from "@/types";
 import * as _ from "lodash-es";
 import { printDebugMessage } from "./is-debug.service";
 import {
   getQueryParamValue,
   getValueLabel,
-  maybeSetQueryParam,
   isBoardGameRangeWithinFilterRange,
+  maybeSetQueryParam,
 } from "./slider-control.utils";
-import type { SliderFilterControl } from "./useCollectionFilters";
+import type {
+  CollectionFilterState,
+  SliderFilterControl,
+} from "./useCollectionFilters";
 
 const QUERY_PARAM_RATINGS = "ratings";
 const DEFAULT_RATINGS_MIN = 1;

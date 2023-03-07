@@ -1,19 +1,19 @@
-import type { CollectionFilterReducer } from "@/types";
+import { useFilterState } from "@/components/ServiceProvider";
 import { AcceptedResponse } from "./AcceptedResponse";
 import { FilterStatus } from "./FilterStatus";
 import { GameCard } from "./GameCard";
 import { MissingSomethingResponse } from "./MissingSomethingResponse";
 import { useGetCollectionQuery } from "./hooks/useGetCollectionQuery";
 
-type Props = Pick<
-  CollectionFilterReducer,
-  "filterState" | "applyFiltersAndSorts"
->;
+export const BggCollection = () => {
+  const {
+    filterState: { username, showExpansions },
+    applyFiltersAndSorts,
+  } = useFilterState();
 
-export const BggCollection = ({ filterState, applyFiltersAndSorts }: Props) => {
   const { data, pubdate, loadingMessage, error } = useGetCollectionQuery(
-    filterState.username,
-    filterState.showExpansions
+    username,
+    showExpansions
   );
 
   if (!data) return <></>;
@@ -44,7 +44,7 @@ export const BggCollection = ({ filterState, applyFiltersAndSorts }: Props) => {
       >
         {filteredGames?.map((game) => (
           <li key={game.id} className="min-w-[40ch] flex-1">
-            <GameCard game={game} filterState={filterState} />
+            <GameCard game={game} />
           </li>
         ))}
         {Array.from({ length: 10 }).map((_, i) => (

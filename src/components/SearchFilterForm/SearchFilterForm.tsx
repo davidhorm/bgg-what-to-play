@@ -1,26 +1,24 @@
 import { useState } from "react";
-import { useCollectionFilters } from "@/services/filter-sort-services";
 import Paper from "@mui/material/Paper";
 import Slider from "@mui/material/Slider";
+import { useFilterState } from "../ServiceProvider";
 import { BggCollection } from "./BggCollection";
 import { FilterControls } from "./FilterControls";
 import { Header } from "./Header";
 import { UsernameInput } from "./UsernameInput";
 
 export const SearchFilterForm = () => {
-  const filter = useCollectionFilters();
   const {
-    usernameControl,
+    filterState: { username },
     sliderControls,
     initialSliderValues,
-    applyFiltersAndSorts,
-  } = filter;
+  } = useFilterState();
 
   const [sliderValues, setSliderValues] = useState(initialSliderValues);
 
   return (
     <main className="p-4">
-      {!usernameControl.username && <Header />}
+      {!username && <Header />}
 
       <Paper
         elevation={1}
@@ -28,7 +26,7 @@ export const SearchFilterForm = () => {
         component="section"
         aria-label="Filter controls"
       >
-        <UsernameInput {...usernameControl} />
+        <UsernameInput />
 
         {sliderControls.map(({ sliderLabel, sliderProps }, index) => (
           <div key={sliderLabel} className="mt-2 mr-6 flex flex-col">
@@ -50,13 +48,10 @@ export const SearchFilterForm = () => {
           </div>
         ))}
 
-        <FilterControls filter={filter} />
+        <FilterControls />
       </Paper>
 
-      <BggCollection
-        filterState={filter.filterState}
-        applyFiltersAndSorts={applyFiltersAndSorts}
-      />
+      <BggCollection />
     </main>
   );
 };

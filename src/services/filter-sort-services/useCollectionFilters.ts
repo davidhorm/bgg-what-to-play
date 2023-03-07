@@ -42,7 +42,7 @@ export type BooleanFilterControl = Pick<
   toggleReducedState: ActionHandler<Partial<undefined>>;
 };
 
-const initialFilterState = {
+export const initialFilterState = {
   /** The username defined in the query param, or submitted in the input. */
   username: usernameService.getInitialState(),
 
@@ -95,7 +95,7 @@ const initialFilterState = {
 
 export type CollectionFilterState = typeof initialFilterState;
 
-export type ActionHandler<T> = (
+type ActionHandler<T> = (
   state: CollectionFilterState,
   payload: T
 ) => CollectionFilterState;
@@ -291,15 +291,8 @@ export const useCollectionFilters = () => {
   return {
     filterState,
     filterDispatch,
-    usernameControl: {
-      username: filterState.username,
-      setUsername: (payload: string) =>
-        filterDispatch({ type: "SET_USERNAME", payload }),
-    },
     sliderControls,
     initialSliderValues,
     applyFiltersAndSorts: applyFiltersAndSorts(filterState),
   };
 };
-
-export type CollectionFilterReducer = ReturnType<typeof useCollectionFilters>;
