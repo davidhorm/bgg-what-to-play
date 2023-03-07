@@ -65,8 +65,14 @@ export const GameCard = ({ game }: Props) => {
 
             <dt className="text-xs text-gray-500">Complexity</dt>
             <dd className="ml-0 text-2xl">
-              {game.averageWeight}{" "}
-              <span className="text-xs text-gray-500">/ 5</span>
+              {game.averageWeight === 0 ? (
+                "N/A"
+              ) : (
+                <>
+                  {game.averageWeight}{" "}
+                  <span className="text-xs text-gray-500">/ 5</span>
+                </>
+              )}
             </dd>
           </dl>
         </div>

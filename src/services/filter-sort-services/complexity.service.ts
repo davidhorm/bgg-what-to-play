@@ -79,12 +79,18 @@ const getSliderProps: SliderFilterControl["getSliderProps"] = () => ({
   marks,
 });
 
+/** Edge case: Some games don't have a weight, but ought to still show if the min filter value = 1 */
+const convertMinWeightToZero = (minWeight: number) =>
+  minWeight === DEFAULT_COMPLEXITY_MIN ? 0 : minWeight;
+
 const applyFilters: SliderFilterControl["applyFilters"] =
   (filterState) => (games) => {
+    const [minFilter, maxFilter] = filterState.complexityRange;
+
     const filteredGames = games.filter((game) =>
       isBoardGameRangeWithinFilterRange(
         [game.averageWeight, game.averageWeight],
-        filterState.complexityRange
+        [convertMinWeightToZero(minFilter), maxFilter]
       )
     );
 

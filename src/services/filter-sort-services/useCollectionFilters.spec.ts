@@ -191,18 +191,21 @@ describe(applyFiltersAndSorts.name, () => {
   );
 
   test.each`
-    boardGameComplexity | filterComplexityRange | expectedLength
-    ${1.1}              | ${[1, 1]}             | ${0}
-    ${1.1}              | ${[1.1, 1.1]}         | ${1}
-    ${1.1}              | ${[1.2, 1.2]}         | ${0}
-    ${1.1}              | ${[1, 1.1]}           | ${1}
-    ${1.1}              | ${[1.1, 1.2]}         | ${1}
-    ${1.2}              | ${[1, 1.1]}           | ${0}
-    ${1.2}              | ${[1.3, 1.4]}         | ${0}
+    averageWeight | filterComplexityRange | expectedLength
+    ${0}          | ${[1, 1]}             | ${1 /* edge case: show games w/o weights if filtering from 1 */}
+    ${0}          | ${[1.1, 1.1]}         | ${0}
+    ${1}          | ${[1, 1]}             | ${1}
+    ${1.1}        | ${[1, 1]}             | ${0}
+    ${1.1}        | ${[1.1, 1.1]}         | ${1}
+    ${1.1}        | ${[1.2, 1.2]}         | ${0}
+    ${1.1}        | ${[1, 1.1]}           | ${1}
+    ${1.1}        | ${[1.1, 1.2]}         | ${1}
+    ${1.2}        | ${[1, 1.1]}           | ${0}
+    ${1.2}        | ${[1.3, 1.4]}         | ${0}
   `(
-    "GIVEN boardGameComplexity=$boardGameComplexity, WHEN filterComplexityRange=$filterComplexityRange, THEN expectedLength=$expectedLength",
-    ({ boardGameComplexity, filterComplexityRange, expectedLength }) => {
-      const boardgame = buildMockGame({ averageWeight: boardGameComplexity });
+    "GIVEN averageWeight=$averageWeight, WHEN filterComplexityRange=$filterComplexityRange, THEN expectedLength=$expectedLength",
+    ({ averageWeight, filterComplexityRange, expectedLength }) => {
+      const boardgame = buildMockGame({ averageWeight });
 
       const filter = buildMockFilters({
         complexityRange: filterComplexityRange,
