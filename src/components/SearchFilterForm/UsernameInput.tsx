@@ -1,18 +1,16 @@
 import { useState } from "react";
-import type { CollectionFilterReducer } from "@/types";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
+import { useFilterDispatch, useFilterState } from "../ServiceProvider";
 import { ReactComponent as MagnifyingGlassIcon } from "./magnifying-glass.svg";
 
-type Props = {
-  filter: CollectionFilterReducer;
-};
-
-export const UsernameInput = ({
-  filter: { filterState, filterDispatch },
-}: Props) => {
-  const [usernameInput, setUsernameInput] = useState(filterState.username);
+export const UsernameInput = () => {
+  const {
+    filterState: { username },
+  } = useFilterState();
+  const filterDispatch = useFilterDispatch();
+  const [usernameInput, setUsernameInput] = useState(username);
 
   return (
     <form

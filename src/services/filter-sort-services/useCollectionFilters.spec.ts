@@ -1,7 +1,10 @@
-import type { CollectionFilterState } from "@/types";
+import type { SimpleBoardGame } from "@/types";
 import { describe, test, expect } from "vitest";
-import { applyFiltersAndSorts } from "./BggCollection.utils";
-import type { SimpleBoardGame } from "./hooks/useGetCollectionQuery.utils";
+import {
+  applyFiltersAndSorts,
+  initialFilterState,
+  CollectionFilterState,
+} from "./useCollectionFilters";
 
 describe(applyFiltersAndSorts.name, () => {
   const buildMockGame = (
@@ -26,16 +29,8 @@ describe(applyFiltersAndSorts.name, () => {
   const buildMockFilters = (
     props: Partial<CollectionFilterState>
   ): CollectionFilterState => ({
-    username: props.username ?? "",
-    showInvalidPlayerCount: props.showInvalidPlayerCount ?? false,
-    showExpansions: props.showExpansions ?? false,
-    playerCountRange: props.playerCountRange ?? [1, Number.POSITIVE_INFINITY],
-    playtimeRange: props.playtimeRange ?? [0, Number.POSITIVE_INFINITY],
-    ratingsRange: props.ratingsRange ?? [1, 10],
-    showRatings: props.showRatings ?? "NO_RATING",
-    complexityRange: props.complexityRange ?? [1, 5],
-    showNotRecommended: props.showNotRecommended ?? false,
-    isDebug: props.isDebug ?? false, // PRO TIP: set to true to help debug tests
+    ...initialFilterState,
+    ...props,
   });
 
   test.each`
@@ -56,7 +51,7 @@ describe(applyFiltersAndSorts.name, () => {
       });
 
       const filter = buildMockFilters({ showInvalidPlayerCount });
-      const actual = applyFiltersAndSorts([gameWith3Recs], filter);
+      const actual = applyFiltersAndSorts(filter)([gameWith3Recs]);
       expect(actual[0].recommendedPlayerCount.length).toBe(expectedLength);
     }
   );
@@ -76,7 +71,7 @@ describe(applyFiltersAndSorts.name, () => {
       });
 
       const filter = buildMockFilters({ showInvalidPlayerCount });
-      const actual = applyFiltersAndSorts([boardgame], filter);
+      const actual = applyFiltersAndSorts(filter)([boardgame]);
       expect(actual.length).toBe(expectedLength);
     }
   );
@@ -92,7 +87,7 @@ describe(applyFiltersAndSorts.name, () => {
       const expansion = buildMockGame({ type: "boardgameexpansion" });
 
       const filter = buildMockFilters({ showExpansions });
-      const actual = applyFiltersAndSorts([boardgame, expansion], filter);
+      const actual = applyFiltersAndSorts(filter)([boardgame, expansion]);
       expect(actual.length).toBe(expectedLength);
     }
   );
@@ -145,7 +140,7 @@ describe(applyFiltersAndSorts.name, () => {
       const filter = buildMockFilters({
         playerCountRange: filterPlayerCountRange,
       });
-      const actual = applyFiltersAndSorts([boardgame], filter);
+      const actual = applyFiltersAndSorts(filter)([boardgame]);
 
       expect(actual.length).toBe(expectedLength);
 
@@ -190,29 +185,32 @@ describe(applyFiltersAndSorts.name, () => {
       });
 
       const filter = buildMockFilters({ playtimeRange: filterPlaytimeRange });
-      const actual = applyFiltersAndSorts([boardgame], filter);
+      const actual = applyFiltersAndSorts(filter)([boardgame]);
       expect(actual.length).toBe(expectedLength);
     }
   );
 
   test.each`
-    boardGameComplexity | filterComplexityRange | expectedLength
-    ${1.1}              | ${[1, 1]}             | ${0}
-    ${1.1}              | ${[1.1, 1.1]}         | ${1}
-    ${1.1}              | ${[1.2, 1.2]}         | ${0}
-    ${1.1}              | ${[1, 1.1]}           | ${1}
-    ${1.1}              | ${[1.1, 1.2]}         | ${1}
-    ${1.2}              | ${[1, 1.1]}           | ${0}
-    ${1.2}              | ${[1.3, 1.4]}         | ${0}
+    averageWeight | filterComplexityRange | expectedLength
+    ${0}          | ${[1, 1]}             | ${1 /* edge case: show games w/o weights if filtering from 1 */}
+    ${0}          | ${[1.1, 1.1]}         | ${0}
+    ${1}          | ${[1, 1]}             | ${1}
+    ${1.1}        | ${[1, 1]}             | ${0}
+    ${1.1}        | ${[1.1, 1.1]}         | ${1}
+    ${1.1}        | ${[1.2, 1.2]}         | ${0}
+    ${1.1}        | ${[1, 1.1]}           | ${1}
+    ${1.1}        | ${[1.1, 1.2]}         | ${1}
+    ${1.2}        | ${[1, 1.1]}           | ${0}
+    ${1.2}        | ${[1.3, 1.4]}         | ${0}
   `(
-    "GIVEN boardGameComplexity=$boardGameComplexity, WHEN filterComplexityRange=$filterComplexityRange, THEN expectedLength=$expectedLength",
-    ({ boardGameComplexity, filterComplexityRange, expectedLength }) => {
-      const boardgame = buildMockGame({ averageWeight: boardGameComplexity });
+    "GIVEN averageWeight=$averageWeight, WHEN filterComplexityRange=$filterComplexityRange, THEN expectedLength=$expectedLength",
+    ({ averageWeight, filterComplexityRange, expectedLength }) => {
+      const boardgame = buildMockGame({ averageWeight });
 
       const filter = buildMockFilters({
         complexityRange: filterComplexityRange,
       });
-      const actual = applyFiltersAndSorts([boardgame], filter);
+      const actual = applyFiltersAndSorts(filter)([boardgame]);
       expect(actual.length).toBe(expectedLength);
     }
   );
@@ -262,7 +260,7 @@ describe(applyFiltersAndSorts.name, () => {
         ratingsRange: filterRatingsRange,
         showRatings,
       });
-      const actual = applyFiltersAndSorts([boardgame], filter);
+      const actual = applyFiltersAndSorts(filter)([boardgame]);
       expect(actual.length).toBe(expectedLength);
     }
   );
@@ -287,7 +285,7 @@ describe(applyFiltersAndSorts.name, () => {
       const boardgame = buildMockGame({ recommendedPlayerCount });
 
       const filter = buildMockFilters({ showNotRecommended });
-      const actual = applyFiltersAndSorts([boardgame], filter);
+      const actual = applyFiltersAndSorts(filter)([boardgame]);
       expect(actual.length).toBe(expectedLength);
     }
   );

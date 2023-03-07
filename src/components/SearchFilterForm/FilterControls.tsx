@@ -1,89 +1,97 @@
-import type { CollectionFilterReducer } from "@/types";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
+import { useFilterDispatch, useFilterState } from "../ServiceProvider";
 
-type Props = {
-  filter: CollectionFilterReducer;
-};
+export const FilterControls = () => {
+  const {
+    filterState: {
+      showRatings,
+      showExpansions,
+      showNotRecommended,
+      showInvalidPlayerCount,
+    },
+  } = useFilterState();
+  const filterDispatch = useFilterDispatch();
 
-export const FilterControls = ({
-  filter: { filterState, filterDispatch },
-}: Props) => (
-  <div className="mt-1">
-    <FormGroup row>
+  return (
+    <div className="mt-1">
+      <FormGroup row>
+        <FormControlLabel
+          id="show-ratings"
+          label="Show ratings"
+          control={
+            <Checkbox
+              checked={showRatings !== "NO_RATING"}
+              onChange={() => filterDispatch({ type: "TOGGLE_SHOW_RATINGS" })}
+            />
+          }
+        />
+        <RadioGroup
+          className="ml-8"
+          aria-labelledby="show-ratings"
+          name="show-ratings-group"
+          row
+          value={showRatings}
+          onChange={(_, newRating) =>
+            filterDispatch({
+              type: "SET_SHOW_RATINGS",
+              payload: newRating as "USER_RATING" | "AVERAGE_RATING",
+            })
+          }
+        >
+          <FormControlLabel
+            value="AVERAGE_RATING"
+            disabled={showRatings === "NO_RATING"}
+            control={<Radio />}
+            label="Average Ratings"
+          />
+          <FormControlLabel
+            value="USER_RATING"
+            disabled={showRatings === "NO_RATING"}
+            control={<Radio />}
+            label="User Ratings"
+          />
+        </RadioGroup>
+      </FormGroup>
+
       <FormControlLabel
-        id="show-ratings"
-        label="Show ratings"
+        label="Show expansions"
         control={
           <Checkbox
-            checked={filterState.showRatings !== "NO_RATING"}
-            onChange={() => filterDispatch({ type: "TOGGLE_SHOW_RATINGS" })}
+            checked={showExpansions}
+            onChange={() => filterDispatch({ type: "TOGGLE_SHOW_EXPANSIONS" })}
           />
         }
       />
-      <RadioGroup
-        className="ml-8"
-        aria-labelledby="show-ratings"
-        name="show-ratings-group"
-        row
-        value={filterState.showRatings}
-        onChange={(_, newRating) =>
-          filterDispatch({
-            type: "SET_SHOW_RATINGS",
-            payload: newRating as "USER_RATING" | "AVERAGE_RATING",
-          })
+
+      <FormControlLabel
+        label="Show not recommended player counts"
+        control={
+          <Checkbox
+            checked={showNotRecommended}
+            onChange={() =>
+              filterDispatch({
+                type: "TOGGLE_SHOW_NOT_RECOMMENDED_PLAYER_COUNT",
+              })
+            }
+          />
         }
-      >
-        <FormControlLabel
-          value="AVERAGE_RATING"
-          disabled={filterState.showRatings === "NO_RATING"}
-          control={<Radio />}
-          label="Average Ratings"
-        />
-        <FormControlLabel
-          value="USER_RATING"
-          disabled={filterState.showRatings === "NO_RATING"}
-          control={<Radio />}
-          label="User Ratings"
-        />
-      </RadioGroup>
-    </FormGroup>
+      />
 
-    <FormControlLabel
-      label="Show expansions"
-      control={
-        <Checkbox
-          checked={filterState.showExpansions}
-          onChange={() => filterDispatch({ type: "TOGGLE_SHOW_EXPANSIONS" })}
-        />
-      }
-    />
-
-    <FormControlLabel
-      label="Show not recommended player counts"
-      control={
-        <Checkbox
-          checked={filterState.showNotRecommended}
-          onChange={() =>
-            filterDispatch({ type: "TOGGLE_SHOW_NOT_RECOMMENDED_PLAYER_COUNT" })
-          }
-        />
-      }
-    />
-
-    <FormControlLabel
-      label="Show invalid player counts"
-      control={
-        <Checkbox
-          checked={filterState.showInvalidPlayerCount}
-          onChange={() =>
-            filterDispatch({ type: "TOGGLE_SHOW_INVALID_PLAYER_COUNT" })
-          }
-        />
-      }
-    />
-  </div>
-);
+      <FormControlLabel
+        label="Show invalid player counts"
+        control={
+          <Checkbox
+            checked={showInvalidPlayerCount}
+            onChange={() =>
+              filterDispatch({ type: "TOGGLE_SHOW_INVALID_PLAYER_COUNT" })
+            }
+          />
+        }
+      />
+    </div>
+  );
+};

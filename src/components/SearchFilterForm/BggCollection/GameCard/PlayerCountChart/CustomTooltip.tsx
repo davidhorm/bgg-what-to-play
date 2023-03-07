@@ -2,7 +2,7 @@ export const CustomTooltip = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   { payload, label }: any
 ) => {
-  if (!payload[0]?.payload) return null;
+  if (!payload?.[0]?.payload) return null;
 
   const {
     Best,

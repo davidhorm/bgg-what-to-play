@@ -194,8 +194,6 @@ export const transformToBoardGame = (
   thingData: Thing["items"]["item"][number],
   collectionData?: Collection["items"]["item"][number]
 ) => ({
-  // TODO: unit test special characters, and numbers as titles
-  // TODO: fix game id = 93194; name "011"
   /** Board Game's primary name */
   name: decodeHtmlCharCodes(
     collectionData?.name.text.toString() ||

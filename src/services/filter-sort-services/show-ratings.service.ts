@@ -8,23 +8,24 @@ const QUERY_PARAM_SHOW_AVERAGE_RATINGS = "showRatings";
 
 type RatingVisibility = "NO_RATING" | "USER_RATING" | "AVERAGE_RATING";
 
-const getInitialState = (): RatingVisibility => {
-  if (
-    new URLSearchParams(document.location.search).get(
-      QUERY_PARAM_SHOW_USER_RATINGS
-    ) === "1"
-  )
-    return "USER_RATING";
+const getInitialState: FilterControl<RatingVisibility>["getInitialState"] =
+  () => {
+    if (
+      new URLSearchParams(document.location.search).get(
+        QUERY_PARAM_SHOW_USER_RATINGS
+      ) === "1"
+    )
+      return "USER_RATING";
 
-  if (
-    new URLSearchParams(document.location.search).get(
-      QUERY_PARAM_SHOW_AVERAGE_RATINGS
-    ) === "1"
-  )
-    return "AVERAGE_RATING";
+    if (
+      new URLSearchParams(document.location.search).get(
+        QUERY_PARAM_SHOW_AVERAGE_RATINGS
+      ) === "1"
+    )
+      return "AVERAGE_RATING";
 
-  return "NO_RATING";
-};
+    return "NO_RATING";
+  };
 
 const setQueryParam: FilterControl<RatingVisibility>["setQueryParam"] = (
   searchParams,
@@ -41,15 +42,16 @@ const setQueryParam: FilterControl<RatingVisibility>["setQueryParam"] = (
   }
 };
 
-export const showRatings: FilterControl<RatingVisibility> & {
+export const showRatingsService: FilterControl<RatingVisibility> & {
   getToggleShowRatings: (state: CollectionFilterState) => CollectionFilterState;
 } = {
   getInitialState,
   getReducedState: (state, showRatings) => ({ ...state, showRatings }),
+  setQueryParam,
+  applyFilters: () => (whatever) => whatever,
   getToggleShowRatings: (state) => ({
     ...state,
     showRatings:
       state.showRatings === "NO_RATING" ? "AVERAGE_RATING" : "NO_RATING",
   }),
-  setQueryParam,
 };

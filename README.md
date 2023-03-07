@@ -47,3 +47,13 @@ These are the other scripts defined in `package.json`.
 | `pnpm test:e2e`   | Run end-to-end tests (can add `--headed` and/or `--debug`) |
 | `pnpm codegen`    | Generate end-to-end tests with codegen                     |
 | `pnpm run deploy` | Deploy to Github pages                                     |
+
+FYI - when running Playwright end-to-end tests, there may be flakey firefox-specific tests:
+
+```
+page.goto: NS_ERROR_CONNECTION_REFUSED
+=========================== logs ===========================
+navigating to "http://localhost:5173/", waiting until "load"
+```
+
+This maybe an only Windows problem. Workaround is to execute end-to-end tests with just Chrome: `pnpm test -- --project=chromium`

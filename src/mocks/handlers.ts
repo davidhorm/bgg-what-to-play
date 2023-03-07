@@ -29,4 +29,7 @@ export const handlers = [
 
     return req.passthrough();
   }),
+  rest.get("https://cf.geekdo-images.com/*", (req, res, ctx) =>
+    req.passthrough()
+  ),
 ];
