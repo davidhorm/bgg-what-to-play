@@ -91,6 +91,7 @@ const applyFilters: SliderFilterControl["applyFilters"] =
     filterState.isDebug &&
       printDebugMessage(
         `Filter by Complexity: ${filterState.complexityRange}`,
+        games,
         filteredGames,
         ["averageWeight"]
       );

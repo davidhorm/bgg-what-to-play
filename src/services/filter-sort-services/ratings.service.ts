@@ -118,6 +118,7 @@ const applyFilters: SliderFilterControl["applyFilters"] =
     filterState.isDebug &&
       printDebugMessage(
         getSliderLabel(filterState) + ` ${filterState.ratingsRange}`,
+        games,
         filteredGames,
         ["averageRating", "userRating"]
       );

@@ -20,6 +20,7 @@ const applyFilters: BooleanFilterControl["applyFilters"] =
     filterState.isDebug &&
       printDebugMessage(
         "Show Only Recommended",
+        games,
         filteredGames,
         [],
         !filterState.showNotRecommended

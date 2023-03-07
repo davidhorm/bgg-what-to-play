@@ -113,6 +113,7 @@ const applyFilters: SliderFilterControl["applyFilters"] =
     filterState.isDebug &&
       printDebugMessage(
         `Filter by Time (minutes): ${filterState.playtimeRange}`,
+        games,
         filteredGames,
         ["minPlaytime", "maxPlaytime"]
       );

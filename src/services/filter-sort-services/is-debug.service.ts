@@ -14,15 +14,43 @@ export const isDebugService: BooleanFilterControl = {
 
 export const printDebugMessage = <T extends SimpleBoardGame>(
   groupLabel: string,
-  games: T[],
+  beforeFilterGames: T[],
+  afterFilterGames?: T[],
   columns?: Array<keyof SimpleBoardGame>,
   isFiltered?: boolean
 ) => {
   if (isFiltered || isFiltered === undefined) {
-    console.groupCollapsed(groupLabel);
-    console.log(`length: ${games.length}`);
-    console.table(games, ["id", "name", ...(columns || [])]);
-    console.groupEnd();
+    if (afterFilterGames) {
+      // if `afterFilterGames` defined, then print diff
+      const afterFilterGamesIds = afterFilterGames.map(({ id }) => id);
+      const filteredGames = beforeFilterGames.filter(
+        (before) => !afterFilterGamesIds.includes(before.id)
+      );
+
+      console.groupCollapsed(
+        `${groupLabel} (keep: ${afterFilterGames.length}, filter: ${filteredGames.length})`
+      );
+
+      filteredGames.length > 0 &&
+        console.groupCollapsed(`keep: ${afterFilterGames.length}`);
+      console.table(afterFilterGames, ["id", "name", ...(columns || [])]);
+
+      if (filteredGames.length > 0) {
+        console.groupEnd();
+        console.groupCollapsed(`filter out: ${filteredGames.length}`);
+        console.table(filteredGames, ["id", "name", ...(columns || [])]);
+        console.groupEnd();
+      }
+
+      console.groupEnd();
+    } else {
+      // if `afterFilterGames` not defined, then only print out `beforeFilterGames`
+      console.groupCollapsed(
+        `${groupLabel} (length: ${beforeFilterGames.length})`
+      );
+      console.table(beforeFilterGames, ["id", "name", ...(columns || [])]);
+      console.groupEnd();
+    }
   } else {
     console.log(`Skipping ${groupLabel}`);
   }
