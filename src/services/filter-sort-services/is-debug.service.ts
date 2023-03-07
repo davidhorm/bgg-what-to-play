@@ -15,12 +15,13 @@ export const isDebugService: BooleanFilterControl = {
 export const printDebugMessage = <T extends SimpleBoardGame>(
   groupLabel: string,
   games: T[],
+  columns?: Array<keyof SimpleBoardGame>,
   isFiltered?: boolean
 ) => {
   if (isFiltered || isFiltered === undefined) {
     console.groupCollapsed(groupLabel);
     console.log(`length: ${games.length}`);
-    console.table(games.map(({ id, name }) => ({ id, name })));
+    console.table(games, ["id", "name", ...(columns || [])]);
     console.groupEnd();
   } else {
     console.log(`Skipping ${groupLabel}`);

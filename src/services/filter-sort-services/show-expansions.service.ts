@@ -14,8 +14,9 @@ const applyFilters: BooleanFilterControl["applyFilters"] =
 
     filterState.isDebug &&
       printDebugMessage(
-        "Maybe Show Expansions",
+        "Show Expansions",
         filteredGames,
+        ["type"],
         filterState.showExpansions
       );
 

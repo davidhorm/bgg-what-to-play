@@ -114,7 +114,11 @@ const applyFilters: SliderFilterControl["applyFilters"] =
     });
 
     filterState.isDebug &&
-      printDebugMessage(getSliderLabel(filterState), filteredGames);
+      printDebugMessage(
+        getSliderLabel(filterState) + ` ${filterState.ratingsRange}`,
+        filteredGames,
+        ["averageRating", "userRating"]
+      );
 
     return filteredGames;
   };

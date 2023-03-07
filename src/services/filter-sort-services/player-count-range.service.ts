@@ -110,7 +110,11 @@ const applyFilters: SliderFilterControl["applyFilters"] =
     );
 
     filterState.isDebug &&
-      printDebugMessage("Filter by Player Count", filteredGames);
+      printDebugMessage(
+        `Filter by Player Count: ${filterState.playerCountRange}`,
+        filteredGames,
+        ["minPlayers", "maxPlayers"]
+      );
 
     return filteredGames;
   };
