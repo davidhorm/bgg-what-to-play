@@ -1,5 +1,6 @@
-import type { CollectionFilterReducer } from "@/types";
+import type { CollectionFilterState } from "@/types";
 import * as _ from "lodash-es";
+import { printDebugMessage } from "./is-debug.service";
 import {
   getQueryParamValue,
   getValueLabel,
@@ -62,18 +63,15 @@ const setQueryParam: SliderFilterControl["setQueryParam"] = (
     QUERY_PARAM_RATINGS
   );
 
-const getLabelByFilter = (
-  filterState: CollectionFilterReducer["filterState"]
-) =>
+const getLabelByFilter = (filterState: CollectionFilterState) =>
   filterState.showRatings === "USER_RATING"
     ? "User Ratings"
     : "Average Ratings";
 
-const getAriaLabel =
-  (filterState: CollectionFilterReducer["filterState"]) => (index: number) =>
-    index === 0
-      ? `Minimum ${getLabelByFilter(filterState)}`
-      : `Maximum ${getLabelByFilter(filterState)}`;
+const getAriaLabel = (filterState: CollectionFilterState) => (index: number) =>
+  index === 0
+    ? `Minimum ${getLabelByFilter(filterState)}`
+    : `Maximum ${getLabelByFilter(filterState)}`;
 
 const marks = Array.from({ length: 101 }, (_, index) => ({
   value: index / 10,
@@ -93,29 +91,39 @@ const getSliderProps: SliderFilterControl["getSliderProps"] = (
   marks,
 });
 
-const isWithinRange: SliderFilterControl["isWithinRange"] =
-  (filterState) => (game) => {
-    const userOrAverageRating =
-      filterState.showRatings === "USER_RATING"
-        ? game.userRating
-        : game.averageRating;
+const getSliderLabel: SliderFilterControl["getSliderLabel"] = (filterState) =>
+  `Filter by ${getLabelByFilter(filterState)}`;
 
-    const rating =
-      typeof userOrAverageRating === "number"
-        ? userOrAverageRating
-        : DEFAULT_RATINGS_MIN;
+const applyFilters: SliderFilterControl["applyFilters"] =
+  (filterState) => (games) => {
+    const filteredGames = games.filter((game) => {
+      const userOrAverageRating =
+        filterState.showRatings === "USER_RATING"
+          ? game.userRating
+          : game.averageRating;
 
-    return isBoardGameRangeWithinFilterRange(
-      [rating, rating],
-      filterState.ratingsRange
-    );
+      const rating =
+        typeof userOrAverageRating === "number"
+          ? userOrAverageRating
+          : DEFAULT_RATINGS_MIN;
+
+      return isBoardGameRangeWithinFilterRange(
+        [rating, rating],
+        filterState.ratingsRange
+      );
+    });
+
+    filterState.isDebug &&
+      printDebugMessage(getSliderLabel(filterState), filteredGames);
+
+    return filteredGames;
   };
 
 export const ratingsService: SliderFilterControl = {
   getInitialState,
   getReducedState,
   setQueryParam,
-  getSliderLabel: (filterState) => `Filter by ${getLabelByFilter(filterState)}`,
+  getSliderLabel,
   getSliderProps,
-  isWithinRange,
+  applyFilters,
 };

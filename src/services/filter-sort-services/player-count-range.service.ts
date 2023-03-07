@@ -1,4 +1,5 @@
 import * as _ from "lodash-es";
+import { printDebugMessage } from "./is-debug.service";
 import {
   getAriaLabel,
   getQueryParamValue,
@@ -96,20 +97,29 @@ const getSliderProps: SliderFilterControl["getSliderProps"] = () => ({
   scale: convertElevenToInfinity,
 });
 
-const isWithinRange: SliderFilterControl["isWithinRange"] =
-  (filterState) => (game) =>
-    isBoardGameRangeWithinFilterRange(
-      [game.minPlayers, game.maxPlayers],
-      filterState.playerCountRange
-    ) ||
-    // handle edge case for id = 40567
-    (filterState.showInvalidPlayerCount && game.minPlayers === 0);
+const applyFilters: SliderFilterControl["applyFilters"] =
+  (filterState) => (games) => {
+    const filteredGames = games.filter(
+      (game) =>
+        isBoardGameRangeWithinFilterRange(
+          [game.minPlayers, game.maxPlayers],
+          filterState.playerCountRange
+        ) ||
+        // handle edge case for id = 40567
+        (filterState.showInvalidPlayerCount && game.minPlayers === 0)
+    );
 
-export const playerCountService: SliderFilterControl = {
+    filterState.isDebug &&
+      printDebugMessage("Filter by Player Count", filteredGames);
+
+    return filteredGames;
+  };
+
+export const playerCountRangeService: SliderFilterControl = {
   getInitialState,
   getReducedState,
   setQueryParam,
   getSliderLabel: () => "Filter by Player Count",
   getSliderProps,
-  isWithinRange,
+  applyFilters,
 };

@@ -1,13 +1,25 @@
 import { getInitialState, setQueryParam } from "./boolean-control.utils";
+import { printDebugMessage } from "./is-debug.service";
 import type { BooleanFilterControl } from "./useCollectionFilters";
 
 const QUERY_PARAM_SHOW_EXPANSIONS = "showExpansions";
 
-const maybeShow: BooleanFilterControl["maybeShow"] =
-  (filterState) => (game) => {
-    if (filterState.showExpansions) return true;
+const applyFilters: BooleanFilterControl["applyFilters"] =
+  (filterState) => (games) => {
+    const filteredGames = games.filter((game) => {
+      if (filterState.showExpansions) return true;
 
-    return game.type === "boardgame";
+      return game.type === "boardgame";
+    });
+
+    filterState.isDebug &&
+      printDebugMessage(
+        "Maybe Show Expansions",
+        filteredGames,
+        filterState.showExpansions
+      );
+
+    return filteredGames;
   };
 
 export const showExpansionsService: BooleanFilterControl = {
@@ -22,5 +34,5 @@ export const showExpansionsService: BooleanFilterControl = {
       QUERY_PARAM_SHOW_EXPANSIONS,
       state.showExpansions
     ),
-  maybeShow,
+  applyFilters,
 };

@@ -1,9 +1,11 @@
 import { useReducer, ComponentProps } from "react";
 import type { SimpleBoardGame } from "@/types";
 import Slider from "@mui/material/Slider";
+import * as _ from "lodash-es";
 import { complexityService } from "./complexity.service";
-import { isDebugService } from "./is-debug.service";
-import { playerCountService } from "./player-count.service";
+import { isDebugService, printDebugMessage } from "./is-debug.service";
+import { playerCountRangeService } from "./player-count-range.service";
+import { playerCountRecommendationService } from "./player-count-recommendation.service";
 import { playtimeService } from "./playtime.service";
 import { ratingsService } from "./ratings.service";
 import { showExpansionsService } from "./show-expansions.service";
@@ -20,6 +22,9 @@ export type FilterControl<T> = {
     searchParams: URLSearchParams,
     state: CollectionFilterState
   ) => void;
+  applyFilters: <T extends SimpleBoardGame>(
+    filterState: CollectionFilterState
+  ) => (games: T[]) => T[];
 };
 
 export type SliderFilterControl = FilterControl<[number, number]> & {
@@ -27,20 +32,14 @@ export type SliderFilterControl = FilterControl<[number, number]> & {
   getSliderProps: (
     filterState: CollectionFilterState
   ) => ComponentProps<typeof Slider>;
-  isWithinRange: (
-    filterState: CollectionFilterState
-  ) => (game: SimpleBoardGame) => boolean;
 };
 
 /** Interface to abstract boolean filter controls. */
 export type BooleanFilterControl = Pick<
   FilterControl<boolean>,
-  "getInitialState" | "setQueryParam"
+  "getInitialState" | "setQueryParam" | "applyFilters"
 > & {
   toggleReducedState: ActionHandler<Partial<undefined>>;
-  maybeShow: (
-    filterState: CollectionFilterState
-  ) => (game: SimpleBoardGame) => boolean;
 };
 
 const initialFilterState = {
@@ -55,7 +54,7 @@ const initialFilterState = {
    * - Valid `minRange` values are 1-11.
    * - Valid `maxRange` values are 1-10, or Infinity;
    */
-  playerCountRange: playerCountService.getInitialState(),
+  playerCountRange: playerCountRangeService.getInitialState(),
 
   /**
    * The Play Time `[minRange, maxRange]` the user wants to filter the collection.
@@ -103,7 +102,7 @@ export type ActionHandler<T> = (
 
 const actions = {
   SET_COMPLEXITY: complexityService.getReducedState,
-  SET_PLAYER_COUNT_RANGE: playerCountService.getReducedState,
+  SET_PLAYER_COUNT_RANGE: playerCountRangeService.getReducedState,
   SET_PLAYTIME_RANGE: playtimeService.getReducedState,
   SET_USERNAME: usernameService.getReducedState,
 
@@ -129,7 +128,7 @@ const sliderSetActions: Array<{
   setAction: keyof typeof actions;
 }> = [
   {
-    sliderControl: playerCountService,
+    sliderControl: playerCountRangeService,
     setAction: "SET_PLAYER_COUNT_RANGE",
   },
   { sliderControl: playtimeService, setAction: "SET_PLAYTIME_RANGE" },
@@ -155,7 +154,7 @@ const maybeSetQueryParam = (state: CollectionFilterState) => {
   const url = new URL(document.location.href);
 
   usernameService.setQueryParam(url.searchParams, state);
-  playerCountService.setQueryParam(url.searchParams, state);
+  playerCountRangeService.setQueryParam(url.searchParams, state);
   playtimeService.setQueryParam(url.searchParams, state);
   complexityService.setQueryParam(url.searchParams, state);
   ratingsService.setQueryParam(url.searchParams, state);
@@ -205,43 +204,6 @@ const reducer: ActionHandler<Action> = (
 
 //#endregion reducer
 
-//#region apply
-
-const maybeOutputList =
-  <T extends SimpleBoardGame>(
-    filterState: CollectionFilterState,
-    groupLabel: string
-  ) =>
-  (game: T, index: number, array: T[]) => {
-    if (filterState.isDebug && index === 0) {
-      console.groupCollapsed(groupLabel);
-      console.table(array.map(({ id, name }) => ({ id, name })));
-      console.groupEnd();
-    }
-
-    return game;
-  };
-
-/** Used to determine which bar to highlight in the graph */
-const addIsPlayerCountWithinRange =
-  (filterState: CollectionFilterState) => (game: SimpleBoardGame) => {
-    const [minFilterCount, maxFilterCount] = filterState.playerCountRange;
-
-    return {
-      ...game,
-
-      /** Board Game's recommended player count according to BGG poll */
-      recommendedPlayerCount: game.recommendedPlayerCount.map((rec) => ({
-        ...rec,
-
-        /** Is `true` if the Poll's Player Count value is within the filter's Player Count Range. */
-        isPlayerCountWithinRange:
-          minFilterCount <= rec.playerCountValue &&
-          rec.playerCountValue <= maxFilterCount,
-      })),
-    };
-  };
-
 //#region maybeSortByScore
 
 const calcSortScoreSum = (
@@ -273,31 +235,35 @@ const maybeSortByScore =
 
 //#endregion maybeSortByScore
 
+export type DecoratedBoardGames = ReturnType<
+  ReturnType<
+    typeof playerCountRecommendationService.addIsPlayerCountWithinRange
+  >
+>;
+
 export const applyFiltersAndSorts =
-  (filterState: CollectionFilterState) => (games: SimpleBoardGame[]) =>
-    games
-      ?.map(maybeOutputList(filterState, "All Games"))
-      .filter(showExpansionsService.maybeShow(filterState)) // Show as many things as needed from here
-      .map(maybeOutputList(filterState, "maybeShowExpansions"))
-      .map(showInvalidPlayerCountService.maybeShow(filterState))
-      .filter(playerCountService.isWithinRange(filterState)) // Start removing things as needed from here
-      .map(maybeOutputList(filterState, "isMinMaxPlayerRangeWithinRange"))
-      .filter(playtimeService.isWithinRange(filterState))
-      .map(maybeOutputList(filterState, "isPlaytimeWithinRange"))
-      .filter(complexityService.isWithinRange(filterState))
-      .map(maybeOutputList(filterState, "isComplexityWithinRange"))
-      .filter(ratingsService.isWithinRange(filterState))
-      .map(maybeOutputList(filterState, "isRatingsWithinRange"))
-      .map(addIsPlayerCountWithinRange(filterState)) // Add any calculations from here
-      .filter(showNotRecommendedService.maybeShow(filterState)) // But do one more filter based on isPlayerCountWithinRange
-      .map(maybeOutputList(filterState, "maybeShowNotRecommended"))
-      .sort(maybeSortByScore(filterState));
+  (filterState: CollectionFilterState) => (games: SimpleBoardGame[]) => {
+    filterState.isDebug && printDebugMessage("All Games", games);
+
+    const filter = _.flow(
+      showExpansionsService.applyFilters(filterState), // Show as many things as needed from here
+      showInvalidPlayerCountService.applyFilters(filterState),
+      playerCountRangeService.applyFilters(filterState), // Start removing things as needed from here
+      playtimeService.applyFilters(filterState),
+      complexityService.applyFilters(filterState),
+      ratingsService.applyFilters(filterState),
+      playerCountRecommendationService.addIsPlayerCountWithinRange(filterState), // Add any calculations from here
+      showNotRecommendedService.applyFilters(filterState) // But do one more filter based on isPlayerCountWithinRange
+    );
+
+    const filteredGames = filter(games) as DecoratedBoardGames;
+
+    return filteredGames.sort(maybeSortByScore(filterState));
+  };
 
 export type BoardGame = ReturnType<
   ReturnType<typeof applyFiltersAndSorts>
 >[number];
-
-//#endregion apply
 
 export const useCollectionFilters = () => {
   const [filterState, filterDispatch] = useReducer(reducer, initialFilterState);

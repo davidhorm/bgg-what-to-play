@@ -1,4 +1,5 @@
 import * as _ from "lodash-es";
+import { printDebugMessage } from "./is-debug.service";
 import {
   getAriaLabel,
   getQueryParamValue,
@@ -78,12 +79,20 @@ const getSliderProps: SliderFilterControl["getSliderProps"] = () => ({
   marks,
 });
 
-const isWithinRange: SliderFilterControl["isWithinRange"] =
-  (filterState) => (game) =>
-    isBoardGameRangeWithinFilterRange(
-      [game.averageWeight, game.averageWeight],
-      filterState.complexityRange
+const applyFilters: SliderFilterControl["applyFilters"] =
+  (filterState) => (games) => {
+    const filteredGames = games.filter((game) =>
+      isBoardGameRangeWithinFilterRange(
+        [game.averageWeight, game.averageWeight],
+        filterState.complexityRange
+      )
     );
+
+    filterState.isDebug &&
+      printDebugMessage("Filter by Complexity", filteredGames);
+
+    return filteredGames;
+  };
 
 export const complexityService: SliderFilterControl = {
   getInitialState,
@@ -91,5 +100,5 @@ export const complexityService: SliderFilterControl = {
   setQueryParam,
   getSliderLabel: () => "Filter by Complexity",
   getSliderProps,
-  isWithinRange,
+  applyFilters,
 };

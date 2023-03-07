@@ -26,12 +26,11 @@ const maybeShowInvalidPlayerCount =
             .filter(removeRecsMoreThan(game.maxPlayers)),
         };
 
-export const showInvalidPlayerCountService: Omit<
-  BooleanFilterControl,
-  "maybeShow"
-> & {
-  maybeShow: typeof maybeShowInvalidPlayerCount;
-} = {
+const applyFilters: BooleanFilterControl["applyFilters"] =
+  (filterState) => (games) =>
+    games.map<any>(maybeShowInvalidPlayerCount(filterState));
+
+export const showInvalidPlayerCountService: BooleanFilterControl = {
   getInitialState: () => getInitialState(QUERY_PARAM_SHOW_INVALID_PLAYER_COUNT),
   toggleReducedState: (state) => ({
     ...state,
@@ -43,5 +42,5 @@ export const showInvalidPlayerCountService: Omit<
       QUERY_PARAM_SHOW_INVALID_PLAYER_COUNT,
       state.showInvalidPlayerCount
     ),
-  maybeShow: maybeShowInvalidPlayerCount,
+  applyFilters,
 };
