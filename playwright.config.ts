@@ -55,6 +55,7 @@ const config: PlaywrightTestConfig = {
       name: "firefox",
       use: {
         ...devices["Desktop Firefox"],
+        navigationTimeout: 60000, // firefox seems flakey on Windows
       },
     },
 
