@@ -5,7 +5,7 @@ import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import { useFilterDispatch, useFilterState } from "../ServiceProvider";
 
-export const FilterControls = () => {
+export const CheckboxControls = () => {
   const {
     filterState: {
       showRatings,
