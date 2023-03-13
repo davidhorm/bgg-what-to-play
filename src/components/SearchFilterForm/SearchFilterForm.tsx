@@ -3,6 +3,7 @@ import Paper from "@mui/material/Paper";
 import Slider from "@mui/material/Slider";
 import { useFilterState } from "../ServiceProvider";
 import { CheckboxControls } from "./CheckboxControls";
+import { CustomSortControls } from "./CustomSortControls";
 import { UsernameInput } from "./UsernameInput";
 
 export const SearchFilterForm = () => {
@@ -40,6 +41,8 @@ export const SearchFilterForm = () => {
       ))}
 
       <CheckboxControls />
+
+      <CustomSortControls />
     </Paper>
   );
 };
