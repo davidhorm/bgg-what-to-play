@@ -1,4 +1,10 @@
-import { useReducer, ComponentProps } from "react";
+import {
+  ComponentProps,
+  Dispatch,
+  SetStateAction,
+  useReducer,
+  useState,
+} from "react";
 import type { SimpleBoardGame } from "@/types";
 import Slider from "@mui/material/Slider";
 import * as _ from "lodash-es";
@@ -265,8 +271,84 @@ export type BoardGame = ReturnType<
   ReturnType<typeof applyFiltersAndSorts>
 >[number];
 
+/** List of options the user can sort by */
+export const sortByOptions = [
+  "Name",
+  "Player Count Recommendation",
+  "Average Playtime",
+  "Complexity",
+  "Ratings",
+] as const;
+
+type SortByOption = typeof sortByOptions[number];
+
+export type SortDirection = "ASC" | "DESC";
+
+type SelectedSort = {
+  sortBy: SortByOption;
+  direction: SortDirection;
+};
+
+type SortConfig = Record<
+  SortByOption,
+  {
+    /** Default direction when adding to SelectedSort arrays */
+    direction: SortDirection;
+  }
+>;
+
+const sortConfig: SortConfig = {
+  "Name": { direction: "ASC" },
+  "Player Count Recommendation": { direction: "DESC" },
+  "Average Playtime": { direction: "DESC" },
+  "Complexity": { direction: "DESC" },
+  "Ratings": { direction: "DESC" },
+};
+
+/**
+ * 1. IF `sortBy` doesn't exist in `selectedSort` array, THEN append value to the end is default direction
+ * 2. IF `sortBy` does exists in `selectedSort` array
+ *   a. AND direction is different than default
+ *     i.  AND `allowDelete`, then remove from `selectedSort` array
+ *   b. ELSE (direction is same as default, or not `allowDelete`) toggle to other direction
+ */
+const toggleSelectedSort =
+  ([selectedSort, setSelectedSort]: [
+    SelectedSort[],
+    Dispatch<SetStateAction<SelectedSort[]>>
+  ]) =>
+  ({ sortBy, allowDelete }: { sortBy: SortByOption; allowDelete: boolean }) => {
+    const existingSelectedSort = selectedSort.find((s) => s.sortBy === sortBy);
+    const { direction } = sortConfig[sortBy];
+
+    if (!existingSelectedSort) {
+      // if doesn't exist in array, then append to end
+      setSelectedSort((existing) => [...existing, { sortBy, direction }]);
+    } else if (allowDelete && existingSelectedSort.direction !== direction) {
+      // if direction is different than default, then remove from array
+      setSelectedSort((existing) =>
+        existing.filter((e) => e.sortBy !== sortBy)
+      );
+    } else {
+      const toggledDirection =
+        existingSelectedSort.direction === "ASC" ? "DESC" : "ASC";
+
+      // if direction is default (or don't allow delete), then toggle.
+      setSelectedSort((existing) =>
+        existing.map((e) => ({
+          sortBy: e.sortBy,
+          direction: e.sortBy === sortBy ? toggledDirection : e.direction,
+        }))
+      );
+    }
+  };
+
 export const useCollectionFilters = () => {
   const [filterState, filterDispatch] = useReducer(reducer, initialFilterState);
+  const [selectedSort, setSelectedSort] = useState<SelectedSort[]>([]);
+
+  const deleteSort = (sortBy: string) =>
+    setSelectedSort((existing) => existing.filter((e) => e.sortBy !== sortBy));
 
   const sliderControls: Array<{
     sliderLabel: string;
@@ -294,5 +376,8 @@ export const useCollectionFilters = () => {
     sliderControls,
     initialSliderValues,
     applyFiltersAndSorts: applyFiltersAndSorts(filterState),
+    selectedSort,
+    toggleSelectedSort: toggleSelectedSort([selectedSort, setSelectedSort]),
+    deleteSort,
   };
 };

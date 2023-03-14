@@ -1,4 +1,9 @@
 import { useState } from "react";
+import {
+  useFilterDispatch,
+  useFilterState,
+} from "@/components/ServiceProvider";
+import { SortDirection } from "@/types";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -8,20 +13,7 @@ import MenuItem from "@mui/material/MenuItem";
 import { ReactComponent as DownArrow } from "./down-arrow.svg";
 import { ReactComponent as Plus } from "./plus.svg";
 
-type SortOption = {
-  sortBy: string;
-  direction: "ASC" | "DESC";
-};
-
-const sortOptions: SortOption[] = [
-  { sortBy: "Name", direction: "ASC" },
-  { sortBy: "Player Count Recommendation", direction: "DESC" },
-  { sortBy: "Average Playtime", direction: "DESC" },
-  { sortBy: "Complexity", direction: "DESC" },
-  { sortBy: "Ratings", direction: "DESC" },
-];
-
-const Arrow = ({ direction }: Partial<Pick<SortOption, "direction">>) =>
+const Arrow = ({ direction }: { direction?: SortDirection }) =>
   direction ? (
     <DownArrow
       className={`ml-2 w-3 fill-current ${
@@ -36,39 +28,8 @@ export const CustomSortControls = () => {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const open = Boolean(anchorEl);
   const id = open ? "add-sorts-dialog" : undefined;
-
-  const [selectedSort, setSelectedSort] = useState<SortOption[]>([]);
-
-  const toggleSelectedSort = (sortOption: SortOption, allowDelete: boolean) => {
-    const existingSelectedSort = selectedSort.find(
-      (selected) => selected.sortBy === sortOption.sortBy
-    );
-
-    if (!existingSelectedSort) {
-      // if doesn't exist in array, then append to end
-      setSelectedSort((existing) => [...existing, sortOption]);
-    } else if (
-      allowDelete &&
-      existingSelectedSort.direction !== sortOption.direction
-    ) {
-      // if direction is different than default, then remove from array
-      setSelectedSort((existing) =>
-        existing.filter((e) => e.sortBy !== sortOption.sortBy)
-      );
-    } else {
-      const toggledDirection =
-        existingSelectedSort.direction === "ASC" ? "DESC" : "ASC";
-
-      // if direction is default, then toggle.
-      setSelectedSort((existing) =>
-        existing.map(({ sortBy, direction }) => ({
-          sortBy,
-          direction:
-            sortBy === sortOption.sortBy ? toggledDirection : direction,
-        }))
-      );
-    }
-  };
+  const { selectedSort, sortByOptions } = useFilterState();
+  const { toggleSelectedSort, deleteSort } = useFilterDispatch();
 
   return (
     <>
@@ -92,12 +53,8 @@ export const CustomSortControls = () => {
               label={sortBy}
               variant="outlined"
               icon={<Arrow direction={direction} />}
-              onClick={() => toggleSelectedSort({ sortBy, direction }, false)}
-              onDelete={() =>
-                setSelectedSort((existing) =>
-                  existing.filter((e) => e.sortBy !== sortBy)
-                )
-              }
+              onClick={() => toggleSelectedSort({ sortBy, allowDelete: false })}
+              onDelete={() => deleteSort(sortBy)}
             />
           </li>
         ))}
@@ -112,10 +69,10 @@ export const CustomSortControls = () => {
           "aria-labelledby": id,
         }}
       >
-        {sortOptions.map(({ sortBy, direction }) => (
+        {sortByOptions.map((sortBy) => (
           <MenuItem
             key={sortBy}
-            onClick={() => toggleSelectedSort({ sortBy, direction }, true)}
+            onClick={() => toggleSelectedSort({ sortBy, allowDelete: true })}
           >
             <ListItemIcon>
               <Arrow

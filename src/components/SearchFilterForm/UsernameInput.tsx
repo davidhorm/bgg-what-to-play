@@ -9,7 +9,7 @@ export const UsernameInput = () => {
   const {
     filterState: { username },
   } = useFilterState();
-  const filterDispatch = useFilterDispatch();
+  const { filterDispatch } = useFilterDispatch();
   const [usernameInput, setUsernameInput] = useState(username);
 
   return (

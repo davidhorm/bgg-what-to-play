@@ -14,7 +14,7 @@ export const CheckboxControls = () => {
       showInvalidPlayerCount,
     },
   } = useFilterState();
-  const filterDispatch = useFilterDispatch();
+  const { filterDispatch } = useFilterDispatch();
 
   return (
     <div className="mt-1">
