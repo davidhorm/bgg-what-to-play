@@ -241,14 +241,28 @@ const maybeSortByScore =
 
 //#endregion maybeSortByScore
 
-export type DecoratedBoardGames = ReturnType<
+export type BoardGame = ReturnType<
   ReturnType<
     typeof playerCountRecommendationService.addIsPlayerCountWithinRange
   >
->;
+>[number];
+
+const applySort =
+  (selectedSort: SelectedSort[]) =>
+  (a: BoardGame, b: BoardGame): number => {
+    for (const { direction, sort } of selectedSort) {
+      const sortResult = sort(direction, a, b);
+      if (sortResult !== 0) {
+        return sortResult;
+      }
+    }
+
+    return 0;
+  };
 
 export const applyFiltersAndSorts =
-  (filterState: CollectionFilterState) => (games: SimpleBoardGame[]) => {
+  (filterState: CollectionFilterState, selectedSort: SelectedSort[]) =>
+  (games: SimpleBoardGame[]): BoardGame[] => {
     filterState.isDebug && printDebugMessage("All Games", games);
 
     const filter = _.flow(
@@ -262,14 +276,8 @@ export const applyFiltersAndSorts =
       showNotRecommendedService.applyFilters(filterState) // But do one more filter based on isPlayerCountWithinRange
     );
 
-    const filteredGames = filter(games) as DecoratedBoardGames;
-
-    return filteredGames.sort(maybeSortByScore(filterState));
+    return filter(games).sort(applySort(selectedSort));
   };
-
-export type BoardGame = ReturnType<
-  ReturnType<typeof applyFiltersAndSorts>
->[number];
 
 /** List of options the user can sort by */
 export const sortByOptions = [
@@ -284,9 +292,12 @@ type SortByOption = typeof sortByOptions[number];
 
 export type SortDirection = "ASC" | "DESC";
 
+type SortFn = (direction: SortDirection, a: BoardGame, b: BoardGame) => number;
+
 type SelectedSort = {
   sortBy: SortByOption;
   direction: SortDirection;
+  sort: SortFn;
 };
 
 type SortConfig = Record<
@@ -294,15 +305,34 @@ type SortConfig = Record<
   {
     /** Default direction when adding to SelectedSort arrays */
     direction: SortDirection;
+
+    /** Sort function */
+    sort: SortFn;
   }
 >;
 
+const stringSort = (direction: SortDirection, a: string, b: string) =>
+  direction === "ASC" ? a.localeCompare(b) : b.localeCompare(a);
+
+const numberSort = (direction: SortDirection, a?: number, b?: number) => {
+  const valueA = typeof a !== "number" ? 0 : a;
+  const valueB = typeof b !== "number" ? 0 : b;
+
+  return direction === "ASC" ? valueA - valueB : valueB - valueA;
+};
+
 const sortConfig: SortConfig = {
-  "Name": { direction: "ASC" },
-  "Player Count Recommendation": { direction: "DESC" },
-  "Average Playtime": { direction: "DESC" },
-  "Complexity": { direction: "DESC" },
-  "Ratings": { direction: "DESC" },
+  "Name": {
+    direction: "ASC",
+    sort: (dir, a, b) => stringSort(dir, a.name, b.name),
+  },
+  "Player Count Recommendation": { direction: "DESC", sort: () => 0 },
+  "Average Playtime": { direction: "DESC", sort: () => 0 },
+  "Complexity": {
+    direction: "DESC",
+    sort: (dir, a, b) => numberSort(dir, a?.averageWeight, b?.averageWeight),
+  },
+  "Ratings": { direction: "DESC", sort: () => 0 },
 };
 
 /**
@@ -319,11 +349,11 @@ const toggleSelectedSort =
   ]) =>
   ({ sortBy, allowDelete }: { sortBy: SortByOption; allowDelete: boolean }) => {
     const existingSelectedSort = selectedSort.find((s) => s.sortBy === sortBy);
-    const { direction } = sortConfig[sortBy];
+    const { direction, sort } = sortConfig[sortBy];
 
     if (!existingSelectedSort) {
       // if doesn't exist in array, then append to end
-      setSelectedSort((existing) => [...existing, { sortBy, direction }]);
+      setSelectedSort((existing) => [...existing, { sortBy, direction, sort }]);
     } else if (allowDelete && existingSelectedSort.direction !== direction) {
       // if direction is different than default, then remove from array
       setSelectedSort((existing) =>
@@ -337,6 +367,7 @@ const toggleSelectedSort =
       setSelectedSort((existing) =>
         existing.map((e) => ({
           sortBy: e.sortBy,
+          sort: e.sort,
           direction: e.sortBy === sortBy ? toggledDirection : e.direction,
         }))
       );
@@ -375,7 +406,7 @@ export const useCollectionFilters = () => {
     filterDispatch,
     sliderControls,
     initialSliderValues,
-    applyFiltersAndSorts: applyFiltersAndSorts(filterState),
+    applyFiltersAndSorts: applyFiltersAndSorts(filterState, selectedSort),
     selectedSort,
     toggleSelectedSort: toggleSelectedSort([selectedSort, setSelectedSort]),
     deleteSort,
