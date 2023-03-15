@@ -1,10 +1,4 @@
-import {
-  ComponentProps,
-  Dispatch,
-  SetStateAction,
-  useReducer,
-  useState,
-} from "react";
+import { ComponentProps, useReducer, useState } from "react";
 import type { SimpleBoardGame } from "@/types";
 import Slider from "@mui/material/Slider";
 import * as _ from "lodash-es";
@@ -18,6 +12,15 @@ import { showExpansionsService } from "./show-expansions.service";
 import { showInvalidPlayerCountService } from "./show-invalid-player-count.service";
 import { showNotRecommendedService } from "./show-not-recommended.service";
 import { showRatingsService } from "./show-ratings.service";
+import {
+  applySort,
+  deleteSort,
+  numberSort,
+  SelectedSort,
+  SortConfig,
+  stringSort,
+  toggleSelectedSort,
+} from "./sort.service";
 import { usernameService } from "./username.service";
 
 /** Interface to abstract filter control logic. Needs to be able to provide initial state, and a reducer to set state */
@@ -247,19 +250,6 @@ export type BoardGame = ReturnType<
   >
 >[number];
 
-const applySort =
-  (selectedSort: SelectedSort[]) =>
-  (a: BoardGame, b: BoardGame): number => {
-    for (const { direction, sort } of selectedSort) {
-      const sortResult = sort(direction, a, b);
-      if (sortResult !== 0) {
-        return sortResult;
-      }
-    }
-
-    return 0;
-  };
-
 export const applyFiltersAndSorts =
   (filterState: CollectionFilterState, selectedSort: SelectedSort[]) =>
   (games: SimpleBoardGame[]): BoardGame[] => {
@@ -288,38 +278,7 @@ export const sortByOptions = [
   "Ratings",
 ] as const;
 
-type SortByOption = typeof sortByOptions[number];
-
-export type SortDirection = "ASC" | "DESC";
-
-type SortFn = (direction: SortDirection, a: BoardGame, b: BoardGame) => number;
-
-type SelectedSort = {
-  sortBy: SortByOption;
-  direction: SortDirection;
-  sort: SortFn;
-};
-
-type SortConfig = Record<
-  SortByOption,
-  {
-    /** Default direction when adding to SelectedSort arrays */
-    direction: SortDirection;
-
-    /** Sort function */
-    sort: SortFn;
-  }
->;
-
-const stringSort = (direction: SortDirection, a: string, b: string) =>
-  direction === "ASC" ? a.localeCompare(b) : b.localeCompare(a);
-
-const numberSort = (direction: SortDirection, a?: number, b?: number) => {
-  const valueA = typeof a !== "number" ? 0 : a;
-  const valueB = typeof b !== "number" ? 0 : b;
-
-  return direction === "ASC" ? valueA - valueB : valueB - valueA;
-};
+export type SortByOption = typeof sortByOptions[number];
 
 const sortConfig: SortConfig = {
   "Name": {
@@ -335,51 +294,9 @@ const sortConfig: SortConfig = {
   "Ratings": { direction: "DESC", sort: () => 0 },
 };
 
-/**
- * 1. IF `sortBy` doesn't exist in `selectedSort` array, THEN append value to the end is default direction
- * 2. IF `sortBy` does exists in `selectedSort` array
- *   a. AND direction is different than default
- *     i.  AND `allowDelete`, then remove from `selectedSort` array
- *   b. ELSE (direction is same as default, or not `allowDelete`) toggle to other direction
- */
-const toggleSelectedSort =
-  ([selectedSort, setSelectedSort]: [
-    SelectedSort[],
-    Dispatch<SetStateAction<SelectedSort[]>>
-  ]) =>
-  ({ sortBy, allowDelete }: { sortBy: SortByOption; allowDelete: boolean }) => {
-    const existingSelectedSort = selectedSort.find((s) => s.sortBy === sortBy);
-    const { direction, sort } = sortConfig[sortBy];
-
-    if (!existingSelectedSort) {
-      // if doesn't exist in array, then append to end
-      setSelectedSort((existing) => [...existing, { sortBy, direction, sort }]);
-    } else if (allowDelete && existingSelectedSort.direction !== direction) {
-      // if direction is different than default, then remove from array
-      setSelectedSort((existing) =>
-        existing.filter((e) => e.sortBy !== sortBy)
-      );
-    } else {
-      const toggledDirection =
-        existingSelectedSort.direction === "ASC" ? "DESC" : "ASC";
-
-      // if direction is default (or don't allow delete), then toggle.
-      setSelectedSort((existing) =>
-        existing.map((e) => ({
-          sortBy: e.sortBy,
-          sort: e.sort,
-          direction: e.sortBy === sortBy ? toggledDirection : e.direction,
-        }))
-      );
-    }
-  };
-
 export const useCollectionFilters = () => {
   const [filterState, filterDispatch] = useReducer(reducer, initialFilterState);
   const [selectedSort, setSelectedSort] = useState<SelectedSort[]>([]);
-
-  const deleteSort = (sortBy: string) =>
-    setSelectedSort((existing) => existing.filter((e) => e.sortBy !== sortBy));
 
   const sliderControls: Array<{
     sliderLabel: string;
@@ -408,7 +325,11 @@ export const useCollectionFilters = () => {
     initialSliderValues,
     applyFiltersAndSorts: applyFiltersAndSorts(filterState, selectedSort),
     selectedSort,
-    toggleSelectedSort: toggleSelectedSort([selectedSort, setSelectedSort]),
-    deleteSort,
+    toggleSelectedSort: toggleSelectedSort(
+      selectedSort,
+      setSelectedSort,
+      sortConfig
+    ),
+    deleteSort: deleteSort(setSelectedSort),
   };
 };
