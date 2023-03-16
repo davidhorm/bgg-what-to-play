@@ -1,4 +1,5 @@
 import { CollectionFilterState, SimpleBoardGame } from "@/types";
+import { numberSort, SortFn } from "./sort.service";
 
 /** Used to determine which bar to highlight in the graph */
 const addIsPlayerCountWithinRange =
@@ -20,6 +21,27 @@ const addIsPlayerCountWithinRange =
     }));
   };
 
+const calcSortScoreSum = (
+  game: SimpleBoardGame,
+  minRange: number,
+  maxRange: number
+): number =>
+  game.recommendedPlayerCount
+    .filter(
+      (g) => minRange <= g.playerCountValue && g.playerCountValue <= maxRange
+    )
+    .reduce((prev, curr) => curr.sortScore + prev, 0);
+
+const sort: SortFn = (dir, a, b, filterState) => {
+  const [minRange, maxRange] = filterState.playerCountRange;
+
+  const valueA = calcSortScoreSum(a, minRange, maxRange);
+  const valueB = calcSortScoreSum(b, minRange, maxRange);
+
+  return numberSort(dir, valueA, valueB);
+};
+
 export const playerCountRecommendationService = {
   addIsPlayerCountWithinRange,
+  sort,
 };

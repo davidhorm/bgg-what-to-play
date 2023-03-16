@@ -5,6 +5,7 @@ import {
   maybeSetQueryParam,
   isBoardGameRangeWithinFilterRange,
 } from "./slider-control.utils";
+import { numberSort, SortFn } from "./sort.service";
 import type { SliderFilterControl } from "./useCollectionFilters";
 
 const QUERY_PARAM_PLAYTIME = "playtime";
@@ -121,11 +122,19 @@ const applyFilters: SliderFilterControl["applyFilters"] =
     return filteredGames;
   };
 
-export const playtimeService: SliderFilterControl = {
+const sort: SortFn = (dir, a, b) => {
+  const valueA = (a.minPlaytime + a.maxPlaytime) / 2;
+  const valueB = (b.minPlaytime + b.maxPlaytime) / 2;
+
+  return numberSort(dir, valueA, valueB);
+};
+
+export const playtimeService: SliderFilterControl & { sort: SortFn } = {
   getInitialState,
   getReducedState,
   setQueryParam,
   getSliderLabel: () => "Filter by Time (minutes)",
   getSliderProps,
   applyFilters,
+  sort,
 };

@@ -1,9 +1,18 @@
 import type { Dispatch, SetStateAction } from "react";
-import type { BoardGame, SortByOption } from "./useCollectionFilters";
+import type {
+  BoardGame,
+  SortByOption,
+  CollectionFilterState,
+} from "./useCollectionFilters";
 
-export type SortDirection = "ASC" | "DESC";
+type SortDirection = "ASC" | "DESC";
 
-type SortFn = (direction: SortDirection, a: BoardGame, b: BoardGame) => number;
+export type SortFn = (
+  direction: SortDirection,
+  a: BoardGame,
+  b: BoardGame,
+  filterState: CollectionFilterState
+) => number;
 
 export type SelectedSort = {
   sortBy: SortByOption;
@@ -76,10 +85,10 @@ export const deleteSort =
     setSelectedSort((existing) => existing.filter((e) => e.sortBy !== sortBy));
 
 export const applySort =
-  (selectedSort: SelectedSort[]) =>
+  (filterState: CollectionFilterState, selectedSort: SelectedSort[]) =>
   (a: BoardGame, b: BoardGame): number => {
     for (const { direction, sort } of selectedSort) {
-      const sortResult = sort(direction, a, b);
+      const sortResult = sort(direction, a, b, filterState);
       if (sortResult !== 0) {
         return sortResult;
       }

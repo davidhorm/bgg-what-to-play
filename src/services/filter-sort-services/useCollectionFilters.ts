@@ -15,7 +15,6 @@ import { showRatingsService } from "./show-ratings.service";
 import {
   applySort,
   deleteSort,
-  numberSort,
   SelectedSort,
   SortConfig,
   stringSort,
@@ -213,37 +212,6 @@ const reducer: ActionHandler<Action> = (
 
 //#endregion reducer
 
-//#region maybeSortByScore
-
-const calcSortScoreSum = (
-  game: SimpleBoardGame,
-  minRange: number,
-  maxRange: number
-): number =>
-  game.recommendedPlayerCount
-    .filter(
-      (g) => minRange <= g.playerCountValue && g.playerCountValue <= maxRange
-    )
-    .reduce((prev, curr) => curr.sortScore + prev, 0);
-
-const maybeSortByScore =
-  (filterState: CollectionFilterState) =>
-  (gameA: SimpleBoardGame, gameB: SimpleBoardGame): number => {
-    // if using non-default player range, then sort by score
-    const [minRange, maxRange] = filterState.playerCountRange;
-    if (minRange !== 1 || maxRange !== Number.POSITIVE_INFINITY) {
-      return (
-        calcSortScoreSum(gameB, minRange, maxRange) -
-        calcSortScoreSum(gameA, minRange, maxRange)
-      );
-    }
-
-    // else sort by game name by default.
-    return gameA.name.localeCompare(gameB.name);
-  };
-
-//#endregion maybeSortByScore
-
 export type BoardGame = ReturnType<
   ReturnType<
     typeof playerCountRecommendationService.addIsPlayerCountWithinRange
@@ -266,7 +234,7 @@ export const applyFiltersAndSorts =
       showNotRecommendedService.applyFilters(filterState) // But do one more filter based on isPlayerCountWithinRange
     );
 
-    return filter(games).sort(applySort(selectedSort));
+    return filter(games).sort(applySort(filterState, selectedSort));
   };
 
 /** List of options the user can sort by */
@@ -285,13 +253,13 @@ const sortConfig: SortConfig = {
     direction: "ASC",
     sort: (dir, a, b) => stringSort(dir, a.name, b.name),
   },
-  "Player Count Recommendation": { direction: "DESC", sort: () => 0 },
-  "Average Playtime": { direction: "DESC", sort: () => 0 },
-  "Complexity": {
+  "Player Count Recommendation": {
     direction: "DESC",
-    sort: (dir, a, b) => numberSort(dir, a?.averageWeight, b?.averageWeight),
+    sort: playerCountRecommendationService.sort,
   },
-  "Ratings": { direction: "DESC", sort: () => 0 },
+  "Average Playtime": { direction: "DESC", sort: playtimeService.sort },
+  "Complexity": { direction: "DESC", sort: complexityService.sort },
+  "Ratings": { direction: "DESC", sort: ratingsService.sort },
 };
 
 export const useCollectionFilters = () => {
