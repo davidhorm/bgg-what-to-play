@@ -51,7 +51,7 @@ describe(applyFiltersAndSorts.name, () => {
       });
 
       const filter = buildMockFilters({ showInvalidPlayerCount });
-      const actual = applyFiltersAndSorts(filter)([gameWith3Recs]);
+      const actual = applyFiltersAndSorts(filter, [])([gameWith3Recs]);
       expect(actual[0].recommendedPlayerCount.length).toBe(expectedLength);
     }
   );
@@ -71,7 +71,7 @@ describe(applyFiltersAndSorts.name, () => {
       });
 
       const filter = buildMockFilters({ showInvalidPlayerCount });
-      const actual = applyFiltersAndSorts(filter)([boardgame]);
+      const actual = applyFiltersAndSorts(filter, [])([boardgame]);
       expect(actual.length).toBe(expectedLength);
     }
   );
@@ -87,7 +87,7 @@ describe(applyFiltersAndSorts.name, () => {
       const expansion = buildMockGame({ type: "boardgameexpansion" });
 
       const filter = buildMockFilters({ showExpansions });
-      const actual = applyFiltersAndSorts(filter)([boardgame, expansion]);
+      const actual = applyFiltersAndSorts(filter, [])([boardgame, expansion]);
       expect(actual.length).toBe(expectedLength);
     }
   );
@@ -140,7 +140,7 @@ describe(applyFiltersAndSorts.name, () => {
       const filter = buildMockFilters({
         playerCountRange: filterPlayerCountRange,
       });
-      const actual = applyFiltersAndSorts(filter)([boardgame]);
+      const actual = applyFiltersAndSorts(filter, [])([boardgame]);
 
       expect(actual.length).toBe(expectedLength);
 
@@ -185,7 +185,7 @@ describe(applyFiltersAndSorts.name, () => {
       });
 
       const filter = buildMockFilters({ playtimeRange: filterPlaytimeRange });
-      const actual = applyFiltersAndSorts(filter)([boardgame]);
+      const actual = applyFiltersAndSorts(filter, [])([boardgame]);
       expect(actual.length).toBe(expectedLength);
     }
   );
@@ -210,7 +210,7 @@ describe(applyFiltersAndSorts.name, () => {
       const filter = buildMockFilters({
         complexityRange: filterComplexityRange,
       });
-      const actual = applyFiltersAndSorts(filter)([boardgame]);
+      const actual = applyFiltersAndSorts(filter, [])([boardgame]);
       expect(actual.length).toBe(expectedLength);
     }
   );
@@ -260,7 +260,7 @@ describe(applyFiltersAndSorts.name, () => {
         ratingsRange: filterRatingsRange,
         showRatings,
       });
-      const actual = applyFiltersAndSorts(filter)([boardgame]);
+      const actual = applyFiltersAndSorts(filter, [])([boardgame]);
       expect(actual.length).toBe(expectedLength);
     }
   );
@@ -285,7 +285,7 @@ describe(applyFiltersAndSorts.name, () => {
       const boardgame = buildMockGame({ recommendedPlayerCount });
 
       const filter = buildMockFilters({ showNotRecommended });
-      const actual = applyFiltersAndSorts(filter)([boardgame]);
+      const actual = applyFiltersAndSorts(filter, [])([boardgame]);
       expect(actual.length).toBe(expectedLength);
     }
   );
