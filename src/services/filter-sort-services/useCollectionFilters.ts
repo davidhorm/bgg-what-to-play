@@ -14,8 +14,7 @@ import { showNotRecommendedService } from "./show-not-recommended.service";
 import { showRatingsService } from "./show-ratings.service";
 import {
   applySort,
-  deleteSort,
-  SelectedSort,
+  deleteSelectedSort,
   SortConfig,
   stringSort,
   toggleSelectedSort,
@@ -219,11 +218,11 @@ export type BoardGame = ReturnType<
 >[number];
 
 export const applyFiltersAndSorts =
-  (filterState: CollectionFilterState, selectedSort: SelectedSort[]) =>
-  (games: SimpleBoardGame[]): BoardGame[] => {
+  (filterState: CollectionFilterState, selectedSorts: SortConfig[]) =>
+  (games: SimpleBoardGame[]) => {
     filterState.isDebug && printDebugMessage("All Games", games);
 
-    const filter = _.flow(
+    const filter: (g: SimpleBoardGame[]) => BoardGame[] = _.flow(
       showExpansionsService.applyFilters(filterState), // Show as many things as needed from here
       showInvalidPlayerCountService.applyFilters(filterState),
       playerCountRangeService.applyFilters(filterState), // Start removing things as needed from here
@@ -234,37 +233,31 @@ export const applyFiltersAndSorts =
       showNotRecommendedService.applyFilters(filterState) // But do one more filter based on isPlayerCountWithinRange
     );
 
-    return filter(games).sort(applySort(filterState, selectedSort));
+    return filter(games).sort(applySort(filterState, selectedSorts));
   };
 
-/** List of options the user can sort by */
-export const sortByOptions = [
-  "Name",
-  "Player Count Recommendation",
-  "Average Playtime",
-  "Complexity",
-  "Ratings",
-] as const;
-
-export type SortByOption = typeof sortByOptions[number];
-
-const sortConfig: SortConfig = {
-  "Name": {
+const defaultSortConfigs: SortConfig[] = [
+  {
+    sortBy: "Name",
     direction: "ASC",
     sort: (dir, a, b) => stringSort(dir, a.name, b.name),
   },
-  "Player Count Recommendation": {
+  {
+    sortBy: "Player Count Recommendation",
     direction: "DESC",
     sort: playerCountRecommendationService.sort,
   },
-  "Average Playtime": { direction: "DESC", sort: playtimeService.sort },
-  "Complexity": { direction: "DESC", sort: complexityService.sort },
-  "Ratings": { direction: "DESC", sort: ratingsService.sort },
-};
+  { sortBy: "Average Playtime", direction: "DESC", sort: playtimeService.sort },
+  { sortBy: "Complexity", direction: "DESC", sort: complexityService.sort },
+  { sortBy: "Ratings", direction: "DESC", sort: ratingsService.sort },
+];
+
+/** List of options the user can sort by */
+export const sortByOptions = defaultSortConfigs.map((s) => s.sortBy);
 
 export const useCollectionFilters = () => {
   const [filterState, filterDispatch] = useReducer(reducer, initialFilterState);
-  const [selectedSort, setSelectedSort] = useState<SelectedSort[]>([]);
+  const [selectedSorts, setSelectedSorts] = useState<SortConfig[]>([]);
 
   const sliderControls: Array<{
     sliderLabel: string;
@@ -291,13 +284,13 @@ export const useCollectionFilters = () => {
     filterDispatch,
     sliderControls,
     initialSliderValues,
-    applyFiltersAndSorts: applyFiltersAndSorts(filterState, selectedSort),
-    selectedSort,
+    applyFiltersAndSorts: applyFiltersAndSorts(filterState, selectedSorts),
+    selectedSorts,
     toggleSelectedSort: toggleSelectedSort(
-      selectedSort,
-      setSelectedSort,
-      sortConfig
+      selectedSorts,
+      setSelectedSorts,
+      defaultSortConfigs
     ),
-    deleteSort: deleteSort(setSelectedSort),
+    deleteSelectedSort: deleteSelectedSort(setSelectedSorts),
   };
 };

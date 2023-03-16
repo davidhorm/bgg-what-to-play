@@ -28,8 +28,8 @@ export const CustomSortControls = () => {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const open = Boolean(anchorEl);
   const id = open ? "add-sorts-dialog" : undefined;
-  const { selectedSort, sortByOptions } = useFilterState();
-  const { toggleSelectedSort, deleteSort } = useFilterDispatch();
+  const { selectedSorts, sortByOptions } = useFilterState();
+  const { toggleSelectedSort, deleteSelectedSort } = useFilterDispatch();
 
   return (
     <>
@@ -47,14 +47,14 @@ export const CustomSortControls = () => {
           </Button>
         </li>
 
-        {selectedSort.map(({ sortBy, direction }) => (
+        {selectedSorts.map(({ sortBy, direction }) => (
           <li key={sortBy}>
             <Chip
               label={sortBy}
               variant="outlined"
               icon={<Arrow direction={direction} />}
               onClick={() => toggleSelectedSort({ sortBy, allowDelete: false })}
-              onDelete={() => deleteSort(sortBy)}
+              onDelete={() => deleteSelectedSort(sortBy)}
             />
           </li>
         ))}
@@ -77,7 +77,7 @@ export const CustomSortControls = () => {
             <ListItemIcon>
               <Arrow
                 direction={
-                  selectedSort.find((i) => i.sortBy === sortBy)?.direction
+                  selectedSorts.find((i) => i.sortBy === sortBy)?.direction
                 }
               />
             </ListItemIcon>

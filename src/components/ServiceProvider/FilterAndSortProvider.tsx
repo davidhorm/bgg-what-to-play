@@ -8,28 +8,28 @@ import {
 const FilterAndSortContext = createContext<
   Omit<
     ReturnType<typeof useCollectionFilters>,
-    "filterDispatch" | "toggleSelectedSort" | "deleteSort"
+    "filterDispatch" | "toggleSelectedSort" | "deleteSelectedSort"
   > & { sortByOptions: typeof sortByOptions }
 >({
   filterState: initialFilterState,
   sliderControls: [],
   initialSliderValues: {},
   applyFiltersAndSorts: () => [],
-  selectedSort: [],
+  selectedSorts: [],
   sortByOptions,
 });
 
 const FilterAndSortDispatchContext = createContext<
   Pick<
     ReturnType<typeof useCollectionFilters>,
-    "filterDispatch" | "toggleSelectedSort" | "deleteSort"
+    "filterDispatch" | "toggleSelectedSort" | "deleteSelectedSort"
   >
 >({
   filterDispatch: (state) => state,
   toggleSelectedSort: () => {
     return;
   },
-  deleteSort: () => {
+  deleteSelectedSort: () => {
     return;
   },
 });
@@ -45,9 +45,9 @@ export const FilterAndSortProvider = ({
     sliderControls,
     initialSliderValues,
     applyFiltersAndSorts,
-    selectedSort,
+    selectedSorts,
     toggleSelectedSort,
-    deleteSort,
+    deleteSelectedSort,
   } = useCollectionFilters();
 
   const state = {
@@ -55,14 +55,14 @@ export const FilterAndSortProvider = ({
     sliderControls,
     initialSliderValues,
     applyFiltersAndSorts,
-    selectedSort,
+    selectedSorts,
     sortByOptions,
   };
 
   const dispatch = {
     filterDispatch,
     toggleSelectedSort,
-    deleteSort,
+    deleteSelectedSort,
   };
 
   return (

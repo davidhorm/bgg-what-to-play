@@ -1,9 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import type {
-  BoardGame,
-  SortByOption,
-  CollectionFilterState,
-} from "./useCollectionFilters";
+import type { BoardGame, CollectionFilterState } from "./useCollectionFilters";
 
 type SortDirection = "ASC" | "DESC";
 
@@ -14,16 +10,16 @@ export type SortFn = (
   filterState: CollectionFilterState
 ) => number;
 
-export type SelectedSort = {
-  sortBy: SortByOption;
+export type SortConfig = {
+  /** Label */
+  sortBy: string;
+
+  /** Direction to sort */
   direction: SortDirection;
+
+  /** Sort function */
   sort: SortFn;
 };
-
-export type SortConfig = Record<
-  SortByOption,
-  Pick<SelectedSort, "direction" | "sort">
->;
 
 export const stringSort = (direction: SortDirection, a: string, b: string) =>
   direction === "ASC" ? a.localeCompare(b) : b.localeCompare(a);
@@ -48,20 +44,25 @@ export const numberSort = (
  */
 export const toggleSelectedSort =
   (
-    selectedSort: SelectedSort[],
-    setSelectedSort: Dispatch<SetStateAction<SelectedSort[]>>,
-    sortConfig: SortConfig
+    selectedSorts: SortConfig[],
+    setSelectedSorts: Dispatch<SetStateAction<SortConfig[]>>,
+    defaultSortConfigs: SortConfig[]
   ) =>
-  ({ sortBy, allowDelete }: { sortBy: SortByOption; allowDelete: boolean }) => {
-    const existingSelectedSort = selectedSort.find((s) => s.sortBy === sortBy);
-    const { direction, sort } = sortConfig[sortBy];
+  ({ sortBy, allowDelete }: { sortBy: string; allowDelete: boolean }) => {
+    const existingSelectedSort = selectedSorts.find((s) => s.sortBy === sortBy);
+    const { direction, sort } =
+      defaultSortConfigs.find((s) => s.sortBy === sortBy) ||
+      defaultSortConfigs[0];
 
     if (!existingSelectedSort) {
       // if doesn't exist in array, then append to end
-      setSelectedSort((existing) => [...existing, { sortBy, direction, sort }]);
+      setSelectedSorts((existing) => [
+        ...existing,
+        { sortBy, direction, sort },
+      ]);
     } else if (allowDelete && existingSelectedSort.direction !== direction) {
       // if direction is different than default, then remove from array
-      setSelectedSort((existing) =>
+      setSelectedSorts((existing) =>
         existing.filter((e) => e.sortBy !== sortBy)
       );
     } else {
@@ -69,7 +70,7 @@ export const toggleSelectedSort =
         existingSelectedSort.direction === "ASC" ? "DESC" : "ASC";
 
       // if direction is default (or don't allow delete), then toggle.
-      setSelectedSort((existing) =>
+      setSelectedSorts((existing) =>
         existing.map((e) => ({
           sortBy: e.sortBy,
           sort: e.sort,
@@ -79,15 +80,15 @@ export const toggleSelectedSort =
     }
   };
 
-export const deleteSort =
-  (setSelectedSort: Dispatch<SetStateAction<SelectedSort[]>>) =>
+export const deleteSelectedSort =
+  (setSelectedSorts: Dispatch<SetStateAction<SortConfig[]>>) =>
   (sortBy: string) =>
-    setSelectedSort((existing) => existing.filter((e) => e.sortBy !== sortBy));
+    setSelectedSorts((existing) => existing.filter((e) => e.sortBy !== sortBy));
 
 export const applySort =
-  (filterState: CollectionFilterState, selectedSort: SelectedSort[]) =>
+  (filterState: CollectionFilterState, selectedSorts: SortConfig[]) =>
   (a: BoardGame, b: BoardGame): number => {
-    for (const { direction, sort } of selectedSort) {
+    for (const { direction, sort } of selectedSorts) {
       const sortResult = sort(direction, a, b, filterState);
       if (sortResult !== 0) {
         return sortResult;
