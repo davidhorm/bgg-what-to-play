@@ -1,16 +1,19 @@
+import { useEffect } from "react";
 import type { SimpleBoardGame } from "@/types";
-import { describe, test, expect } from "vitest";
+import { cleanup, render, screen } from "@testing-library/react";
+import { describe, test, expect, afterEach } from "vitest";
 import {
   applyFiltersAndSorts,
   initialFilterState,
   CollectionFilterState,
+  useCollectionFilters,
 } from "./useCollectionFilters";
 
 describe(applyFiltersAndSorts.name, () => {
   const buildMockGame = (
     props?: Partial<SimpleBoardGame>
   ): SimpleBoardGame => ({
-    name: "Ticket to Ride",
+    name: props?.name ?? "Ticket to Ride",
     type: props?.type ?? "boardgame",
     id: 0,
     thumbnail: "thumbnail.png",
@@ -293,6 +296,74 @@ describe(applyFiltersAndSorts.name, () => {
   });
 
   describe("Sort", () => {
-    test.todo("test sort logic here");
+    type Props = { games: SimpleBoardGame[]; sortBys: string[] };
+    const MockComponent = ({ games, sortBys }: Props) => {
+      const { applyFiltersAndSorts, toggleSelectedSort, selectedSorts } =
+        useCollectionFilters();
+
+      useEffect(() => {
+        const sortBy = sortBys.shift();
+        sortBy && toggleSelectedSort({ sortBy, allowDelete: false });
+      }, [selectedSorts]);
+
+      const filteredAndSortedGames = applyFiltersAndSorts(games);
+
+      return (
+        filteredAndSortedGames && (
+          <div data-testid="actual">
+            {JSON.stringify(filteredAndSortedGames)}
+          </div>
+        )
+      );
+    };
+
+    afterEach(() => cleanup());
+
+    const GIVEN_GAME_PROPS: Record<string, Partial<SimpleBoardGame>[]> = {
+      "name": ["second", "third", "first"].map((name) => ({ name })),
+      "same min max playtime": [20, 30, 10].map((time) => ({
+        minPlaytime: time,
+        maxPlaytime: time,
+      })),
+      "different min max playtime": [
+        [20, 30],
+        [20, 40],
+        [10, 30],
+      ].map(([minPlaytime, maxPlaytime]) => ({ minPlaytime, maxPlaytime })),
+      "averageWeight": [2, 3, 1].map((averageWeight) => ({ averageWeight })),
+      "averageRating": [2, 3, 1].map((averageRating) => ({ averageRating })),
+    };
+
+    // TODO: add test cases for Player Count Recommendation
+    // TODO: add test cases for user ratings
+
+    test.each`
+      gamesProps                                        | sortBys                                     | expectedOrder
+      ${GIVEN_GAME_PROPS["name"]}                       | ${["Name"]}                                 | ${["first", "second", "third"]}
+      ${GIVEN_GAME_PROPS["name"]}                       | ${["Name", "Name"]}                         | ${["third", "second", "first"]}
+      ${GIVEN_GAME_PROPS["same min max playtime"]}      | ${["Average Playtime"]}                     | ${["3", "2", "1"]}
+      ${GIVEN_GAME_PROPS["same min max playtime"]}      | ${["Average Playtime", "Average Playtime"]} | ${["1", "2", "3"]}
+      ${GIVEN_GAME_PROPS["different min max playtime"]} | ${["Average Playtime"]}                     | ${["3", "2", "1"]}
+      ${GIVEN_GAME_PROPS["different min max playtime"]} | ${["Average Playtime", "Average Playtime"]} | ${["1", "2", "3"]}
+      ${GIVEN_GAME_PROPS["averageWeight"]}              | ${["Complexity"]}                           | ${["3", "2", "1"]}
+      ${GIVEN_GAME_PROPS["averageWeight"]}              | ${["Complexity", "Complexity"]}             | ${["1", "2", "3"]}
+      ${GIVEN_GAME_PROPS["averageRating"]}              | ${["Ratings"]}                              | ${["3", "2", "1"]}
+      ${GIVEN_GAME_PROPS["averageRating"]}              | ${["Ratings", "Ratings"]}                   | ${["1", "2", "3"]}
+    `(
+      "GIVEN games ordered 2-3-1, WHEN sortBys=$sortBys, THEN expectedOrder=$expectedOrder",
+      async ({ gamesProps, sortBys, expectedOrder }) => {
+        const DEFAULT_NAMES = ["2", "3", "1"];
+        const games = (gamesProps as Partial<SimpleBoardGame>[]).map(
+          (game, i) => buildMockGame({ name: DEFAULT_NAMES[i], ...game })
+        );
+
+        render(<MockComponent games={games} sortBys={sortBys} />);
+
+        const actual = await screen.getByTestId(`actual`)?.innerHTML;
+
+        const actualOrder = JSON.parse(actual).map((g: any) => g.name);
+        expect(actualOrder).toEqual(expectedOrder);
+      }
+    );
   });
 });
