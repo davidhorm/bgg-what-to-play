@@ -302,7 +302,7 @@ export const fetchBggCollection = (
 
 export const fetchBggThings = (thingIds?: string): Promise<Thing> | undefined =>
   thingIds
-    ? fetch(`https://bgg.cc/xmlapi2/thing?id=${thingIds}&stats=1`)
+    ? fetch(`https://bgg.cc/xmlapi2/thing?id=${thingIds}&stats=1&v=1`)
         .then((response) => response.text())
         .then((xml) => parser.parse(xml))
         .catch((err) => {
