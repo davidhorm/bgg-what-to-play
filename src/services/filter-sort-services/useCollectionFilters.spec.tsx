@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import type { SimpleBoardGame } from "@/types";
+import type { BoardGame, SimpleBoardGame } from "@/types";
 import { cleanup, render, screen } from "@testing-library/react";
 import { describe, test, expect, afterEach } from "vitest";
 import {
@@ -319,6 +319,9 @@ describe(applyFiltersAndSorts.name, () => {
 
     afterEach(() => cleanup());
 
+    // When creating a list of mock games to later sort, then create them in the initial 2-3-1 order
+    const DEFAULT_GAME_NAMES = ["2", "3", "1"];
+
     const GIVEN_GAME_PROPS: Record<string, Partial<SimpleBoardGame>[]> = {
       "name": ["second", "third", "first"].map((name) => ({ name })),
       "same min max playtime": [20, 30, 10].map((time) => ({
@@ -334,7 +337,6 @@ describe(applyFiltersAndSorts.name, () => {
       "averageRating": [2, 3, 1].map((averageRating) => ({ averageRating })),
     };
 
-    // TODO: add test cases for Player Count Recommendation
     // TODO: add test cases for user ratings
 
     test.each`
@@ -352,9 +354,8 @@ describe(applyFiltersAndSorts.name, () => {
     `(
       "GIVEN games ordered 2-3-1, WHEN sortBys=$sortBys, THEN expectedOrder=$expectedOrder",
       async ({ gamesProps, sortBys, expectedOrder }) => {
-        const DEFAULT_NAMES = ["2", "3", "1"];
         const games = (gamesProps as Partial<SimpleBoardGame>[]).map(
-          (game, i) => buildMockGame({ name: DEFAULT_NAMES[i], ...game })
+          (game, i) => buildMockGame({ name: DEFAULT_GAME_NAMES[i], ...game })
         );
 
         render(<MockComponent games={games} sortBys={sortBys} />);
@@ -362,6 +363,134 @@ describe(applyFiltersAndSorts.name, () => {
         const actual = await screen.getByTestId(`actual`)?.innerHTML;
 
         const actualOrder = JSON.parse(actual).map((g: any) => g.name);
+        expect(actualOrder).toEqual(expectedOrder);
+      }
+    );
+
+    /**
+     * Build mock recommendedPlayerCount
+     * @param [Best, Recommended, NotRecommended, playerCountValue?]
+     */
+    const buildMockRecs = ([
+      Best,
+      Recommended,
+      NotRecommended,
+      playerCountValue = 1,
+    ]: number[]): BoardGame["recommendedPlayerCount"][number] => {
+      const sum = Best + Recommended + NotRecommended;
+
+      return {
+        Best,
+        Recommended,
+        "Not Recommended": 0 - NotRecommended,
+        "isPlayerCountWithinRange": true,
+        playerCountValue,
+        "playerCountLabel": playerCountValue.toString(),
+        "BestPercent": Math.round((Best / sum) * 100),
+        "RecommendedPercent": Math.round((Recommended / sum) * 100),
+        "NotRecommendedPercent": Math.round((NotRecommended / sum) * 100),
+      };
+    };
+
+    const GIVEN_PLAYER_RECS: Record<string, Partial<SimpleBoardGame>[]> = {
+      "best is best": [
+        [1, 2, 1],
+        [2, 1, 1],
+        [1, 1, 2],
+      ].map((recs, i) =>
+        buildMockGame({
+          name: DEFAULT_GAME_NAMES[i],
+          recommendedPlayerCount: [buildMockRecs(recs)],
+        })
+      ),
+
+      /**
+       * Just because a game has 100% Best votes doesn't mean it should rank to the top. Give bonus points to those with more points.
+       *
+       * See up to [v1.1.3 explanation](https://boardgamegeek.com/thread/3028512/article/41805927#41805927) for more reason why.
+       */
+      "bonus points for number of votes": [
+        [1300, 400, 40], // Catan (13)
+        [350, 20, 2], // Galaxy Trucker (31481)
+        [6, 0, 0], // Orient Express (2363) // TODO: fix so [10,0,0] => 1st when ASC
+      ].map((recs, i) =>
+        buildMockGame({
+          name: DEFAULT_GAME_NAMES[i],
+          recommendedPlayerCount: [buildMockRecs(recs)],
+        })
+      ),
+
+      "average ranges": [
+        [
+          [1, 1, 1],
+          [1, 2, 1],
+        ],
+        [
+          [1, 1, 1],
+          [2, 1, 1],
+        ],
+        [
+          [1, 1, 1],
+          [1, 1, 2],
+        ],
+      ].map((recs, i) =>
+        buildMockGame({
+          name: DEFAULT_GAME_NAMES[i],
+          maxPlayers: recs.length,
+          recommendedPlayerCount: recs.map((r, j) =>
+            buildMockRecs([...r, j + 1])
+          ),
+        })
+      ),
+
+      "party game ranges": [
+        [
+          [15, 90, 67],
+          [14, 82, 76],
+        ], // Deception (156129)
+        [
+          [3, 45, 32],
+          [11, 45, 26],
+        ], // Wavelength (262543)
+        [
+          [0, 3, 7],
+          [3, 4, 3],
+        ], // Electronic Catch Phrase (135262)
+      ].map((recs, i) =>
+        buildMockGame({
+          name: DEFAULT_GAME_NAMES[i],
+          maxPlayers: recs.length,
+          recommendedPlayerCount: recs.map((r, j) =>
+            buildMockRecs([...r, j + 1])
+          ),
+        })
+      ),
+    };
+
+    test.each`
+      givenScenario                         | sortBys                                                           | expectedOrder
+      ${"best is best"}                     | ${["Player Count Recommendation"]}                                | ${["3", "2", "1"]}
+      ${"best is best"}                     | ${["Player Count Recommendation", "Player Count Recommendation"]} | ${["1", "2", "3"]}
+      ${"bonus points for number of votes"} | ${["Player Count Recommendation"]}                                | ${["3", "2", "1"]}
+      ${"bonus points for number of votes"} | ${["Player Count Recommendation", "Player Count Recommendation"]} | ${["1", "2", "3"]}
+      ${"average ranges"}                   | ${["Player Count Recommendation"]}                                | ${["3", "2", "1"]}
+      ${"average ranges"}                   | ${["Player Count Recommendation", "Player Count Recommendation"]} | ${["1", "2", "3"]}
+      ${"party game ranges"}                | ${["Player Count Recommendation"]}                                | ${["3", "2", "1"]}
+      ${"party game ranges"}                | ${["Player Count Recommendation", "Player Count Recommendation"]} | ${["1", "2", "3"]}
+    `(
+      "GIVEN $givenScenario with games ordered 2-3-1, WHEN sortBys=$sortBys, THEN expectedOrder=$expectedOrder",
+      async ({ givenScenario, sortBys, expectedOrder }) => {
+        render(
+          <MockComponent
+            games={GIVEN_PLAYER_RECS[givenScenario] as any}
+            sortBys={sortBys}
+          />
+        );
+
+        const actual = await screen.getByTestId(`actual`)?.innerHTML;
+
+        const actualOrder = JSON.parse(actual).map((g: any) => g.name);
+
         expect(actualOrder).toEqual(expectedOrder);
       }
     );

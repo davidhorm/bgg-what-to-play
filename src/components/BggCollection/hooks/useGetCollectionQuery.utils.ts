@@ -124,18 +124,6 @@ const calcPercentAndAddSortScore = (
   const RecommendedPercent = Math.round((Recommended * 100) / totalVotes);
   const NotRecommendedPercent = Math.round((notRec * 100) / totalVotes);
 
-  const maybeSortScore = Math.round(
-    Math.min(Math.sqrt(Best), 10) +
-      BestPercent +
-      RecommendedPercent * 0.8 -
-      NotRecommendedPercent * 0.8
-  );
-
-  const sortScore =
-    totalVotes === 0 || Number.isNaN(maybeSortScore)
-      ? Number.NEGATIVE_INFINITY
-      : maybeSortScore;
-
   return {
     ...playerRec,
 
@@ -147,9 +135,6 @@ const calcPercentAndAddSortScore = (
 
     /** Percentage of users not recommending this player count. */
     NotRecommendedPercent,
-
-    /** 2xBest Raw + Best % + Recommended Raw + Recommended % - Not Recommended Row - Not Recommended % */
-    sortScore,
   };
 };
 

@@ -119,7 +119,6 @@ describe(transformToBoardGame.name, () => {
           "RecommendedPercent": 16,
           "playerCountValue": 1,
           "playerCountLabel": "1",
-          "sortScore": 102,
         },
         {
           "Best": 5,
@@ -130,7 +129,6 @@ describe(transformToBoardGame.name, () => {
           "RecommendedPercent": 57,
           "playerCountValue": 2,
           "playerCountLabel": "2",
-          "sortScore": 57,
         },
         {
           "Best": 0,
@@ -141,7 +139,6 @@ describe(transformToBoardGame.name, () => {
           "RecommendedPercent": 29,
           "playerCountValue": 3,
           "playerCountLabel": "3",
-          "sortScore": -34,
         },
         {
           "Best": 0,
@@ -152,7 +149,6 @@ describe(transformToBoardGame.name, () => {
           "RecommendedPercent": 12,
           "playerCountValue": 4,
           "playerCountLabel": "4",
-          "sortScore": -61,
         },
         {
           "Best": 0,
@@ -163,7 +159,6 @@ describe(transformToBoardGame.name, () => {
           "RecommendedPercent": 0,
           "playerCountValue": 5,
           "playerCountLabel": "4+",
-          "sortScore": -80,
         },
       ],
     };
