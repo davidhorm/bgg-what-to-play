@@ -340,22 +340,24 @@ describe(applyFiltersAndSorts.name, () => {
     // TODO: add test cases for user ratings
 
     test.each`
-      gamesProps                                        | sortBys                                     | expectedOrder
-      ${GIVEN_GAME_PROPS["name"]}                       | ${["Name"]}                                 | ${["first", "second", "third"]}
-      ${GIVEN_GAME_PROPS["name"]}                       | ${["Name", "Name"]}                         | ${["third", "second", "first"]}
-      ${GIVEN_GAME_PROPS["same min max playtime"]}      | ${["Average Playtime"]}                     | ${["3", "2", "1"]}
-      ${GIVEN_GAME_PROPS["same min max playtime"]}      | ${["Average Playtime", "Average Playtime"]} | ${["1", "2", "3"]}
-      ${GIVEN_GAME_PROPS["different min max playtime"]} | ${["Average Playtime"]}                     | ${["3", "2", "1"]}
-      ${GIVEN_GAME_PROPS["different min max playtime"]} | ${["Average Playtime", "Average Playtime"]} | ${["1", "2", "3"]}
-      ${GIVEN_GAME_PROPS["averageWeight"]}              | ${["Complexity"]}                           | ${["3", "2", "1"]}
-      ${GIVEN_GAME_PROPS["averageWeight"]}              | ${["Complexity", "Complexity"]}             | ${["1", "2", "3"]}
-      ${GIVEN_GAME_PROPS["averageRating"]}              | ${["Ratings"]}                              | ${["3", "2", "1"]}
-      ${GIVEN_GAME_PROPS["averageRating"]}              | ${["Ratings", "Ratings"]}                   | ${["1", "2", "3"]}
+      gamesProps                      | sortBys                                     | expectedOrder
+      ${"name"}                       | ${["Name"]}                                 | ${["first", "second", "third"]}
+      ${"name"}                       | ${["Name", "Name"]}                         | ${["third", "second", "first"]}
+      ${"same min max playtime"}      | ${["Average Playtime"]}                     | ${["3", "2", "1"]}
+      ${"same min max playtime"}      | ${["Average Playtime", "Average Playtime"]} | ${["1", "2", "3"]}
+      ${"different min max playtime"} | ${["Average Playtime"]}                     | ${["3", "2", "1"]}
+      ${"different min max playtime"} | ${["Average Playtime", "Average Playtime"]} | ${["1", "2", "3"]}
+      ${"averageWeight"}              | ${["Complexity"]}                           | ${["3", "2", "1"]}
+      ${"averageWeight"}              | ${["Complexity", "Complexity"]}             | ${["1", "2", "3"]}
+      ${"averageRating"}              | ${["Ratings"]}                              | ${["3", "2", "1"]}
+      ${"averageRating"}              | ${["Ratings", "Ratings"]}                   | ${["1", "2", "3"]}
     `(
-      "GIVEN games ordered 2-3-1, WHEN sortBys=$sortBys, THEN expectedOrder=$expectedOrder",
+      "GIVEN games with $gamesProps ordered 2-3-1, WHEN sortBys=$sortBys, THEN expectedOrder=$expectedOrder",
       async ({ gamesProps, sortBys, expectedOrder }) => {
-        const games = (gamesProps as Partial<SimpleBoardGame>[]).map(
-          (game, i) => buildMockGame({ name: DEFAULT_GAME_NAMES[i], ...game })
+        const games = (
+          GIVEN_GAME_PROPS[gamesProps] as Partial<SimpleBoardGame>[]
+        ).map((game, i) =>
+          buildMockGame({ name: DEFAULT_GAME_NAMES[i], ...game })
         );
 
         render(<MockComponent games={games} sortBys={sortBys} />);
