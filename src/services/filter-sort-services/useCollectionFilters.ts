@@ -287,7 +287,6 @@ export const useCollectionFilters = () => {
     applyFiltersAndSorts: applyFiltersAndSorts(filterState, selectedSorts),
     selectedSorts,
     toggleSelectedSort: toggleSelectedSort(
-      selectedSorts,
       setSelectedSorts,
       defaultSortConfigs
     ),

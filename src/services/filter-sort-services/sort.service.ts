@@ -44,41 +44,39 @@ export const numberSort = (
  */
 export const toggleSelectedSort =
   (
-    selectedSorts: SortConfig[],
     setSelectedSorts: Dispatch<SetStateAction<SortConfig[]>>,
     defaultSortConfigs: SortConfig[]
   ) =>
-  ({ sortBy, allowDelete }: { sortBy: string; allowDelete: boolean }) => {
-    const existingSelectedSort = selectedSorts.find((s) => s.sortBy === sortBy);
-    const { direction, sort } =
-      defaultSortConfigs.find((s) => s.sortBy === sortBy) ||
-      defaultSortConfigs[0];
+  ({ sortBy, allowDelete }: { sortBy: string; allowDelete: boolean }) =>
+    setSelectedSorts((existing) => {
+      const existingSelectedSort = existing.find((s) => s.sortBy === sortBy);
 
-    if (!existingSelectedSort) {
-      // if doesn't exist in array, then append to end
-      setSelectedSorts((existing) => [
-        ...existing,
-        { sortBy, direction, sort },
-      ]);
-    } else if (allowDelete && existingSelectedSort.direction !== direction) {
-      // if direction is different than default, then remove from array
-      setSelectedSorts((existing) =>
-        existing.filter((e) => e.sortBy !== sortBy)
-      );
-    } else {
-      const toggledDirection =
-        existingSelectedSort.direction === "ASC" ? "DESC" : "ASC";
+      const { direction, sort } =
+        defaultSortConfigs.find((s) => s.sortBy === sortBy) ||
+        defaultSortConfigs[0];
 
-      // if direction is default (or don't allow delete), then toggle.
-      setSelectedSorts((existing) =>
-        existing.map((e) => ({
+      let newState: SortConfig[] = [];
+
+      if (!existingSelectedSort) {
+        // if doesn't exist in array, then append to end
+        newState = [...existing, { sortBy, direction, sort }];
+      } else if (allowDelete && existingSelectedSort.direction !== direction) {
+        // if direction is different than default (and allowed to delete), then remove from array
+        newState = existing.filter((e) => e.sortBy !== sortBy);
+      } else {
+        const toggledDirection =
+          existingSelectedSort.direction === "ASC" ? "DESC" : "ASC";
+
+        // if direction is default (or don't allow delete), then toggle.
+        newState = existing.map((e) => ({
           sortBy: e.sortBy,
           sort: e.sort,
           direction: e.sortBy === sortBy ? toggledDirection : e.direction,
-        }))
-      );
-    }
-  };
+        }));
+      }
+
+      return newState;
+    });
 
 export const deleteSelectedSort =
   (setSelectedSorts: Dispatch<SetStateAction<SortConfig[]>>) =>
