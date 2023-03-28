@@ -15,6 +15,7 @@ import { showRatingsService } from "./show-ratings.service";
 import {
   applySort,
   deleteSelectedSort,
+  getInitialSortState,
   SortConfig,
   stringSort,
   toggleSelectedSort,
@@ -239,17 +240,34 @@ export const applyFiltersAndSorts =
 const defaultSortConfigs: SortConfig[] = [
   {
     sortBy: "Name",
+    qpKey: "name",
     direction: "ASC",
     sort: (dir, a, b) => stringSort(dir, a.name, b.name),
   },
   {
     sortBy: "Player Count Recommendation",
+    qpKey: "rec",
     direction: "DESC",
     sort: playerCountRecommendationService.sort,
   },
-  { sortBy: "Average Playtime", direction: "DESC", sort: playtimeService.sort },
-  { sortBy: "Complexity", direction: "DESC", sort: complexityService.sort },
-  { sortBy: "Ratings", direction: "DESC", sort: ratingsService.sort },
+  {
+    sortBy: "Average Playtime",
+    qpKey: "time",
+    direction: "DESC",
+    sort: playtimeService.sort,
+  },
+  {
+    sortBy: "Complexity",
+    qpKey: "weight",
+    direction: "DESC",
+    sort: complexityService.sort,
+  },
+  {
+    sortBy: "Ratings",
+    qpKey: "ratings",
+    direction: "DESC",
+    sort: ratingsService.sort,
+  },
 ];
 
 /** List of options the user can sort by */
@@ -257,7 +275,9 @@ export const sortByOptions = defaultSortConfigs.map((s) => s.sortBy);
 
 export const useCollectionFilters = () => {
   const [filterState, filterDispatch] = useReducer(reducer, initialFilterState);
-  const [selectedSorts, setSelectedSorts] = useState<SortConfig[]>([]);
+  const [selectedSorts, setSelectedSorts] = useState(
+    getInitialSortState(defaultSortConfigs)
+  );
 
   const sliderControls: Array<{
     sliderLabel: string;
