@@ -19,6 +19,7 @@ const Arrow = ({ direction }: { direction?: SortDirection }) =>
       className={`ml-2 w-3 fill-current ${
         direction === "ASC" ? "rotate-180" : ""
       }`}
+      title={direction === "ASC" ? "Ascending" : "Descending"}
     />
   ) : (
     <></>
@@ -37,7 +38,7 @@ export const CustomSortControls = () => {
         <li className="pl-2">
           <Button
             variant="outlined"
-            startIcon={<Plus className="w-3 fill-current" />}
+            startIcon={<Plus className="w-3 fill-current" title="Add" />}
             aria-controls={open ? id : undefined}
             aria-expanded={open ? "true" : undefined}
             aria-haspopup="true"
