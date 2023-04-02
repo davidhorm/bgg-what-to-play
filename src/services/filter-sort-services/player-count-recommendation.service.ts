@@ -1,5 +1,4 @@
 import { CollectionFilterState, SimpleBoardGame, BoardGame } from "@/types";
-import { g } from "vitest/dist/index-761e769b";
 import { numberSort, SortFn } from "./sort.service";
 
 /** Used to determine which bar to highlight in the graph */
