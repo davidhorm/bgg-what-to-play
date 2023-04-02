@@ -22,4 +22,14 @@ test.describe("Mock User Responses", () => {
       })
     ).toBeVisible();
   });
+
+  test("WHEN navigating to `/?username=202`, THEN large collection (and retry) message is visible", async ({
+    page,
+  }) => {
+    await page.goto("/?username=202");
+
+    await expect(
+      page.getByRole("heading", { name: "My, what a big collection" })
+    ).toBeVisible({ timeout: 10000 });
+  });
 });
