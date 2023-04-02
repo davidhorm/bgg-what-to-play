@@ -31,6 +31,16 @@ Website to visualize your [BGG](https://boardgamegeek.com/) collection to better
 1. `pnpm dev` to start the dev server
 1. Navigate to http://localhost:5173/
 
+### Testing with Mock Users
+
+When developing locally, mock users have been created to help test certain scenarios:
+
+| User | Scenario                                          |
+| ---- | ------------------------------------------------- |
+| 000  | Mock response for an empty collection             |
+| 001  | Mock response for a collection with a single game |
+| 202  | Mock response that always returns the 202 code    |
+
 ### Troubleshoot
 
 If an expected game isn't showing up, then add `debug=1` to the query parameter to see the list of games as it goes through the different filters outputted to the console.
