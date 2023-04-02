@@ -10,4 +10,16 @@ test.describe("Mock User Responses", () => {
       page.getByRole("link", { name: "Ticket to Ride" })
     ).toBeVisible();
   });
+
+  test("WHEN navigating to `/?username=000`, THEN empty collection message is visible", async ({
+    page,
+  }) => {
+    await page.goto("/?username=000");
+
+    await expect(
+      page.getByRole("heading", {
+        name: "You have zero games in your collection?",
+      })
+    ).toBeVisible();
+  });
 });

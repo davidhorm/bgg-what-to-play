@@ -141,13 +141,14 @@ export const useGetCollectionQuery = (
       : "";
 
   return {
+    boardGameCollectionStatus,
     pubdate: boardGameCollectionData?.items?.pubdate
       ? `${new Date(
           boardGameCollectionData?.items?.pubdate
         ).toLocaleDateString()}`
       : "",
     loadingMessage,
-    data,
+    data: data || [],
     error: loadingStatus.isError
       ? {
           isBoardGameAccepted:

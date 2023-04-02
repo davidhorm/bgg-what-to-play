@@ -12,12 +12,10 @@ export const BggCollection = () => {
   } = useFilterState();
 
   // TODO: fix 202 message
-  const { data, pubdate, loadingMessage, error } = useGetCollectionQuery(
-    username,
-    showExpansions
-  );
+  const { data, pubdate, loadingMessage, error, boardGameCollectionStatus } =
+    useGetCollectionQuery(username, showExpansions);
 
-  if (!data) return <></>;
+  if (boardGameCollectionStatus === "loading") return <></>;
 
   if (error?.isBoardGameAccepted) return <AcceptedResponse />;
 
