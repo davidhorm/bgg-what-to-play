@@ -11,7 +11,6 @@ export const BggCollection = () => {
     applyFiltersAndSorts,
   } = useFilterState();
 
-  // TODO: fix 202 message
   const { data, pubdate, loadingMessage, error, boardGameCollectionStatus } =
     useGetCollectionQuery(username, showExpansions);
 
