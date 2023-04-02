@@ -43,12 +43,13 @@ test.describe("Filter Controls and Query Parameters", () => {
       ).not.toBeChecked();
     }
 
-    expect(await page.getByRole("button", { name: "Add Sort" }));
-    expect(
-      await page.getByRole("button", {
+    await expect(page.getByRole("button", { name: "Add Sort" })).toBeVisible();
+
+    await expect(
+      page.getByRole("button", {
         name: "Descending Player Count Recommendation",
       })
-    );
+    ).toBeVisible();
 
     expect(new URL(page.url()).search).toBe("");
   });
@@ -368,7 +369,7 @@ test.describe("Filter Controls and Query Parameters", () => {
     for await (const name of sortConfigs.map(
       ({ sortBy }) => `Ascending ${sortBy}`
     )) {
-      expect(await page.getByRole("button", { name })).toBeDefined();
+      await expect(page.getByRole("button", { name })).toBeVisible();
     }
 
     const descendingQueryParameters = sortConfigs
@@ -380,7 +381,7 @@ test.describe("Filter Controls and Query Parameters", () => {
     for await (const name of sortConfigs.map(
       ({ sortBy }) => `Descending ${sortBy}`
     )) {
-      expect(await page.getByRole("button", { name })).toBeDefined();
+      await expect(page.getByRole("button", { name })).toBeVisible();
     }
   });
 });
