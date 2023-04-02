@@ -9,6 +9,19 @@ const response001 = `<?xml version="1.0" encoding="utf-8" standalone="yes"?><ite
 <item objecttype="thing" objectid="9209" subtype="boardgame" collid="16613980">
   <name sortindex="1">Ticket to Ride</name>
   <status own="1" prevowned="0" fortrade="0" want="0" wanttoplay="0" wanttobuy="0" wishlist="0"  preordered="0" lastmodified="2021-02-07 13:46:15" />
+  <stats minplayers="2" maxplayers="5" minplaytime="30" maxplaytime="60" playingtime="60" numowned="118911">
+    <rating value="9.5">
+      <usersrated value="83630" />
+      <average value="7.3991" />
+      <bayesaverage value="7.28624" />
+      <stddev value="1.29921" />
+      <median value="0" />
+      <ranks>
+        <rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="211" bayesaverage="7.28624" />
+        <rank type="family" id="5499" name="familygames" friendlyname="Family Game Rank" value="49" bayesaverage="7.28517" />
+      </ranks>
+    </rating>
+  </stats>
 </item>
 </items>`;
 
