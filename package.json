@@ -1,6 +1,6 @@
 {
   "name": "bgg-what-to-play",
-  "version": "1.2.2",
+  "version": "1.3.0",
   "description": "Website to visualize your BGG collection by player count recommendation.",
   "keywords": [
     "vite",
@@ -48,7 +48,7 @@
     "recharts": "^2.2.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.31.2",
+    "@playwright/test": "^1.32.1",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^14.4.3",
     "@trivago/prettier-plugin-sort-imports": "^4.0.0",

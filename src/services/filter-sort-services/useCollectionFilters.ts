@@ -1,4 +1,4 @@
-import { useReducer, ComponentProps } from "react";
+import { ComponentProps, useReducer, useState } from "react";
 import type { SimpleBoardGame } from "@/types";
 import Slider from "@mui/material/Slider";
 import * as _ from "lodash-es";
@@ -12,6 +12,14 @@ import { showExpansionsService } from "./show-expansions.service";
 import { showInvalidPlayerCountService } from "./show-invalid-player-count.service";
 import { showNotRecommendedService } from "./show-not-recommended.service";
 import { showRatingsService } from "./show-ratings.service";
+import {
+  applySort,
+  deleteSelectedSort,
+  getInitialSortState,
+  SortConfig,
+  stringSort,
+  toggleSelectedSort,
+} from "./sort.service";
 import { usernameService } from "./username.service";
 
 /** Interface to abstract filter control logic. Needs to be able to provide initial state, and a reducer to set state */
@@ -204,48 +212,18 @@ const reducer: ActionHandler<Action> = (
 
 //#endregion reducer
 
-//#region maybeSortByScore
-
-const calcSortScoreSum = (
-  game: SimpleBoardGame,
-  minRange: number,
-  maxRange: number
-): number =>
-  game.recommendedPlayerCount
-    .filter(
-      (g) => minRange <= g.playerCountValue && g.playerCountValue <= maxRange
-    )
-    .reduce((prev, curr) => curr.sortScore + prev, 0);
-
-const maybeSortByScore =
-  (filterState: CollectionFilterState) =>
-  (gameA: SimpleBoardGame, gameB: SimpleBoardGame): number => {
-    // if using non-default player range, then sort by score
-    const [minRange, maxRange] = filterState.playerCountRange;
-    if (minRange !== 1 || maxRange !== Number.POSITIVE_INFINITY) {
-      return (
-        calcSortScoreSum(gameB, minRange, maxRange) -
-        calcSortScoreSum(gameA, minRange, maxRange)
-      );
-    }
-
-    // else sort by game name by default.
-    return gameA.name.localeCompare(gameB.name);
-  };
-
-//#endregion maybeSortByScore
-
-export type DecoratedBoardGames = ReturnType<
+export type BoardGame = ReturnType<
   ReturnType<
     typeof playerCountRecommendationService.addIsPlayerCountWithinRange
   >
->;
+>[number];
 
 export const applyFiltersAndSorts =
-  (filterState: CollectionFilterState) => (games: SimpleBoardGame[]) => {
+  (filterState: CollectionFilterState, selectedSorts: SortConfig[]) =>
+  (games: SimpleBoardGame[]) => {
     filterState.isDebug && printDebugMessage("All Games", games);
 
-    const filter = _.flow(
+    const filter: (g: SimpleBoardGame[]) => BoardGame[] = _.flow(
       showExpansionsService.applyFilters(filterState), // Show as many things as needed from here
       showInvalidPlayerCountService.applyFilters(filterState),
       playerCountRangeService.applyFilters(filterState), // Start removing things as needed from here
@@ -256,17 +234,61 @@ export const applyFiltersAndSorts =
       showNotRecommendedService.applyFilters(filterState) // But do one more filter based on isPlayerCountWithinRange
     );
 
-    const filteredGames = filter(games) as DecoratedBoardGames;
-
-    return filteredGames.sort(maybeSortByScore(filterState));
+    return filter(games).sort(applySort(filterState, selectedSorts));
   };
 
-export type BoardGame = ReturnType<
-  ReturnType<typeof applyFiltersAndSorts>
->[number];
+const defaultSortConfigs: SortConfig[] = [
+  {
+    sortBy: "Name",
+    qpKey: "name",
+    direction: "ASC",
+    sort: (dir, a, b) => stringSort(dir, a.name, b.name),
+  },
+  {
+    sortBy: "Player Count Recommendation",
+    qpKey: "rec",
+    direction: "DESC",
+    sort: playerCountRecommendationService.sort,
+  },
+  {
+    sortBy: "Average Playtime",
+    qpKey: "time",
+    direction: "DESC",
+    sort: playtimeService.sort,
+  },
+  {
+    sortBy: "Complexity",
+    qpKey: "weight",
+    direction: "DESC",
+    sort: complexityService.sort,
+  },
+  {
+    sortBy: "Ratings",
+    qpKey: "ratings",
+    direction: "DESC",
+    sort: ratingsService.sort,
+  },
+];
 
-export const useCollectionFilters = () => {
+/** List of options the user can sort by */
+export const sortByOptions = defaultSortConfigs.map((s) => s.sortBy);
+
+type Props = Partial<{
+  /**
+   * If `true`, then set the initial sort state to an empty array. Used for testing.
+   *
+   * If `false` or undefined, then set the initial sort state based on the query parameter. If the query parameter is empty, then set the default sort state.
+   */
+  isInitialSortStateEmpty: boolean;
+}>;
+
+export const useCollectionFilters = (props: Props) => {
   const [filterState, filterDispatch] = useReducer(reducer, initialFilterState);
+
+  const initialSortState = props?.isInitialSortStateEmpty
+    ? []
+    : getInitialSortState(defaultSortConfigs);
+  const [selectedSorts, setSelectedSorts] = useState(initialSortState);
 
   const sliderControls: Array<{
     sliderLabel: string;
@@ -293,6 +315,12 @@ export const useCollectionFilters = () => {
     filterDispatch,
     sliderControls,
     initialSliderValues,
-    applyFiltersAndSorts: applyFiltersAndSorts(filterState),
+    applyFiltersAndSorts: applyFiltersAndSorts(filterState, selectedSorts),
+    selectedSorts,
+    toggleSelectedSort: toggleSelectedSort(
+      setSelectedSorts,
+      defaultSortConfigs
+    ),
+    deleteSelectedSort: deleteSelectedSort(setSelectedSorts),
   };
 };

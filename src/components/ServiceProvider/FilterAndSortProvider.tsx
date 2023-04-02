@@ -2,20 +2,37 @@ import { createContext, useContext, ReactNode } from "react";
 import {
   useCollectionFilters,
   initialFilterState,
+  sortByOptions,
 } from "@/services/filter-sort-services";
 
 const FilterAndSortContext = createContext<
-  Omit<ReturnType<typeof useCollectionFilters>, "filterDispatch">
+  Omit<
+    ReturnType<typeof useCollectionFilters>,
+    "filterDispatch" | "toggleSelectedSort" | "deleteSelectedSort"
+  > & { sortByOptions: typeof sortByOptions }
 >({
   filterState: initialFilterState,
   sliderControls: [],
   initialSliderValues: {},
   applyFiltersAndSorts: () => [],
+  selectedSorts: [],
+  sortByOptions,
 });
 
 const FilterAndSortDispatchContext = createContext<
-  ReturnType<typeof useCollectionFilters>["filterDispatch"]
->((state) => state);
+  Pick<
+    ReturnType<typeof useCollectionFilters>,
+    "filterDispatch" | "toggleSelectedSort" | "deleteSelectedSort"
+  >
+>({
+  filterDispatch: (state) => state,
+  toggleSelectedSort: () => {
+    return;
+  },
+  deleteSelectedSort: () => {
+    return;
+  },
+});
 
 export const FilterAndSortProvider = ({
   children,
@@ -28,18 +45,29 @@ export const FilterAndSortProvider = ({
     sliderControls,
     initialSliderValues,
     applyFiltersAndSorts,
+    selectedSorts,
+    toggleSelectedSort,
+    deleteSelectedSort,
   } = useCollectionFilters();
 
-  const value = {
+  const state = {
     filterState,
     sliderControls,
     initialSliderValues,
     applyFiltersAndSorts,
+    selectedSorts,
+    sortByOptions,
+  };
+
+  const dispatch = {
+    filterDispatch,
+    toggleSelectedSort,
+    deleteSelectedSort,
   };
 
   return (
-    <FilterAndSortContext.Provider value={value}>
-      <FilterAndSortDispatchContext.Provider value={filterDispatch}>
+    <FilterAndSortContext.Provider value={state}>
+      <FilterAndSortDispatchContext.Provider value={dispatch}>
         {children}
       </FilterAndSortDispatchContext.Provider>
     </FilterAndSortContext.Provider>

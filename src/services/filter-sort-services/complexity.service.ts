@@ -7,6 +7,7 @@ import {
   maybeSetQueryParam,
   isBoardGameRangeWithinFilterRange,
 } from "./slider-control.utils";
+import { numberSort, SortFn } from "./sort.service";
 import type { SliderFilterControl } from "./useCollectionFilters";
 
 const QUERY_PARAM_COMPLEXITY = "complexity";
@@ -105,11 +106,15 @@ const applyFilters: SliderFilterControl["applyFilters"] =
     return filteredGames;
   };
 
-export const complexityService: SliderFilterControl = {
+const sort: SortFn = (dir, a, b) =>
+  numberSort(dir, a.averageWeight, b.averageWeight);
+
+export const complexityService: SliderFilterControl & { sort: SortFn } = {
   getInitialState,
   getReducedState,
   setQueryParam,
   getSliderLabel: () => "Filter by Complexity",
   getSliderProps,
   applyFilters,
+  sort,
 };

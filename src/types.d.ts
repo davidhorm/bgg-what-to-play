@@ -1,3 +1,7 @@
-export type { BoardGame } from "./services/filter-sort-services/useCollectionFilters";
+export type {
+  BoardGame,
+  CollectionFilterState,
+  SortDirection,
+} from "./services/filter-sort-services/useCollectionFilters";
 
-export type { SimpleBoardGame } from "./components/SearchFilterForm/BggCollection/hooks/useGetCollectionQuery.utils";
+export type { SimpleBoardGame } from "./components/BggCollection/hooks/useGetCollectionQuery.utils";

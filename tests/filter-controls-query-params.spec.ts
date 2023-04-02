@@ -43,10 +43,18 @@ test.describe("Filter Controls and Query Parameters", () => {
       ).not.toBeChecked();
     }
 
+    await expect(page.getByRole("button", { name: "Add Sort" })).toBeVisible();
+
+    await expect(
+      page.getByRole("button", {
+        name: "Descending Player Count Recommendation",
+      })
+    ).toBeVisible();
+
     expect(new URL(page.url()).search).toBe("");
   });
 
-  test("WHEN query parameters has values, THEN set the filter controls to their specified values", async ({
+  test("WHEN query parameters has filter values, THEN set the filter controls to their specified values", async ({
     page,
   }) => {
     const queryParams = [
@@ -226,6 +234,7 @@ test.describe("Filter Controls and Query Parameters", () => {
     }
   });
 
+  /** Test Average vs Users Ratings */
   [
     {
       queryParam: "&ratings=1.1-9.9",
@@ -286,7 +295,7 @@ test.describe("Filter Controls and Query Parameters", () => {
       })
   );
 
-  test("WHEN user searches in search form, THEN url reflects filter params", async ({
+  test("WHEN user manipulates controls in search form, THEN url reflects filter params", async ({
     page,
   }) => {
     await page.goto("./");
@@ -338,5 +347,41 @@ test.describe("Filter Controls and Query Parameters", () => {
     ].join("&");
 
     await expect(new URL(page.url()).search).toBe(expectedUrl);
+  });
+
+  test("WHEN navigating with all of the sort values in the query parameters, THEN all of the buttons are visible", async ({
+    page,
+  }) => {
+    const sortConfigs = [
+      { sortBy: "Name", qpKey: "name" },
+      { sortBy: "Player Count Recommendation", qpKey: "rec" },
+      { sortBy: "Average Playtime", qpKey: "time" },
+      { sortBy: "Complexity", qpKey: "weight" },
+      { sortBy: "Ratings", qpKey: "ratings" },
+    ];
+
+    const ascendingQueryParameters = sortConfigs
+      .map(({ qpKey }) => `${qpKey}-asc`)
+      .join("_");
+
+    await page.goto(`/?username=davidhorm&sort=${ascendingQueryParameters}`);
+
+    for await (const name of sortConfigs.map(
+      ({ sortBy }) => `Ascending ${sortBy}`
+    )) {
+      await expect(page.getByRole("button", { name })).toBeVisible();
+    }
+
+    const descendingQueryParameters = sortConfigs
+      .map(({ qpKey }) => `${qpKey}-desc`)
+      .join("_");
+
+    await page.goto(`/?username=davidhorm&sort=${descendingQueryParameters}`);
+
+    for await (const name of sortConfigs.map(
+      ({ sortBy }) => `Descending ${sortBy}`
+    )) {
+      await expect(page.getByRole("button", { name })).toBeVisible();
+    }
   });
 });

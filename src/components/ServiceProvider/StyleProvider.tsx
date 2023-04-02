@@ -6,7 +6,21 @@ import {
   createTheme,
 } from "@mui/material/styles";
 
-const theme = createTheme();
+const rootElement = document.getElementById("root");
+const theme = createTheme({
+  components: {
+    MuiPopover: {
+      defaultProps: {
+        container: rootElement,
+      },
+    },
+    MuiPopper: {
+      defaultProps: {
+        container: rootElement,
+      },
+    },
+  },
+});
 
 export const StyleProvider = ({ children }: PropsWithChildren<object>) => (
   <StyledEngineProvider injectFirst>

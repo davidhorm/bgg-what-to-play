@@ -6,6 +6,7 @@ import {
   isBoardGameRangeWithinFilterRange,
   maybeSetQueryParam,
 } from "./slider-control.utils";
+import { numberSort, SortFn } from "./sort.service";
 import type {
   CollectionFilterState,
   SliderFilterControl,
@@ -126,11 +127,28 @@ const applyFilters: SliderFilterControl["applyFilters"] =
     return filteredGames;
   };
 
-export const ratingsService: SliderFilterControl = {
+const sort: SortFn = (dir, a, b, filterState) => {
+  const userOrAverageRatingA =
+    filterState.showRatings === "USER_RATING" ? a.userRating : a.averageRating;
+  const userOrAverageRatingB =
+    filterState.showRatings === "USER_RATING" ? b.userRating : b.averageRating;
+
+  const valueA =
+    typeof userOrAverageRatingA !== "number" ? 0 : userOrAverageRatingA;
+  const valueB =
+    typeof userOrAverageRatingB !== "number" ? 0 : userOrAverageRatingB;
+
+  return numberSort(dir, valueA, valueB);
+};
+
+export const ratingsService: SliderFilterControl & {
+  sort: SortFn;
+} = {
   getInitialState,
   getReducedState,
   setQueryParam,
   getSliderLabel,
   getSliderProps,
   applyFilters,
+  sort,
 };
