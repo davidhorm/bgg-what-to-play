@@ -89,7 +89,10 @@ export const getInitialSortState = (
     .map(parseQueryParamToSortConfigs(defaultSortConfigs))
     .filter(truthy);
 
-  return initialState || [];
+  const recConfig = defaultSortConfigs.find((s) => s.qpKey === "rec");
+  const defaultConfig = recConfig ? [recConfig] : [];
+
+  return initialState || defaultConfig;
 };
 
 /**

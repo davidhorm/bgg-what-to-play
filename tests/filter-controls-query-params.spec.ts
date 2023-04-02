@@ -44,6 +44,11 @@ test.describe("Filter Controls and Query Parameters", () => {
     }
 
     expect(await page.getByRole("button", { name: "Add Sort" }));
+    expect(
+      await page.getByRole("button", {
+        name: "Descending Player Count Recommendation",
+      })
+    );
 
     expect(new URL(page.url()).search).toBe("");
   });

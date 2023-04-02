@@ -273,11 +273,22 @@ const defaultSortConfigs: SortConfig[] = [
 /** List of options the user can sort by */
 export const sortByOptions = defaultSortConfigs.map((s) => s.sortBy);
 
-export const useCollectionFilters = () => {
+type Props = Partial<{
+  /**
+   * If `true`, then set the initial sort state to an empty array. Used for testing.
+   *
+   * If `false` or undefined, then set the initial sort state based on the query parameter. If the query parameter is empty, then set the default sort state.
+   */
+  isInitialSortStateEmpty: boolean;
+}>;
+
+export const useCollectionFilters = (props: Props) => {
   const [filterState, filterDispatch] = useReducer(reducer, initialFilterState);
-  const [selectedSorts, setSelectedSorts] = useState(
-    getInitialSortState(defaultSortConfigs)
-  );
+
+  const initialSortState = props?.isInitialSortStateEmpty
+    ? []
+    : getInitialSortState(defaultSortConfigs);
+  const [selectedSorts, setSelectedSorts] = useState(initialSortState);
 
   const sliderControls: Array<{
     sliderLabel: string;

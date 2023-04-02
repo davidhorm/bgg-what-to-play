@@ -299,7 +299,7 @@ describe(applyFiltersAndSorts.name, () => {
     type Props = { games: SimpleBoardGame[]; sortBys: string[] };
     const MockComponent = ({ games, sortBys }: Props) => {
       const { applyFiltersAndSorts, toggleSelectedSort, selectedSorts } =
-        useCollectionFilters();
+        useCollectionFilters({ isInitialSortStateEmpty: true });
 
       useEffect(() => {
         const sortBy = sortBys.shift();
