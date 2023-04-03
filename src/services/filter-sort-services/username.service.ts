@@ -9,4 +9,5 @@ export const usernameService: FilterControl<string> = {
   getReducedState: (state, username) => ({ ...state, username }),
   setQueryParam: (searchParams, state) =>
     searchParams.set(QUERY_PARAM_USERNAME, state.username),
+  applyFilters: () => (notUsed) => notUsed,
 };

@@ -282,7 +282,7 @@ type Props = Partial<{
   isInitialSortStateEmpty: boolean;
 }>;
 
-export const useCollectionFilters = (props: Props) => {
+export const useCollectionFilters = (props?: Props) => {
   const [filterState, filterDispatch] = useReducer(reducer, initialFilterState);
 
   const initialSortState = props?.isInitialSortStateEmpty
