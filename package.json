@@ -31,8 +31,8 @@
     "test:unit": "vitest",
     "test:e2e": "pnpm dlx playwright test",
     "codegen": "concurrently --kill-others \"vite\" \"pnpm dlx playwright codegen\"",
-    "predeploy": "pnpm run build",
-    "deploy": "gh-pages -d dist"
+    "predeploy": "pnpm test && pnpm dlx rimraf ./dist && pnpm run build",
+    "deploy": "pnpm run predeploy && gh-pages -d dist"
   },
   "dependencies": {
     "@emotion/react": "^11.10.5",
