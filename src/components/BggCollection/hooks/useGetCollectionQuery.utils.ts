@@ -12,7 +12,7 @@ import type {
 const transformToThingIds = (i: Collection["items"]["item"][number]) =>
   i.objectid;
 
-const THING_QUERY_LIMIT = 1200;
+const THING_QUERY_LIMIT = 20; // TODO unit test. also render error in future
 
 const transformToUniqueChunks = (games?: Collection) =>
   _.chunk(
