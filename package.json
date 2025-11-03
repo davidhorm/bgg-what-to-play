@@ -1,6 +1,6 @@
 {
   "name": "bgg-what-to-play",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Website to visualize your BGG collection by player count recommendation.",
   "keywords": [
     "vite",
@@ -19,64 +19,26 @@
   "bugs": {
     "url": "https://github.com/davidhorm/bgg-what-to-play/issues"
   },
-  "type": "module",
+  "private": true,
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "lint": "prettier --check . || eslint .",
-    "lint:fix": "prettier --write . && eslint . --fix",
-    "coverage": "vitest run --coverage",
-    "test": "pnpm run test:unit run && pnpm run test:e2e",
-    "test:unit": "vitest",
-    "test:e2e": "pnpm dlx playwright test",
-    "codegen": "concurrently --kill-others \"vite\" \"pnpm dlx playwright codegen\"",
-    "predeploy": "pnpm test && pnpm dlx rimraf ./dist && pnpm run build",
-    "deploy": "pnpm run predeploy && gh-pages -d dist"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
   },
   "dependencies": {
-    "@emotion/react": "^11.10.5",
-    "@emotion/styled": "^11.10.5",
-    "@mui/material": "^5.11.0",
-    "@tanstack/react-query": "^4.20.4",
-    "fast-xml-parser": "^4.1.3",
-    "lodash-es": "^4.17.21",
-    "node-fetch": "^3.3.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-intersection-observer": "^9.4.1",
-    "recharts": "^2.2.0"
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "next": "16.0.1"
   },
   "devDependencies": {
-    "@playwright/test": "^1.32.1",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^14.4.3",
-    "@trivago/prettier-plugin-sort-imports": "^4.0.0",
-    "@types/lodash-es": "^4.17.6",
-    "@types/node": "^18.11.18",
-    "@types/react": "^18.0.26",
-    "@types/react-dom": "^18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.46.1",
-    "@typescript-eslint/parser": "^5.46.1",
-    "@vitejs/plugin-react": "^3.0.0",
-    "autoprefixer": "^10.4.13",
-    "concurrently": "^7.6.0",
-    "eslint": "^8.29.0",
-    "eslint-plugin-react": "^7.31.11",
-    "gh-pages": "^5.0.0",
-    "jsdom": "^21.0.0",
-    "msw": "^0.49.2",
-    "postcss": "^8.4.20",
-    "prettier": "^2.8.1",
-    "prettier-plugin-tailwindcss": "^0.2.1",
-    "rollup-plugin-analyzer": "^4.0.0",
-    "tailwindcss": "^3.2.4",
-    "typescript": "^4.9.3",
-    "vite": "^4.0.4",
-    "vite-plugin-svgr": "^2.4.0",
-    "vitest": "^0.26.3"
-  },
-  "msw": {
-    "workerDirectory": "public"
+    "typescript": "^5",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@tailwindcss/postcss": "^4",
+    "tailwindcss": "^4",
+    "eslint": "^9",
+    "eslint-config-next": "16.0.1"
   }
 }

@@ -1,63 +1,36 @@
-# BGG What to Play
-
-This repo is deployed to https://davidhorm.github.io/bgg-what-to-play/.
-
-Website to visualize your [BGG](https://boardgamegeek.com/) collection to better figure out which board game to play based on number of players and game length.
-
-![What To Play demo](./public/bgg-what-to-play-demo-v1.3.gif)
-
-## Features
-
-- Filter by:
-  - Player count
-  - Playtime
-  - Complexity
-  - Average or User Ratings
-- Hide by default, but can show:
-  - Average or User Ratings
-  - Expansions
-  - Not recommended player counts
-  - Invalid player counts
-- Sort by:
-  - Name
-  - Player Count Recommended
-  - Average Playtime
-  - Complexity
-  - Average or User Ratings
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
 
-1. `pnpm install` to install all the packages
-1. `pnpm dev` to start the dev server
-1. Navigate to http://localhost:5173/
+First, run the development server:
 
-### Testing with Mock Users
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
-When developing locally, mock users have been created to help test certain scenarios:
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-| User | Scenario                                          |
-| ---- | ------------------------------------------------- |
-| 000  | Mock response for an empty collection             |
-| 001  | Mock response for a collection with a single game |
-| 202  | Mock response that always returns the 202 code    |
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-### Troubleshoot
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-If an expected game isn't showing up, then add `debug=1` to the query parameter to see the list of games as it goes through the different filters outputted to the console.
+## Learn More
 
-## Other Scripts
+To learn more about Next.js, take a look at the following resources:
 
-These are the other scripts defined in `package.json`.
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-| Script            | Description                                                |
-| ----------------- | ---------------------------------------------------------- |
-| `pnpm build`      | Build for production.                                      |
-| `pnpm preview`    | Locally preview production build.                          |
-| `pnpm lint`       | Report linting and formatting errors                       |
-| `pnpm lint:fix`   | Fix linting and formatting errors                          |
-| `pnpm test`       | Run unit and end-to-end tests                              |
-| `pnpm test:unit`  | Run unit tests in watch mode                               |
-| `pnpm test:cov`   | Run unit tests with coverage reports                       |
-| `pnpm test:e2e`   | Run end-to-end tests (can add `--headed` and/or `--debug`) |
-| `pnpm codegen`    | Generate end-to-end tests with codegen                     |
-| `pnpm run deploy` | Deploy to Github pages                                     |
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
