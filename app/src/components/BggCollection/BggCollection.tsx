@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useFilterState } from "@/components/ServiceProvider";
 import { AcceptedResponse } from "./AcceptedResponse";
@@ -40,19 +40,15 @@ export const BggCollection = () => {
         aria-label="Search results"
         aria-busy={!!loadingMessage}
         aria-describedby="loading-search-results"
-        className="m-0 flex list-none flex-wrap gap-4 p-0 text-center"
+        className="m-0 grid list-none grid-cols-1 gap-4 p-0 text-center sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
       >
         {filteredGames?.map((game) => (
-          <li key={game.id} className="min-w-[40ch] flex-1">
+          <li key={game.id}>
             <GameCard game={game} />
           </li>
         ))}
         {Array.from({ length: 10 }).map((_, i) => (
-          <li
-            key={`placeholder-${i}`}
-            className="m-2 min-w-[40ch] flex-1"
-            aria-hidden="true"
-          ></li>
+          <li key={`placeholder-${i}`} aria-hidden="true"></li>
         ))}
       </ol>
     </div>

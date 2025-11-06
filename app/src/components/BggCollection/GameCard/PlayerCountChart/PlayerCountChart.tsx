@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useFilterState } from "@/components/ServiceProvider";
 import type { BoardGame } from "@/types";
@@ -33,7 +33,7 @@ type Props = Pick<BoardGame, "recommendedPlayerCount"> & {
 const getFill = (
   isPlayerCountWithinRange: Props["recommendedPlayerCount"][number]["isPlayerCountWithinRange"],
   playerCountRange: [number, number],
-  recommendation: Recommendation
+  recommendation: Recommendation,
 ) => {
   const [defaultColor, fadedColor] = colorFillByRec[recommendation];
   const [minRange, maxRange] = playerCountRange;
@@ -53,7 +53,7 @@ export const PlayerCountChart = ({ recommendedPlayerCount, gameId }: Props) => {
   } = useFilterState();
 
   return (
-    <div ref={ref} className="h-36">
+    <div ref={ref} className="mt-auto h-36">
       {inView && (
         <figure aria-labelledby={`figcap-${gameId}`} className="m-0">
           <figcaption
@@ -106,13 +106,13 @@ export const PlayerCountChart = ({ recommendedPlayerCount, gameId }: Props) => {
                           fill={getFill(
                             playerCount.isPlayerCountWithinRange,
                             playerCountRange,
-                            recommendation as Recommendation
+                            recommendation as Recommendation,
                           )}
                         />
-                      )
+                      ),
                     )}
                   </Bar>
-                )
+                ),
               )}
             </BarChart>
           </ResponsiveContainer>

@@ -14,8 +14,8 @@ export const GameCard = ({ game }: Props) => {
     filterState: { showRatings },
   } = useFilterState();
   return (
-    <Card>
-      <CardContent>
+    <Card className="flex min-h-102 flex-col justify-between">
+      <CardContent className="flex grow flex-col justify-between">
         <a
           className="block min-w-0 truncate text-2xl font-normal text-black no-underline decoration-1 hover:underline"
           href={`https://boardgamegeek.com/${game.type}/${game.id}`}
@@ -23,15 +23,17 @@ export const GameCard = ({ game }: Props) => {
           {game.name}
         </a>
 
-        <div className="mt-2 flex justify-between">
-          <CardMedia
-            className="max-h-40 min-w-fit object-contain p-4"
-            component="img"
-            src={game.thumbnail}
-            alt={`${game.name} thumbnail`}
-          />
+        <div className="mt-2 flex justify-evenly">
+          <div className="max-h-64 max-w-64 p-4">
+            <CardMedia
+              className="max-w-full object-contain"
+              component="img"
+              src={game.thumbnail}
+              alt={`${game.name} thumbnail`}
+            />
+          </div>
 
-          <dl className="my-2 min-w-fit">
+          <dl className="my-2">
             {showRatings === "USER_RATING" && (
               <>
                 <dt className="text-xs text-gray-500">User Rating</dt>
