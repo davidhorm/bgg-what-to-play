@@ -1,0 +1,431 @@
+<ol
+  aria-label="Search results"
+  aria-busy="false"
+  aria-describedby="loading-search-results"
+  class="m-0 flex list-none flex-wrap gap-4 p-0 text-center"
+>
+  <li class="min-w-[40ch] flex-1">
+    <div
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root mui-2epr5x-MuiPaper-root-MuiCard-root"
+      style="--Paper-shadow: var(--mui-shadows-1)"
+    >
+      <div class="MuiCardContent-root mui-1lt5qva-MuiCardContent-root">
+        <a
+          class="block min-w-0 truncate text-2xl font-normal text-black no-underline decoration-1 hover:underline"
+          href="https://boardgamegeek.com/boardgame/118048"
+          >Targi</a
+        >
+        <div class="mt-2 flex justify-between">
+          <img
+            class="MuiCardMedia-root MuiCardMedia-media MuiCardMedia-img min-w-fit object-contain p-4 mui-1kuwa16-MuiCardMedia-root"
+            alt="Targi thumbnail"
+            src="https://cf.geekdo-images.com/wHg4fOf48cs1kw1PDOk1tQ__small/img/6l-jqYlfECK1SVSsUs7FXUheKzQ=/fit-in/200x150/filters:strip_icc()/pic3958793.jpg"
+          />
+          <dl class="my-2 min-w-fit">
+            <dt class="text-xs text-gray-500">Time (minutes)</dt>
+            <dd class="mb-2 ml-0 text-2xl">60</dd>
+            <dt class="text-xs text-gray-500">Complexity</dt>
+            <dd class="ml-0 text-2xl">
+              2.3 <span class="text-xs text-gray-500">/ 5</span>
+            </dd>
+          </dl>
+        </div>
+        <div class="h-36">
+          <figure aria-labelledby="figcap-118048" class="m-0">
+            <figcaption id="figcap-118048" class="mt-4 text-xs text-gray-500">
+              Player Count Recommendations
+            </figcaption>
+            <div
+              class="recharts-responsive-container"
+              style="
+                width: 100%;
+                height: 100%;
+                min-width: 18rem;
+                min-height: 9rem;
+              "
+            >
+              <div style="width: 0px; height: 0px; overflow: visible">
+                <div
+                  width="334"
+                  height="144"
+                  class="recharts-wrapper"
+                  style="
+                    position: relative;
+                    cursor: default;
+                    width: 334px;
+                    height: 144px;
+                  "
+                >
+                  <div
+                    xmlns="http://www.w3.org/1999/xhtml"
+                    tabindex="-1"
+                    class="recharts-tooltip-wrapper"
+                    style="
+                      visibility: hidden;
+                      pointer-events: none;
+                      position: absolute;
+                      top: 0px;
+                      left: 0px;
+                    "
+                  ></div>
+                  <svg
+                    role="application"
+                    tabindex="0"
+                    class="recharts-surface"
+                    width="334"
+                    height="144"
+                    viewBox="0 0 334 144"
+                    style="width: 100%; height: 100%; display: block"
+                  >
+                    <title></title>
+                    <desc></desc>
+                    <defs>
+                      <clipPath id="recharts997-clip">
+                        <rect x="20" y="5" height="104" width="284"></rect>
+                      </clipPath>
+                    </defs>
+                    <g class="recharts-layer recharts-customized-wrapper"></g>
+                    <g
+                      class="recharts-layer recharts-cartesian-axis recharts-xAxis xAxis"
+                    >
+                      <g class="recharts-cartesian-axis-ticks">
+                        <g class="recharts-layer recharts-cartesian-axis-tick">
+                          <line
+                            aria-hidden="true"
+                            height="30"
+                            orientation="bottom"
+                            angle="0"
+                            x="20"
+                            y="109"
+                            width="284"
+                            class="recharts-cartesian-axis-tick-line"
+                            stroke="#666"
+                            fill="none"
+                            x1="162"
+                            y1="115"
+                            x2="162"
+                            y2="109"
+                          ></line>
+                          <text
+                            aria-hidden="true"
+                            height="30"
+                            orientation="bottom"
+                            width="284"
+                            stroke="none"
+                            x="162"
+                            y="117"
+                            class="recharts-text recharts-cartesian-axis-tick-value"
+                            text-anchor="middle"
+                            fill="#666"
+                          >
+                            <tspan x="162" dy="0.71em">2</tspan>
+                          </text>
+                        </g>
+                      </g>
+                    </g>
+                    <g class="recharts-layer recharts-reference-line">
+                      <line
+                        y="0"
+                        stroke="#000"
+                        fill="none"
+                        fill-opacity="1"
+                        stroke-width="1"
+                        x1="20"
+                        y1="109"
+                        x2="304"
+                        y2="109"
+                        class="recharts-reference-line-line"
+                      ></line>
+                    </g>
+                    <g class="recharts-layer recharts-customized-wrapper">
+                      <text
+                        dy="NaN"
+                        dx="NaN"
+                        font-size="0.875rem"
+                        text-anchor="middle"
+                      >
+                        No Recommendations Available
+                      </text>
+                    </g>
+                    <g
+                      class="recharts-layer recharts-bar"
+                      id="recharts-bar-_r_u_"
+                    >
+                      <g class="recharts-layer recharts-bar-rectangles">
+                        <g class="recharts-layer">
+                          <g class="recharts-layer recharts-bar-rectangle">
+                            <path
+                              name="undefined"
+                              x="145.9"
+                              y="105"
+                              width="32"
+                              height="4"
+                              fill="#22c55e"
+                              radius="0"
+                              class="recharts-rectangle"
+                              d="M 145.9,105 h 32 v 4 h -32 Z"
+                            ></path>
+                          </g>
+                        </g>
+                      </g>
+                    </g>
+                    <g
+                      class="recharts-layer recharts-bar"
+                      id="recharts-bar-_r_v_"
+                    >
+                      <g class="recharts-layer recharts-bar-rectangles">
+                        <g class="recharts-layer">
+                          <g class="recharts-layer recharts-bar-rectangle">
+                            <path
+                              name="undefined"
+                              x="145.9"
+                              y="12.599999999999996"
+                              width="32"
+                              height="92.4"
+                              fill="#15803d"
+                              radius="0"
+                              class="recharts-rectangle"
+                              d="M 145.9,12.599999999999996 h 32 v 92.4 h -32 Z"
+                            ></path>
+                          </g>
+                        </g>
+                      </g>
+                    </g>
+                    <g
+                      class="recharts-layer recharts-bar"
+                      id="recharts-bar-_r_10_"
+                    >
+                      <g class="recharts-layer recharts-bar-rectangles">
+                        <g class="recharts-layer">
+                          <g class="recharts-layer recharts-bar-rectangle"></g>
+                        </g>
+                      </g>
+                    </g>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </figure>
+        </div>
+      </div>
+    </div>
+  </li>
+  <li class="min-w-[40ch] flex-1">
+    <div
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root mui-2epr5x-MuiPaper-root-MuiCard-root"
+      style="--Paper-shadow: var(--mui-shadows-1)"
+    >
+      <div class="MuiCardContent-root mui-1lt5qva-MuiCardContent-root">
+        <a
+          class="block min-w-0 truncate text-2xl font-normal text-black no-underline decoration-1 hover:underline"
+          href="https://boardgamegeek.com/boardgame/124742"
+          >Android: Netrunner</a
+        >
+        <div class="mt-2 flex justify-between">
+          <img
+            class="MuiCardMedia-root MuiCardMedia-media MuiCardMedia-img min-w-fit object-contain p-4 mui-1kuwa16-MuiCardMedia-root"
+            alt="Android: Netrunner thumbnail"
+            src="https://cf.geekdo-images.com/PraBmRxVELBVNEOqyL9nIg__small/img/q4UOcUAX27VdL_-x6KYKn1BDEAk=/fit-in/200x150/filters:strip_icc()/pic1324609.jpg"
+          />
+          <dl class="my-2 min-w-fit">
+            <dt class="text-xs text-gray-500">Time (minutes)</dt>
+            <dd class="mb-2 ml-0 text-2xl">45</dd>
+            <dt class="text-xs text-gray-500">Complexity</dt>
+            <dd class="ml-0 text-2xl">
+              3.4 <span class="text-xs text-gray-500">/ 5</span>
+            </dd>
+          </dl>
+        </div>
+        <div class="h-36">
+          <figure aria-labelledby="figcap-124742" class="m-0">
+            <figcaption id="figcap-124742" class="mt-4 text-xs text-gray-500">
+              Player Count Recommendations
+            </figcaption>
+            <div
+              class="recharts-responsive-container"
+              style="
+                width: 100%;
+                height: 100%;
+                min-width: 18rem;
+                min-height: 9rem;
+              "
+            >
+              <div style="width: 0px; height: 0px; overflow: visible">
+                <div
+                  width="334"
+                  height="144"
+                  class="recharts-wrapper"
+                  style="
+                    position: relative;
+                    cursor: default;
+                    width: 334px;
+                    height: 144px;
+                  "
+                >
+                  <div
+                    xmlns="http://www.w3.org/1999/xhtml"
+                    tabindex="-1"
+                    class="recharts-tooltip-wrapper"
+                    style="
+                      visibility: hidden;
+                      pointer-events: none;
+                      position: absolute;
+                      top: 0px;
+                      left: 0px;
+                    "
+                  ></div>
+                  <svg
+                    role="application"
+                    tabindex="0"
+                    class="recharts-surface"
+                    width="334"
+                    height="144"
+                    viewBox="0 0 334 144"
+                    style="width: 100%; height: 100%; display: block"
+                  >
+                    <title></title>
+                    <desc></desc>
+                    <defs>
+                      <clipPath id="recharts1541-clip">
+                        <rect x="20" y="5" height="104" width="284"></rect>
+                      </clipPath>
+                    </defs>
+                    <g class="recharts-layer recharts-customized-wrapper"></g>
+                    <g
+                      class="recharts-layer recharts-cartesian-axis recharts-xAxis xAxis"
+                    >
+                      <g class="recharts-cartesian-axis-ticks">
+                        <g class="recharts-layer recharts-cartesian-axis-tick">
+                          <line
+                            aria-hidden="true"
+                            height="30"
+                            orientation="bottom"
+                            angle="0"
+                            x="20"
+                            y="109"
+                            width="284"
+                            class="recharts-cartesian-axis-tick-line"
+                            stroke="#666"
+                            fill="none"
+                            x1="162"
+                            y1="115"
+                            x2="162"
+                            y2="109"
+                          ></line>
+                          <text
+                            aria-hidden="true"
+                            height="30"
+                            orientation="bottom"
+                            width="284"
+                            stroke="none"
+                            x="162"
+                            y="117"
+                            class="recharts-text recharts-cartesian-axis-tick-value"
+                            text-anchor="middle"
+                            fill="#666"
+                          >
+                            <tspan x="162" dy="0.71em">2</tspan>
+                          </text>
+                        </g>
+                      </g>
+                    </g>
+                    <g class="recharts-layer recharts-reference-line">
+                      <line
+                        y="0"
+                        stroke="#000"
+                        fill="none"
+                        fill-opacity="1"
+                        stroke-width="1"
+                        x1="20"
+                        y1="83"
+                        x2="304"
+                        y2="83"
+                        class="recharts-reference-line-line"
+                      ></line>
+                    </g>
+                    <g class="recharts-layer recharts-customized-wrapper">
+                      <text
+                        dy="NaN"
+                        dx="NaN"
+                        font-size="0.875rem"
+                        text-anchor="middle"
+                      >
+                        No Recommendations Available
+                      </text>
+                    </g>
+                    <g
+                      class="recharts-layer recharts-bar"
+                      id="recharts-bar-_r_14_"
+                    >
+                      <g class="recharts-layer recharts-bar-rectangles">
+                        <g class="recharts-layer">
+                          <g class="recharts-layer recharts-bar-rectangle">
+                            <path
+                              name="undefined"
+                              x="145.9"
+                              y="79.36"
+                              width="32"
+                              height="3.6400000000000006"
+                              fill="#22c55e"
+                              radius="0"
+                              class="recharts-rectangle"
+                              d="M 145.9,79.36 h 32 v 3.6400000000000006 h -32 Z"
+                            ></path>
+                          </g>
+                        </g>
+                      </g>
+                    </g>
+                    <g
+                      class="recharts-layer recharts-bar"
+                      id="recharts-bar-_r_15_"
+                    >
+                      <g class="recharts-layer recharts-bar-rectangles">
+                        <g class="recharts-layer">
+                          <g class="recharts-layer recharts-bar-rectangle">
+                            <path
+                              name="undefined"
+                              x="145.9"
+                              y="10.89333333333333"
+                              width="32"
+                              height="68.46666666666667"
+                              fill="#15803d"
+                              radius="0"
+                              class="recharts-rectangle"
+                              d="M 145.9,10.89333333333333 h 32 v 68.46666666666667 h -32 Z"
+                            ></path>
+                          </g>
+                        </g>
+                      </g>
+                    </g>
+                    <g
+                      class="recharts-layer recharts-bar"
+                      id="recharts-bar-_r_16_"
+                    >
+                      <g class="recharts-layer recharts-bar-rectangles">
+                        <g class="recharts-layer">
+                          <g class="recharts-layer recharts-bar-rectangle">
+                            <path
+                              name="undefined"
+                              x="145.9"
+                              y="83.34666666666666"
+                              width="32"
+                              height="-0.346666666666664"
+                              fill="#f87171"
+                              radius="0"
+                              class="recharts-rectangle"
+                              d="M 145.9,83.34666666666666 h 32 v -0.346666666666664 h -32 Z"
+                            ></path>
+                          </g>
+                        </g>
+                      </g>
+                    </g>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </figure>
+        </div>
+      </div>
+    </div>
+  </li>
+</ol>
