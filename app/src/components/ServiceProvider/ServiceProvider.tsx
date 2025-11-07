@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import type { PropsWithChildren, ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -32,19 +32,3 @@ export const ServiceProvider = ({ children, mockQueryClient }: Props) => (
     </StyleProvider>
   </QueryClientProvider>
 );
-
-// const mockQueryClient = new QueryClient({
-//   defaultOptions: { queries: { retry: false } },
-//   logger: {
-//     log: console.log,
-//     warn: console.warn,
-//     /* eslint-disable-next-line @typescript-eslint/no-empty-function */
-//     error: () => {}, // hide query errors during tests
-//   },
-// });
-
-// export const MockServiceProvider = ({ children }: OnlyChildrenProps) => (
-//   <ServiceProvider mockQueryClient={mockQueryClient}>
-//     {children}
-//   </ServiceProvider>
-// );
