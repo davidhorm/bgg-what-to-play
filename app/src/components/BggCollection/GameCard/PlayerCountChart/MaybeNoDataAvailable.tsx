@@ -16,13 +16,11 @@ export const MaybeNoDataAvailable = (
     return null;
   }
 
+  const h = isNaN(height) ? 2 : height;
+  const w = isNaN(width) ? 2 : width;
+
   return (
-    <text
-      dy={height / 2}
-      dx={width / 2}
-      fontSize="0.875rem"
-      textAnchor="middle"
-    >
+    <text dy={h / 2} dx={w / 2} fontSize="0.875rem" textAnchor="middle">
       No Recommendations Available
     </text>
   );
