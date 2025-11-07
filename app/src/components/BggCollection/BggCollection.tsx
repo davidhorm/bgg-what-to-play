@@ -16,7 +16,7 @@ export const BggCollection = () => {
   const { data, pubdate, loadingMessage, error, boardGameCollectionStatus } =
     useGetCollectionQuery(username, showExpansions);
 
-  if (boardGameCollectionStatus === "loading") return <></>;
+  if (boardGameCollectionStatus === "pending") return <></>;
 
   if (error?.isBoardGameAccepted) return <AcceptedResponse />;
 

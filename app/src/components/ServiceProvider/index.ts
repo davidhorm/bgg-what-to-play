@@ -1,2 +1,2 @@
-export { ServiceProvider, MockServiceProvider } from "./ServiceProvider";
+export { ServiceProvider } from "./ServiceProvider";
 export { useFilterState, useFilterDispatch } from "./FilterAndSortProvider";

@@ -15,7 +15,7 @@ import {
 
 export const useGetCollectionQuery = (
   username: string,
-  showExpansions: boolean
+  showExpansions: boolean,
 ) => {
   const {
     status: boardGameCollectionStatus,
@@ -41,7 +41,7 @@ export const useGetCollectionQuery = (
 
   const thingIdsCollection = transformToThingIdsCollection(
     boardGameCollectionData,
-    boardGameExpansionCollectionData
+    boardGameExpansionCollectionData,
   );
 
   const thingResults = useQueries({
@@ -66,12 +66,12 @@ export const useGetCollectionQuery = (
                   transformToBoardGame(
                     thingData,
                     collectionData.find(
-                      (game) => game.objectid === thingData.id
-                    )
-                  )
+                      (game) => game.objectid === thingData.id,
+                    ),
+                  ),
                 )
-              : []
-          )
+              : [],
+          ),
         )
       : undefined;
 
@@ -84,21 +84,21 @@ export const useGetCollectionQuery = (
 
     if (showExpansions) {
       if (
-        boardGameCollectionStatus === "loading" &&
-        boardGameExpansionStatus === "loading"
+        boardGameCollectionStatus === "pending" &&
+        boardGameExpansionStatus === "pending"
       )
         return "/ 4?";
 
       if (
         boardGameCollectionStatus === "success" &&
-        boardGameExpansionStatus === "loading"
+        boardGameExpansionStatus === "pending"
       )
         return `/ ${thingResults.length + 3}?`;
 
       return `/ ${thingResults.length + 2}`;
     }
 
-    if (boardGameCollectionStatus === "loading") return "/ 2?";
+    if (boardGameCollectionStatus === "pending") return "/ 2?";
 
     return `/ ${
       thingResults.length + 1 + Number(boardGameExpansionStatus === "success")
@@ -131,7 +131,7 @@ export const useGetCollectionQuery = (
         (currVal.error as Error)?.message
       }`.trim(),
     }),
-    initialLoadingState
+    initialLoadingState,
   );
 
   const loadingMessage =
@@ -144,7 +144,7 @@ export const useGetCollectionQuery = (
     boardGameCollectionStatus,
     pubdate: boardGameCollectionData?.items?.pubdate
       ? `${new Date(
-          boardGameCollectionData?.items?.pubdate
+          boardGameCollectionData?.items?.pubdate,
         ).toLocaleDateString()}`
       : "",
     loadingMessage,
