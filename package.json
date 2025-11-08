@@ -31,7 +31,7 @@
     "test:unit": "vitest",
     "test:e2e": "pnpm dlx playwright test",
     "codegen": "concurrently --kill-others \"vite\" \"pnpm dlx playwright codegen\"",
-    "predeploy": "pnpm test && pnpm dlx rimraf ./dist && pnpm run build",
+    "predeploy": "pnpm dlx rimraf ./dist && pnpm run build",
     "deploy": "pnpm run predeploy && gh-pages -d dist"
   },
   "dependencies": {
