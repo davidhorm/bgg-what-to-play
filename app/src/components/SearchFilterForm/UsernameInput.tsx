@@ -27,6 +27,7 @@ export const UsernameInput = () => {
         label="BGG Username"
         variant="filled"
         size="small"
+        className="min-w-60"
         value={usernameInput}
         onChange={({ target: { value } }) => setUsernameInput(value)}
         InputProps={{

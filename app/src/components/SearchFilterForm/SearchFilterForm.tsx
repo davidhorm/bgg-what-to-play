@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Paper from "@mui/material/Paper";
 import Slider from "@mui/material/Slider";
-import Image from "next/image";
 import { useFilterState } from "../ServiceProvider";
 import { CheckboxControls } from "./CheckboxControls";
 import { CustomSortControls } from "./CustomSortControls";
@@ -21,19 +20,7 @@ export const SearchFilterForm = () => {
       component="section"
       aria-label="Filter controls"
     >
-      <div className="flex h-12 flex-row gap-4">
-        <UsernameInput />
-        <a href="https://boardgamegeek.com/">
-          <Image
-            src="/powered-by-bgg.png"
-            alt="Powered by BGG"
-            priority
-            width={1472}
-            height={432}
-            className="h-full w-auto"
-          />
-        </a>
-      </div>
+      <UsernameInput />
 
       {sliderControls.map(({ sliderLabel, sliderProps }, index) => (
         <div key={sliderLabel} className="mt-2 mr-6 flex flex-col">
