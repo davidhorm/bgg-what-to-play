@@ -6,6 +6,7 @@ import Slider from "@mui/material/Slider";
 import { useFilterState } from "../ServiceProvider";
 import { CheckboxControls } from "./CheckboxControls";
 import { CustomSortControls } from "./CustomSortControls";
+import { FriendsInput } from "./FriendsInput";
 import { UsernameInput } from "./UsernameInput";
 
 export const SearchFilterForm = () => {
@@ -21,6 +22,7 @@ export const SearchFilterForm = () => {
       aria-label="Filter controls"
     >
       <UsernameInput />
+      <FriendsInput />
 
       {sliderControls.map(({ sliderLabel, sliderProps }, index) => (
         <div key={sliderLabel} className="mt-2 mr-6 flex flex-col">

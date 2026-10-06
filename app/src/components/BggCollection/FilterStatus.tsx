@@ -18,7 +18,7 @@ export const FilterStatus = ({
     role="status"
     className="flex px-4 text-xs text-gray-500"
   >
-    <dt>Collection as of:</dt>
+    <dt>Primary collection as of:</dt>
     <dd className="ml-1 mr-8">{pubdate}</dd>
 
     <dt># of Games:</dt>

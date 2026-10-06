@@ -14,6 +14,9 @@ const FilterAndSortContext = createContext<
 >({
   filterState: {
     username: "",
+    friendUsernames: [],
+    includeFriends: false,
+    showOwners: false,
     showInvalidPlayerCount: false,
     playerCountRange: [1, Number.POSITIVE_INFINITY],
     playtimeRange: [0, Number.POSITIVE_INFINITY],

@@ -11,7 +11,7 @@ type Props = {
 
 export const GameCard = ({ game }: Props) => {
   const {
-    filterState: { showRatings },
+    filterState: { showRatings, showOwners },
   } = useFilterState();
   return (
     <Card className="flex min-h-102 flex-col justify-between">
@@ -22,6 +22,8 @@ export const GameCard = ({ game }: Props) => {
         >
           {game.name}
         </a>
+
+        {showOwners && <p className="mt-2 text-sm">Owners: {game.owners.join(", ")}</p>}
 
         <div className="mt-2 flex justify-evenly">
           <div className="max-h-64 max-w-64 p-4">

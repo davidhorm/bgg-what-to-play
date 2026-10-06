@@ -1,10 +1,11 @@
-import { server, rest } from "@/mocks";
-import { describe, test, expect } from "vitest";
+import { afterEach, describe, test, expect, vi } from "vitest";
 import { Thing } from "./bggTypes";
 import {
   transformToBoardGame,
   fetchBggCollection,
 } from "./useGetCollectionQuery.utils";
+
+afterEach(() => vi.unstubAllGlobals());
 
 const MOCK_THING_ITEM: Partial<Thing["items"]["item"][number]> = {
   type: "boardgame",
@@ -33,6 +34,7 @@ const MOCK_THING_ITEM: Partial<Thing["items"]["item"][number]> = {
 
 describe(transformToBoardGame.name, () => {
   const EXPECTED_BOARD_GAME = {
+    owners: [],
     id: 314088,
     type: "boardgame",
     thumbnail: "thumbnail.png",
@@ -192,20 +194,20 @@ describe(transformToBoardGame.name, () => {
 
 describe(fetchBggCollection.name, () => {
   test("WHEN <name>011</name>, THEN returns { name: { text: '011' } }", async () => {
-    server.use(
-      rest.get("https://boardgamegeek.com//xmlapi2/collection", (req, res, ctx) => {
-        const gameWithNumberAsName = `
-<items>
+    const fetchMock = vi.fn().mockResolvedValue(new Response(`
+<items totalitems="1">
   <item objecttype="thing" objectid="93194" subtype="boardgame" collid="60952918">
     <name sortindex="1">011</name>
+    <stats><rating value="N/A"/></stats>
   </item>
-</items>`;
-
-        return res.once(ctx.status(200), ctx.xml(gameWithNumberAsName));
-      })
-    );
+</items>`));
+    vi.stubGlobal("fetch", fetchMock);
 
     const response = await fetchBggCollection("mock_username", false);
     expect(response.items.item[0].name.text).toBe("011");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/xmlapi2/collection?username=mock_username&stats=1&own=1&excludesubtype=boardgameexpansion",
+      { signal: undefined },
+    );
   });
 });

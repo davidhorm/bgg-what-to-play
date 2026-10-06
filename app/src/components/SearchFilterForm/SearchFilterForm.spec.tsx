@@ -1,35 +1,30 @@
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, test } from "vitest";
-import { MockServiceProvider } from "../ServiceProvider";
+import { afterEach, beforeEach, expect, test, vi } from "vitest";
+import { FilterAndSortProvider } from "../ServiceProvider/FilterAndSortProvider";
 import { SearchFilterForm } from "./SearchFilterForm";
 
-const ORIGINAL_LOCATION = location.href;
+vi.mock("./magnifying-glass.svg", () => ({ default: () => <svg aria-hidden="true" /> }));
+vi.mock("./CustomSortControls/plus.svg", () => ({ default: () => <svg aria-hidden="true" /> }));
+vi.mock("./CustomSortControls/down-arrow.svg", () => ({ default: () => <svg aria-hidden="true" /> }));
+afterEach(cleanup);
 
-describe(SearchFilterForm.name, () => {
-  beforeEach(() => {
-    // clear out the query parameters between each test
-    history.replaceState({}, "", ORIGINAL_LOCATION);
+const navigation = vi.hoisted(() => ({ replace: vi.fn() }));
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/",
+  useSearchParams: () => new URLSearchParams("other=keep"),
+  useRouter: () => navigation,
+}));
+beforeEach(() => navigation.replace.mockClear());
 
-    // clear body between each render
-    document.body.innerHTML = "";
-  });
-
-  test("WHEN submit `davidhorm` as username, THEN query params is `?username=davidhorm`", async () => {
-    const user = userEvent.setup();
-    render(
-      <MockServiceProvider>
-        <SearchFilterForm />
-      </MockServiceProvider>
-    );
-    const input: HTMLInputElement = screen.getByLabelText("BGG Username");
-
-    expect(location.search).toBe("");
-    expect(input.value).toBe("");
-
-    await user.type(input, "davidhorm{enter}");
-
-    expect(input.value).toBe("davidhorm");
-    expect(location.search).toBe("?username=davidhorm");
-  });
+test("submits the username while preserving unrelated URL parameters without scrolling", async () => {
+  const user = userEvent.setup();
+  render(<FilterAndSortProvider><SearchFilterForm /></FilterAndSortProvider>);
+  const input = screen.getByRole("textbox", { name: "BGG Username", exact: true });
+  await user.type(input, "davidhorm");
+  expect(navigation.replace).not.toHaveBeenCalled();
+  await user.keyboard("{Enter}");
+  await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith(
+    "/?other=keep&username=davidhorm", { scroll: false },
+  ));
 });
