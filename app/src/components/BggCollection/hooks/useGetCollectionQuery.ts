@@ -1,163 +1,176 @@
-import { useQuery, useQueries } from "@tanstack/react-query";
+import { normalizeFriends } from "@/services/filter-sort-services/friends.service";
+import {
+  useQueries,
+  useQueryClient,
+  type UseQueryResult,
+} from "@tanstack/react-query";
 import * as _ from "lodash-es";
-import type { Collection } from "./bggTypes";
+import type { Collection, Thing } from "./bggTypes";
 import {
   fetchBggCollection,
   fetchBggThings,
-  SimpleBoardGame,
   transformToBoardGame,
-  transformToThingIdsCollection,
+  transformToUserRating,
 } from "./useGetCollectionQuery.utils";
 
-// TODO: handle querying array of usernames (p3)
-// TODO: handle querying other things like geeklists (p3)
-// TODO: invalidate when new username (p3)
+type CollectionEntry = Collection["items"]["item"][number];
+
+const mergeCollectionEntries = (
+  sources: { username: string; items: CollectionEntry[] }[],
+  primaryUsername: string,
+) => {
+  const games = new Map<
+    number,
+    {
+      owners: string[];
+      metadataEntry: CollectionEntry;
+      primaryEntry?: CollectionEntry;
+    }
+  >();
+  sources.forEach((source) =>
+    source.items.forEach((item) => {
+      const existing = games.get(item.objectid);
+      if (existing) {
+        if (source.username === primaryUsername && !existing.primaryEntry)
+          existing.primaryEntry = item;
+        if (!existing.owners.includes(source.username))
+          existing.owners.push(source.username);
+      } else {
+        games.set(item.objectid, {
+          owners: [source.username],
+          metadataEntry: item,
+          primaryEntry: source.username === primaryUsername ? item : undefined,
+        });
+      }
+    }),
+  );
+  return games;
+};
+
+const getCollectionMessage = (result: UseQueryResult<Collection, Error>) => {
+  if (result.error) {
+    if (result.error.message === "202 Accepted") return "Queued by BGG";
+    return result.error.message;
+  }
+  if (result.isFetching) return "Loading";
+  if (result.data?.items.item.length === 0) return "Empty collection";
+  return "";
+};
 
 export const useGetCollectionQuery = (
   username: string,
   showExpansions: boolean,
+  friendUsernames: string[] = [],
+  includeFriends = false,
 ) => {
-  const {
-    status: boardGameCollectionStatus,
-    error: boardGameCollectionError,
-    data: boardGameCollectionData,
-  } = useQuery<Collection, Error>({
-    enabled: !!username,
-    queryKey: ["BggCollectionBoardGame", username],
-    queryFn: () => fetchBggCollection(username, false),
-    retry: (failureCount, error) =>
-      error?.message === "000 Empty" ? false : failureCount < 3,
-  });
-
-  const {
-    status: boardGameExpansionStatus,
-    error: boardGameExpansionCollectionError,
-    data: boardGameExpansionCollectionData,
-  } = useQuery<Collection, Error>({
-    enabled: !!username && showExpansions,
-    queryKey: ["BggCollectionBoardGameExpansion", username],
-    queryFn: () => fetchBggCollection(username, true),
-  });
-
-  const thingIdsCollection = transformToThingIdsCollection(
-    boardGameCollectionData,
-    boardGameExpansionCollectionData,
-  );
-
-  const thingResults = useQueries({
-    queries: thingIdsCollection.map((thingIds) => ({
-      queryKey: ["BggThings", thingIds],
-      enabled: !!thingIds,
-      queryFn: () => fetchBggThings(thingIds),
+  const queryClient = useQueryClient();
+  const primary = username.trim();
+  const users = primary
+    ? [
+        primary,
+        ...(includeFriends ? normalizeFriends(friendUsernames, primary) : []),
+      ]
+    : [];
+  const requests = users.flatMap((user) => [
+    { username: user, expansion: false },
+    ...(showExpansions ? [{ username: user, expansion: true }] : []),
+  ]);
+  const collections = useQueries({
+    queries: requests.map((request) => ({
+      queryKey: [
+        request.expansion
+          ? "BggCollectionBoardGameExpansion"
+          : "BggCollectionBoardGame",
+        request.username,
+      ],
+      queryFn: ({ signal }: { signal: AbortSignal }) =>
+        fetchBggCollection(request.username, request.expansion, signal),
+      retry: (count: number, error: Error) =>
+        error.message !== "202 Accepted" && count < 3,
     })),
   });
-
-  const collectionData = [
-    ...(boardGameCollectionData?.items.item || []),
-    ...(boardGameExpansionCollectionData?.items.item || []),
-  ];
-
-  const data: SimpleBoardGame[] | undefined =
-    thingIdsCollection.length > 0
-      ? _.flatten(
-          thingResults.map((result) =>
-            result.data?.items.item
-              ? result.data.items.item.map((thingData) =>
-                  transformToBoardGame(
-                    thingData,
-                    collectionData.find(
-                      (game) => game.objectid === thingData.id,
-                    ),
-                  ),
-                )
-              : [],
-          ),
-        )
-      : undefined;
-
-  /**
-   * Returns the total number of queries (Collections + Things). If still querying the collection,
-   * then assume at least 1 extra Thing query, and append '?' char.
-   */
-  const getQueryDenominator = () => {
-    if (!username) return "/ 0";
-
-    if (showExpansions) {
-      if (
-        boardGameCollectionStatus === "pending" &&
-        boardGameExpansionStatus === "pending"
-      )
-        return "/ 4?";
-
-      if (
-        boardGameCollectionStatus === "success" &&
-        boardGameExpansionStatus === "pending"
-      )
-        return `/ ${thingResults.length + 3}?`;
-
-      return `/ ${thingResults.length + 2}`;
-    }
-
-    if (boardGameCollectionStatus === "pending") return "/ 2?";
-
-    return `/ ${
-      thingResults.length + 1 + Number(boardGameExpansionStatus === "success")
-    }`;
-  };
-
-  const initialLoadingState = {
-    /** Number of queries in `success` state. */
-    successfulQueryCount:
-      Number(boardGameCollectionStatus === "success") +
-      Number(boardGameExpansionStatus === "success"),
-
-    /** True if there are any errors in the queries. */
-    isError:
-      boardGameCollectionStatus === "error" ||
-      boardGameExpansionStatus === "error",
-
-    /** Any error messages. */
-    errorMessage: `${boardGameCollectionError?.message || ""} ${
-      boardGameExpansionCollectionError?.message || ""
-    }`.trim(),
-  };
-
-  const loadingStatus = thingResults.reduce(
-    (prevVal, currVal) => ({
-      successfulQueryCount:
-        prevVal.successfulQueryCount + Number(currVal.status === "success"),
-      isError: prevVal.isError || currVal.status === "error",
-      errorMessage: `${prevVal.errorMessage} ${
-        (currVal.error as Error)?.message
-      }`.trim(),
-    }),
-    initialLoadingState,
+  const merged = mergeCollectionEntries(
+    users.map((user) => ({
+      username: user,
+      items: collections.flatMap((result, index) =>
+        requests[index].username === user ? result.data?.items.item || [] : [],
+      ),
+    })),
+    primary,
   );
-
-  const loadingMessage =
-    loadingStatus.successfulQueryCount <
-    thingResults.length + 1 + Number(showExpansions)
-      ? `(${loadingStatus.successfulQueryCount + getQueryDenominator()})`
-      : "";
-
+  const batches = _.chunk([...merged.keys()], 20).map((ids) => ids.join(","));
+  const things = useQueries({
+    queries: batches.map((ids) => ({
+      queryKey: ["BggThings", ids],
+      queryFn: ({ signal }: { signal: AbortSignal }) =>
+        fetchBggThings(ids, signal),
+    })),
+  });
+  // Reuse fetched details while a changed union is being batched. Only active IDs
+  // may contribute cards or ownership, even when old queries remain cached.
+  const details = new Map<number, Thing["items"]["item"][number]>();
+  const cachedThings = queryClient.getQueriesData<Thing>({
+    queryKey: ["BggThings"],
+  });
+  [
+    ...cachedThings.map(([, value]) => value),
+    ...things.map((result) => result.data),
+  ].forEach((value) =>
+    value?.items.item.forEach((thing) => {
+      if (merged.has(thing.id)) details.set(thing.id, thing);
+    }),
+  );
+  const data = [...details.values()].map((thing) => {
+    const entry = merged.get(thing.id)!;
+    const game = transformToBoardGame(thing, entry.metadataEntry);
+    return {
+      ...game,
+      owners: entry.owners,
+      // Friend-only games have no rating from the primary user.
+      userRating: entry.primaryEntry
+        ? transformToUserRating(entry.primaryEntry)
+        : "N/A",
+    };
+  });
+  const completed = [...collections, ...things].filter(
+    (result) => result.isSuccess,
+  ).length;
+  const total = collections.length + things.length;
+  const unresolved = [...collections, ...things].some(
+    (result) => !result.isSuccess || result.isFetching,
+  );
+  const pubdate = collections[0]?.data?.items.pubdate;
   return {
-    boardGameCollectionStatus,
-    pubdate: boardGameCollectionData?.items?.pubdate
-      ? `${new Date(
-          boardGameCollectionData?.items?.pubdate,
-        ).toLocaleDateString()}`
+    data,
+    pubdate: pubdate ? new Date(pubdate).toLocaleDateString() : "",
+    loadingMessage: unresolved
+      ? `(${completed} / ${total}${collections.some((result) => result.isPending) ? "?" : ""})`
       : "",
-    loadingMessage,
-    data: data || [],
-    error: loadingStatus.isError
-      ? {
-          isBoardGameAccepted:
-            boardGameCollectionError?.message === "202 Accepted",
-          isExpansionAccepted:
-            boardGameExpansionCollectionError?.message === "202 Accepted",
-          isBoardGameEmpty: boardGameCollectionError?.message === "000 Empty",
-          message: loadingStatus.errorMessage,
-        }
-      : undefined,
+    statuses: collections
+      .map((result, index) => ({
+        key: `${requests[index].username}-${requests[index].expansion}`,
+        username: requests[index].username,
+        kind: requests[index].expansion ? "expansions" : "games",
+        message: getCollectionMessage(result),
+        retry: result.isError
+          ? () => {
+              void result.refetch();
+            }
+          : undefined,
+      }))
+      .filter((status) => status.message),
+    thingErrors: things.flatMap((result, index) =>
+      result.isError
+        ? [
+            {
+              key: batches[index],
+              message: result.error.message,
+              retry: () => {
+                void result.refetch();
+              },
+            },
+          ]
+        : [],
+    ),
   };
 };

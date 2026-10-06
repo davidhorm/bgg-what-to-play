@@ -30,6 +30,7 @@ import {
   stringSort,
   toggleSelectedSort,
 } from "./sort.service";
+import { friendsService, includeFriendsService, showOwnersService } from "./friends.service";
 import { usernameService } from "./username.service";
 
 /** Interface to abstract filter control logic. Needs to be able to provide initial state, and a reducer to set state */
@@ -61,6 +62,9 @@ export type BooleanFilterControl = Pick<
 };
 
 export type CollectionFilterState = {
+  friendUsernames: string[];
+  includeFriends: boolean;
+  showOwners: boolean;
   /** The username defined in the query param, or submitted in the input. */
   username: ReturnType<typeof usernameService.getInitialState>;
 
@@ -121,6 +125,9 @@ type ActionHandler<T> = (
 ) => CollectionFilterState;
 
 const actions = {
+  SET_FRIENDS: friendsService.getReducedState,
+  TOGGLE_INCLUDE_FRIENDS: includeFriendsService.toggleReducedState,
+  TOGGLE_SHOW_OWNERS: showOwnersService.toggleReducedState,
   SET_COMPLEXITY: complexityService.getReducedState,
   SET_PLAYER_COUNT_RANGE: playerCountRangeService.getReducedState,
   SET_PLAYTIME_RANGE: playtimeService.getReducedState,
@@ -166,6 +173,9 @@ export const buildSearchParamsFromState = (
 
   // each service sets its own params using the passed-in URLSearchParams
   usernameService.setQueryParam(searchParams, state);
+  friendsService.setQueryParam(searchParams, state);
+  includeFriendsService.setQueryParam(searchParams, state);
+  showOwnersService.setQueryParam(searchParams, state);
   playerCountRangeService.setQueryParam(searchParams, state);
   playtimeService.setQueryParam(searchParams, state);
   complexityService.setQueryParam(searchParams, state);
@@ -284,6 +294,9 @@ export const useCollectionFilters = (props?: Props) => {
   const searchParams = useSearchParams();
 
   const initialFilterState = {
+    friendUsernames: friendsService.getInitialState(searchParams),
+    includeFriends: includeFriendsService.getInitialState(searchParams),
+    showOwners: showOwnersService.getInitialState(searchParams),
     username: usernameService.getInitialState(searchParams),
     showInvalidPlayerCount:
       showInvalidPlayerCountService.getInitialState(searchParams),

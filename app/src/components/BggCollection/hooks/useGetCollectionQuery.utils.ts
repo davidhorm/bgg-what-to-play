@@ -1,4 +1,4 @@
-import { XMLParser } from "fast-xml-parser";
+import { XMLValidator, XMLParser } from "fast-xml-parser";
 import * as _ from "lodash-es";
 import type {
   Collection,
@@ -17,12 +17,12 @@ const THING_QUERY_LIMIT = 20; // TODO unit test. also render error in future
 const transformToUniqueChunks = (games?: Collection) =>
   _.chunk(
     _.uniq(games?.items.item.map(transformToThingIds)),
-    THING_QUERY_LIMIT
+    THING_QUERY_LIMIT,
   ).map((numbers) => numbers.join(","));
 
 export const transformToThingIdsCollection = (
   boardgames?: Collection,
-  expansions?: Collection
+  expansions?: Collection,
 ) => [
   ...transformToUniqueChunks(boardgames),
   ...transformToUniqueChunks(expansions),
@@ -39,7 +39,7 @@ export const transformToThingIdsCollection = (
  */
 const decodeHtmlCharCodes = (str: string) =>
   str.replace(/(&#(\d+);)/g, (match, capture, charCode) =>
-    String.fromCharCode(charCode)
+    String.fromCharCode(charCode),
   );
 
 const getPrimaryName = (name: Name | Name[]) =>
@@ -59,7 +59,7 @@ const getPrimaryName = (name: Name | Name[]) =>
  * ```
  */
 const reduceValueAndNumVotesToObjectProperties = (
-  result: SuggestedNumPlayersResult["result"]
+  result: SuggestedNumPlayersResult["result"],
 ) =>
   result.reduce(
     (prevVal, currVal) => ({
@@ -75,13 +75,13 @@ const reduceValueAndNumVotesToObjectProperties = (
 
       /** Number of people who voted "Best" to play this game at this player count. */
       "Best": 0,
-    }
+    },
   );
 
 const addOneIfHasPlusSign = (value: string) => (value.endsWith("+") ? 1 : 0);
 
 const normalizeNumPlayers = (
-  numplayers: SuggestedNumPlayersResult["numplayers"]
+  numplayers: SuggestedNumPlayersResult["numplayers"],
 ): number =>
   typeof numplayers === "number"
     ? numplayers
@@ -115,7 +115,7 @@ const flattenSuggestedNumPlayersResult = ({
 });
 
 const calcPercentAndAddSortScore = (
-  playerRec: ReturnType<typeof flattenSuggestedNumPlayersResult>
+  playerRec: ReturnType<typeof flattenSuggestedNumPlayersResult>,
 ) => {
   const { Best, Recommended, ["Not Recommended"]: notRec } = playerRec;
   const totalVotes = Best + Recommended + notRec;
@@ -152,7 +152,7 @@ const calcPercentAndAddSortScore = (
  * ```
  */
 const makeNotRecommendedNegative = (
-  i: ReturnType<typeof calcPercentAndAddSortScore>
+  i: ReturnType<typeof calcPercentAndAddSortScore>,
 ) => ({
   ...i,
 
@@ -161,10 +161,10 @@ const makeNotRecommendedNegative = (
 });
 
 const transformToRecommendedPlayerCount = (
-  poll: Thing["items"]["item"][number]["poll"]
+  poll: Thing["items"]["item"][number]["poll"],
 ) => {
   const recommendations =
-    (poll.filter((p) => p.name === "suggested_numplayers")?.[0]
+    ((poll || []).filter((p) => p.name === "suggested_numplayers")?.[0]
       ?.results as SuggestedNumPlayersResult[]) || [];
 
   return Array.isArray(recommendations)
@@ -175,15 +175,24 @@ const transformToRecommendedPlayerCount = (
     : [];
 };
 
+export const transformToUserRating = (
+  collectionData?: Collection["items"]["item"][number],
+) => {
+  const rating = collectionData?.stats.rating.value;
+  return typeof rating === "number" ? +rating.toFixed(1) : rating;
+};
+
 export const transformToBoardGame = (
   thingData: Thing["items"]["item"][number],
-  collectionData?: Collection["items"]["item"][number]
+  collectionData?: Collection["items"]["item"][number],
 ) => ({
+  owners: [] as string[],
+
   /** Board Game's primary name */
   name: decodeHtmlCharCodes(
     collectionData?.name.text.toString() ||
       collectionData?.originalname ||
-      getPrimaryName(thingData.name)
+      getPrimaryName(thingData.name),
   ),
 
   /** BGG' Board Game Thing ID */
@@ -220,10 +229,7 @@ export const transformToBoardGame = (
   averageWeight: +thingData.statistics.ratings.averageweight.value.toFixed(1),
 
   /** User's rating */
-  userRating:
-    typeof collectionData?.stats.rating.value === "number"
-      ? +collectionData.stats.rating.value.toFixed(1)
-      : collectionData?.stats.rating.value,
+  userRating: transformToUserRating(collectionData),
 
   /** Average rating from all users */
   averageRating:
@@ -248,49 +254,85 @@ const parser = new XMLParser({
   allowBooleanAttributes: true,
   parseAttributeValue: true,
   numberParseOptions: { hex: false, leadingZeros: false },
-  isArray: (tagName, jpath, isLeafNode, isAttribute) =>
-    ["items.item", "items.item.stats.rating.ranks.rank"].includes(jpath),
+  isArray: (_tagName, jpath) =>
+    [
+      "items.item",
+      "items.item.stats.rating.ranks.rank",
+      "items.item.poll",
+      "items.item.poll.results",
+      "items.item.poll.results.result",
+    ].includes(jpath),
 });
 
-export const fetchBggCollection = (
+const hasRequiredCollectionFields = (
+  item: Collection["items"]["item"][number],
+) =>
+  Number.isInteger(item.objectid) &&
+  !!item.name &&
+  item.name.text != null &&
+  !!item.stats?.rating;
+
+const hasRequiredThingFields = (item: Thing["items"]["item"][number]) =>
+  Number.isInteger(item.id) &&
+  !!item.name &&
+  !!item.minplayers &&
+  !!item.maxplayers &&
+  !!item.minplaytime &&
+  !!item.maxplaytime &&
+  !!item.statistics?.ratings?.averageweight;
+
+export const fetchBggCollection = async (
   username: string,
-  showExpansions: boolean
-): Promise<Collection> =>
-  fetch(
-    showExpansions
-      ? `/api/xmlapi2/collection?username=${username}&stats=1&own=1&subtype=boardgameexpansion`
-      : `/api/xmlapi2/collection?username=${username}&stats=1&own=1&excludesubtype=boardgameexpansion`
+  showExpansions: boolean,
+  signal?: AbortSignal,
+): Promise<Collection> => {
+  const params = new URLSearchParams({ username, stats: "1", own: "1" });
+  params.set(
+    showExpansions ? "subtype" : "excludesubtype",
+    "boardgameexpansion",
+  );
+  const response = await fetch(`/api/xmlapi2/collection?${params}`, { signal });
+  if (response.status === 202) throw new Error("202 Accepted");
+  if (!response.ok)
+    throw new Error(`Unable to query collection (${response.status})`);
+  const xml = await response.text();
+  if (XMLValidator.validate(xml) !== true)
+    throw new Error("Invalid collection XML");
+  const json = parser.parse(xml);
+  if (!json?.items || json.errors || json.error)
+    throw new Error("Invalid collection response");
+  const items = json.items.item || [];
+  if (
+    !Array.isArray(items) ||
+    items.some((item) => !hasRequiredCollectionFields(item))
+  ) {
+    throw new Error("Invalid collection items");
+  }
+  if (!items.length && Number(json.items.totalitems) !== 0)
+    throw new Error("Invalid empty collection response");
+  return { ...json, items: { ...json.items, item: items } };
+};
+
+export const fetchBggThings = async (
+  thingIds: string,
+  signal?: AbortSignal,
+): Promise<Thing> => {
+  const response = await fetch(
+    `/api/xmlapi2/thing?${new URLSearchParams({ id: thingIds, stats: "1", v: "1" })}`,
+    { signal },
+  );
+  if (!response.ok)
+    throw new Error(`Unable to query games (${response.status})`);
+  const xml = await response.text();
+  if (XMLValidator.validate(xml) !== true) throw new Error("Invalid games XML");
+  const json = parser.parse(xml);
+  if (
+    !Array.isArray(json?.items?.item) ||
+    !json.items.item.length ||
+    json.items.item.some(
+      (item: Thing["items"]["item"][number]) => !hasRequiredThingFields(item),
+    )
   )
-    .then((response) => {
-      if (response.status === 202) {
-        // Handle response code 202 for queued request. (p1)
-        // see https://boardgamegeek.com/wiki/page/BGG_XML_API2#toc11
-        throw new Error("202 Accepted");
-      }
-
-      return response.text();
-    })
-    .then((xml) => {
-      const json = parser.parse(xml);
-
-      if (!showExpansions && !json?.items?.item) {
-        throw new Error("000 Empty");
-      }
-
-      return json;
-    })
-    .catch((e) => {
-      throw new Error(
-        e?.message || `Unable to query collection for ${username}`
-      );
-    });
-
-export const fetchBggThings = (thingIds?: string): Promise<Thing> | undefined =>
-  thingIds
-    ? fetch(`/api/xmlapi2/thing?id=${thingIds}&stats=1&v=1`)
-        .then((response) => response.text())
-        .then((xml) => parser.parse(xml))
-        .catch((err) => {
-          throw new Error(JSON.stringify(err));
-        })
-    : undefined;
+    throw new Error("Invalid games response");
+  return json;
+};
